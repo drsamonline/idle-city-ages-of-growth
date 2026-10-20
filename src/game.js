@@ -1,0 +1,4320 @@
+// IDLE CITY — Ages of Growth
+// Author: Dr. Sohil Momin — Copyright (c) 2026 — PolyForm Noncommercial License 1.0.0 (see LICENSE)
+// Please keep this notice in any copy or substantial reuse.
+"use strict";
+var SEED = 1234567;
+
+function srand(s) {
+  SEED = (s | 0) || 1;
+}
+
+function rnd() {
+  SEED ^= SEED << 13;
+  SEED ^= SEED >>> 17;
+  SEED ^= SEED << 5;
+  SEED |= 0;
+  return ((SEED >>> 0) % 100000) / 100000;
+}
+var GW = 44,
+  GH = 28,
+  TS = 26;
+var AGES = [{
+  n: "STONE AGE",
+  ground: "#5d8a4a",
+  road: "#8a6f4d",
+  wall: "#c9b28a",
+  roof: "#a08050",
+  glass: "#bfe3f2",
+  accent: "#6b5b3a",
+  mult: 1.0
+}, {
+  n: "BRONZE AGE",
+  ground: "#5d8a4a",
+  road: "#9c8054",
+  wall: "#d6bd8e",
+  roof: "#b8860b",
+  glass: "#bfe3f2",
+  accent: "#8a6f2d",
+  mult: 1.3
+}, {
+  n: "IRON AGE",
+  ground: "#5d8a4a",
+  road: "#8d8d92",
+  wall: "#c3c8cf",
+  roof: "#6f7680",
+  glass: "#cfeaf5",
+  accent: "#565d66",
+  mult: 1.6
+}, {
+  n: "MEDIEVAL AGE",
+  ground: "#54854a",
+  road: "#7d7a70",
+  wall: "#e0d2b8",
+  roof: "#a33b2e",
+  glass: "#cfeaf5",
+  accent: "#5b4636",
+  mult: 2.0
+}, {
+  n: "INDUSTRIAL AGE",
+  ground: "#4f7f47",
+  road: "#4a4a52",
+  wall: "#b09a7e",
+  roof: "#5a4a42",
+  glass: "#c9dbe4",
+  accent: "#8a6f4d",
+  mult: 2.6
+}, {
+  n: "MODERN AGE",
+  ground: "#4a7a4a",
+  road: "#3f4148",
+  wall: "#cfd6df",
+  roof: "#3d4c63",
+  glass: "#9fd4f2",
+  accent: "#2f6f9f",
+  mult: 3.5
+}, {
+  n: "DIGITAL AGE",
+  ground: "#3f7350",
+  road: "#33363e",
+  wall: "#dfe6f0",
+  roof: "#1e2f4d",
+  glass: "#7de3f2",
+  accent: "#00c8b4",
+  mult: 5.0
+}, {
+  n: "FUSION AGE",
+  ground: "#35695c",
+  road: "#2c2f3a",
+  wall: "#e8e2f5",
+  roof: "#3b2a6e",
+  glass: "#c77dff",
+  accent: "#7df9ff",
+  mult: 8.0
+}];
+var T = {
+  GRASS: 0,
+  WATER: 1,
+  FOREST: 2,
+  STONE: 3,
+  ROAD: 4
+};
+var DEFS = {
+  road: {
+    id: "road",
+    cat: "infra",
+    name: "Road",
+    ic: "🛣",
+    age: 0,
+    cost: {
+      m: 4,
+      t: 0
+    },
+    drag: true,
+    desc: "Connects zones to the Town Hall. Buildings only work when connected."
+  },
+  demol: {
+    id: "demol",
+    cat: "infra",
+    name: "Demolish",
+    ic: "💣",
+    age: 0,
+    cost: null,
+    drag: true,
+    desc: "Remove a building (25% refund)."
+  },
+  zoneR: {
+    id: "zoneR",
+    cat: "zone",
+    name: "Residential",
+    ic: "🏠",
+    age: 0,
+    cost: {
+      m: 50,
+      t: 20
+    },
+    zone: "R",
+    cap: 6,
+    pow: 1,
+    desc: "People move in over time. Capacity and looks grow with level & age."
+  },
+  zoneC: {
+    id: "zoneC",
+    cat: "zone",
+    name: "Corporate",
+    ic: "🏢",
+    age: 0,
+    cost: {
+      m: 90,
+      t: 35
+    },
+    zone: "C",
+    jobs: 4,
+    pow: 1.5,
+    desc: "Shops & offices. Earns money when residents fill the jobs."
+  },
+  zoneI: {
+    id: "zoneI",
+    cat: "zone",
+    name: "Industrial",
+    ic: "🏭",
+    age: 0,
+    cost: {
+      m: 130,
+      t: 60
+    },
+    zone: "I",
+    jobs: 6,
+    pow: 2,
+    fuelUse: 0.8,
+    pol: 4,
+    desc: "Produces materials. Needs power (later ages) + fuel. Pollutes."
+  },
+  zoneF: {
+    id: "zoneF",
+    cat: "zone",
+    name: "Fun District",
+    ic: "🎡",
+    age: 0,
+    cost: {
+      m: 70,
+      t: 30
+    },
+    zone: "F",
+    fun: 5,
+    jobs: 2,
+    pow: 1,
+    desc: "Parks, theaters, stadiums. Raises happiness."
+  },
+  lumber: {
+    id: "lumber",
+    cat: "util",
+    name: "Lumber Camp",
+    ic: "🪵",
+    age: 0,
+    cost: {
+      m: 120,
+      t: 50
+    },
+    fuel: 1.2,
+    mats: 0.4,
+    jobs: 2,
+    k: "fuel",
+    desc: "Produces fuel (wood) + a little materials."
+  },
+  quarry: {
+    id: "quarry",
+    cat: "util",
+    name: "Quarry",
+    ic: "⛏",
+    age: 0,
+    cost: {
+      m: 180,
+      t: 80
+    },
+    mats: 2.5,
+    jobs: 3,
+    k: "mine",
+    desc: "Steady material production."
+  },
+  mine: {
+    id: "mine",
+    cat: "util",
+    name: "Coal Mine",
+    ic: "🌋",
+    age: 4,
+    cost: {
+      m: 600,
+      t: 300
+    },
+    fuel: 4,
+    mats: 0.5,
+    jobs: 4,
+    pol: 2,
+    k: "mine",
+    desc: "Big fuel production. Some pollution."
+  },
+  pump: {
+    id: "pump",
+    cat: "util",
+    name: "Oil Pump",
+    ic: "🛢",
+    age: 5,
+    cost: {
+      m: 1200,
+      t: 600
+    },
+    fuel: 9,
+    jobs: 5,
+    pol: 3,
+    k: "oil",
+    desc: "Fuel gusher for the modern age."
+  },
+  steam: {
+    id: "steam",
+    cat: "util",
+    name: "Steam Plant",
+    ic: "♨️",
+    age: 4,
+    cost: {
+      m: 500,
+      t: 250
+    },
+    powCap: 25,
+    fuelUse: 1.5,
+    pol: 4,
+    k: "plant",
+    desc: "Burns fuel to make electricity."
+  },
+  plant: {
+    id: "plant",
+    cat: "util",
+    name: "Oil Plant",
+    ic: "🔋",
+    age: 5,
+    cost: {
+      m: 900,
+      t: 500
+    },
+    powCap: 50,
+    fuelUse: 3,
+    pol: 5,
+    k: "plant",
+    desc: "Oil-fired power for a modern city."
+  },
+  nuke: {
+    id: "nuke",
+    cat: "util",
+    name: "Nuclear Plant",
+    ic: "☢️",
+    age: 6,
+    cost: {
+      m: 5000,
+      t: 2500
+    },
+    powCap: 140,
+    pol: 1,
+    k: "plant",
+    desc: "Huge power, tiny fuel needs."
+  },
+  solar: {
+    id: "solar",
+    cat: "util",
+    name: "Solar Farm",
+    ic: "🔆",
+    age: 6,
+    cost: {
+      m: 1500,
+      t: 800
+    },
+    powCap: 18,
+    k: "solar",
+    desc: "Clean power from the sun — output drops to 30% at night. Pair with Grid Batteries."
+  },
+  batt: {
+    id: "batt",
+    cat: "util",
+    name: "Grid Battery",
+    ic: "🔋",
+    age: 6,
+    cost: {
+      m: 800,
+      t: 400
+    },
+    bat: 15,
+    k: "batt",
+    desc: "Releases 15 power at night — keeps solar cities running after dark."
+  },
+  park: {
+    id: "park",
+    cat: "dec",
+    zone: "D",
+    name: "Park",
+    ic: "🌳",
+    age: 1,
+    cost: {
+      m: 150,
+      t: 80
+    },
+    fun: 4,
+    k: "park",
+    desc: "Green space for everyone — +4 city fun. Cheap happiness."
+  },
+  plaza: {
+    id: "plaza",
+    cat: "dec",
+    zone: "D",
+    name: "Plaza",
+    ic: "⛲",
+    age: 3,
+    cost: {
+      m: 400,
+      t: 200
+    },
+    fun: 7,
+    k: "park",
+    desc: "A gathering square — +7 city fun."
+  },
+  fount: {
+    id: "fount",
+    cat: "dec",
+    zone: "D",
+    name: "Grand Fountain",
+    ic: "💦",
+    age: 5,
+    cost: {
+      m: 900,
+      t: 450
+    },
+    fun: 12,
+    k: "park",
+    desc: "A marvel of waterworks — +12 city fun."
+  },
+  tower: {
+    id: "tower",
+    cat: "zone",
+    zone: "R",
+    name: "High-rise Tower",
+    ic: "🏢",
+    age: 6,
+    cost: {
+      m: 4000,
+      t: 2000
+    },
+    cap: 30,
+    pow: 3,
+    tech: "t_arch",
+    desc: "Houses 30 citizens per level — requires SKYSCRAPERS research."
+  },
+  fusion: {
+    id: "fusion",
+    cat: "util",
+    name: "Fusion Reactor",
+    ic: "🌟",
+    age: 7,
+    cost: {
+      m: 20000,
+      t: 10000
+    },
+    powCap: 400,
+    k: "fusion",
+    desc: "The power of stars. Runway to a world-city."
+  },
+  watch: {
+    id: "watch",
+    cat: "svc",
+    name: "Watchpost",
+    ic: "👮",
+    age: 2,
+    cost: {
+      m: 200,
+      t: 100
+    },
+    svc: "safety",
+    r: 6,
+    upkeep: 0.3,
+    desc: "Keeps the district safe. Boosts happiness nearby."
+  },
+  fire: {
+    id: "fire",
+    cat: "svc",
+    name: "Fire Watch",
+    ic: "🚒",
+    age: 2,
+    cost: {
+      m: 250,
+      t: 120
+    },
+    svc: "safety",
+    r: 6,
+    upkeep: 0.3,
+    desc: "Fires stay far away. Safety coverage."
+  },
+  heal: {
+    id: "heal",
+    cat: "svc",
+    name: "Healer",
+    ic: "🏥",
+    age: 2,
+    cost: {
+      m: 250,
+      t: 120
+    },
+    svc: "health",
+    r: 7,
+    upkeep: 0.3,
+    desc: "Healthy citizens are happy citizens."
+  },
+  school: {
+    id: "school",
+    cat: "svc",
+    name: "School",
+    ic: "🏫",
+    age: 3,
+    cost: {
+      m: 400,
+      t: 200
+    },
+    svc: "edu",
+    r: 7,
+    upkeep: 0.5,
+    desc: "Education lets zones reach higher levels."
+  },
+  lib: {
+    id: "lib",
+    cat: "svc",
+    name: "Library",
+    ic: "📚",
+    age: 5,
+    cost: {
+      m: 800,
+      t: 400
+    },
+    svc: "edu",
+    r: 8,
+    upkeep: 0.8,
+    desc: "Broad education coverage."
+  },
+  univ: {
+    id: "univ",
+    cat: "svc",
+    name: "University",
+    ic: "🎓",
+    age: 6,
+    cost: {
+      m: 2000,
+      t: 1000
+    },
+    svc: "edu",
+    r: 10,
+    upkeep: 1.5,
+    desc: "Modern knowledge economy."
+  },
+  farm: {
+    id: "farm",
+    cat: "util",
+    name: "Farm",
+    ic: "🌾",
+    age: 0,
+    cost: {
+      m: 120,
+      t: 60
+    },
+    food: 2.2,
+    jobs: 2,
+    k: "farm",
+    desc: "Grows food for your citizens. No food = no growth, no happiness."
+  },
+  hydro: {
+    id: "hydro",
+    cat: "util",
+    name: "Hydroponic Dome",
+    ic: "🥬",
+    age: 5,
+    cost: {
+      m: 2200,
+      t: 1000
+    },
+    food: 9,
+    jobs: 3,
+    k: "farm",
+    desc: "Industrial food for huge cities."
+  },
+  comp: {
+    id: "comp",
+    cat: "svc",
+    name: "Compost Heap",
+    ic: "🪵",
+    age: 0,
+    cost: {
+      m: 60,
+      t: 30
+    },
+    svc: "waste",
+    r: 6,
+    upkeep: 0.1,
+    waste: 2,
+    desc: "Buries kitchen scraps — 2 waste/s. Stone-Age sanitation."
+  },
+  depot: {
+    id: "depot",
+    cat: "svc",
+    name: "Waste Depot",
+    ic: "🗑",
+    age: 1,
+    cost: {
+      m: 250,
+      t: 120
+    },
+    svc: "waste",
+    r: 8,
+    upkeep: 0.4,
+    waste: 3,
+    desc: "Collects garbage — 3 waste/s capacity."
+  },
+  recycle: {
+    id: "recycle",
+    cat: "svc",
+    name: "Recycling Plant",
+    ic: "♻️",
+    age: 4,
+    cost: {
+      m: 1400,
+      t: 700
+    },
+    svc: "waste",
+    r: 10,
+    upkeep: 1.2,
+    waste: 14,
+    polCut: 4,
+    desc: "Modern waste handling — 14 waste/s, cuts pollution."
+  },
+  mono: {
+    id: "mono",
+    cat: "wonder",
+    name: "Great Monolith",
+    ic: "🗿",
+    age: 0,
+    cost: {
+      m: 1500,
+      t: 800
+    },
+    k: "wonder",
+    unique: 1,
+    desc: "Wonder: +6 happiness & +5% income, forever. One per city."
+  },
+  zigg: {
+    id: "zigg",
+    cat: "wonder",
+    name: "Bronze Ziggurat",
+    ic: "🛕",
+    age: 1,
+    cost: {
+      m: 4000,
+      t: 2000
+    },
+    k: "wonder",
+    unique: 1,
+    desc: "Wonder: +6 happiness & +5% income, forever. One per city."
+  },
+  cit: {
+    id: "cit",
+    cat: "wonder",
+    name: "Iron Citadel",
+    ic: "⚔️",
+    age: 2,
+    cost: {
+      m: 10000,
+      t: 5000
+    },
+    k: "wonder",
+    unique: 1,
+    desc: "Wonder: +6 happiness & +5% income, forever. One per city."
+  },
+  cath: {
+    id: "cath",
+    cat: "wonder",
+    name: "Grand Cathedral",
+    ic: "🏰",
+    age: 3,
+    cost: {
+      m: 25000,
+      t: 12000
+    },
+    k: "wonder",
+    unique: 1,
+    desc: "Wonder: +6 happiness & +5% income, forever. One per city."
+  },
+  expo: {
+    id: "expo",
+    cat: "wonder",
+    name: "Grand Exposition",
+    ic: "🎪",
+    age: 4,
+    cost: {
+      m: 60000,
+      t: 30000
+    },
+    k: "wonder",
+    unique: 1,
+    desc: "Wonder: +6 happiness & +5% income, forever. One per city."
+  },
+  needle: {
+    id: "needle",
+    cat: "wonder",
+    name: "Sky Needle",
+    ic: "🗼",
+    age: 5,
+    cost: {
+      m: 150000,
+      t: 70000
+    },
+    k: "wonder",
+    unique: 1,
+    desc: "Wonder: +6 happiness & +5% income, forever. One per city."
+  },
+  beacon: {
+    id: "beacon",
+    cat: "wonder",
+    name: "Orbital Beacon",
+    ic: "🛰",
+    age: 6,
+    cost: {
+      m: 350000,
+      t: 160000
+    },
+    k: "wonder",
+    unique: 1,
+    desc: "Wonder: +6 happiness & +5% income, forever. One per city."
+  },
+  elev: {
+    id: "elev",
+    cat: "wonder",
+    name: "Space Elevator",
+    ic: "🚀",
+    age: 7,
+    cost: {
+      m: 800000,
+      t: 350000
+    },
+    k: "wonder",
+    unique: 1,
+    desc: "Wonder: +6 happiness & +5% income, forever. One per city."
+  },
+  hall: {
+    id: "hall",
+    cat: "svc",
+    name: "Town Hall",
+    ic: "🏛",
+    age: 0,
+    cost: null,
+    size: 2,
+    k: "hall",
+    noDemol: true,
+    desc: "The heart of your city. Roads must reach it."
+  }
+};
+var CATS = [{
+  id: "zone",
+  n: "ZONES"
+}, {
+  id: "infra",
+  n: "ROAD"
+}, {
+  id: "util",
+  n: "POWER/FUEL"
+}, {
+  id: "svc",
+  n: "SERVICES"
+}, {
+  id: "dec",
+  n: "DECOR"
+}, {
+  id: "tech",
+  n: "TECH"
+}, {
+  id: "wonder",
+  n: "WONDERS"
+}];
+var QUESTS = [
+  [{
+    id: "s1",
+    t: "Lay 15 road tiles",
+    c: function() {
+      return statRoads() >= 15;
+    },
+    rw: {
+      m: 100,
+      t: 40
+    }
+  }, {
+    id: "s2",
+    t: "Place 4 Residential zones",
+    c: function() {
+      return countZone("R") >= 4;
+    },
+    rw: {
+      m: 150,
+      t: 80
+    }
+  }, {
+    id: "s3",
+    t: "Build a Lumber Camp",
+    c: function() {
+      return countDef("lumber") >= 1;
+    },
+    rw: {
+      m: 120,
+      t: 60
+    }
+  }, {
+    id: "s4",
+    t: "Reach 25 population",
+    c: function() {
+      return S.pop >= 25;
+    },
+    rw: {
+      m: 250,
+      t: 120
+    }
+  }, {
+    id: "s5",
+    t: "Build a Farm",
+    c: function() {
+      return countDef("farm") >= 1;
+    },
+    rw: {
+      m: 150,
+      t: 70
+    }
+  }, {
+    id: "s6",
+    t: "Build a Compost Heap",
+    c: function() {
+      return countDef("comp") >= 1;
+    },
+    rw: {
+      m: 120,
+      t: 60
+    }
+  }],
+  [{
+    id: "b1",
+    t: "Place 2 Corporate zones",
+    c: function() {
+      return countZone("C") >= 2;
+    },
+    rw: {
+      m: 200,
+      t: 80
+    }
+  }, {
+    id: "b2",
+    t: "Zone a Fun District",
+    c: function() {
+      return countZone("F") >= 1;
+    },
+    rw: {
+      m: 180,
+      t: 60
+    }
+  }, {
+    id: "b3",
+    t: "Happiness 55 or more",
+    c: function() {
+      return S.hap >= 55;
+    },
+    rw: {
+      m: 250,
+      t: 120
+    }
+  }, {
+    id: "b4",
+    t: "Reach 60 population",
+    c: function() {
+      return S.pop >= 60;
+    },
+    rw: {
+      m: 400,
+      t: 200
+    }
+  }, {
+    id: "b5",
+    t: "Build a Waste Depot",
+    c: function() {
+      return countDef("depot") >= 1;
+    },
+    rw: {
+      m: 200,
+      t: 90
+    }
+  }],
+  [{
+    id: "i1",
+    t: "Place 3 Industrial zones",
+    c: function() {
+      return countZone("I") >= 3;
+    },
+    rw: {
+      m: 350,
+      t: 150
+    }
+  }, {
+    id: "i2",
+    t: "Build a Watchpost",
+    c: function() {
+      return countDef("watch") >= 1;
+    },
+    rw: {
+      m: 250,
+      t: 100
+    }
+  }, {
+    id: "i3",
+    t: "Reach 120 population",
+    c: function() {
+      return S.pop >= 120;
+    },
+    rw: {
+      m: 500,
+      t: 250
+    }
+  }, {
+    id: "i4",
+    t: "Happiness 60 or more",
+    c: function() {
+      return S.hap >= 60;
+    },
+    rw: {
+      m: 400,
+      t: 200
+    }
+  }, {
+    id: "i5",
+    t: "Raise the Iron Citadel",
+    c: function() {
+      return countDef("cit") >= 1;
+    },
+    rw: {
+      m: 800,
+      t: 400
+    }
+  }],
+  [{
+    id: "m1",
+    t: "Build a Fire Watch + a Healer",
+    c: function() {
+      return countDef("fire") >= 1 && countDef("heal") >= 1;
+    },
+    rw: {
+      m: 600,
+      t: 250
+    }
+  }, {
+    id: "m2",
+    t: "Build a School",
+    c: function() {
+      return countDef("school") >= 1;
+    },
+    rw: {
+      m: 500,
+      t: 200
+    }
+  }, {
+    id: "m3",
+    t: "Reach 200 population",
+    c: function() {
+      return S.pop >= 200;
+    },
+    rw: {
+      m: 900,
+      t: 400
+    }
+  }, {
+    id: "m4",
+    t: "Fun total 40+",
+    c: function() {
+      return S.fun >= 40;
+    },
+    rw: {
+      m: 600,
+      t: 300
+    }
+  }],
+  [{
+    id: "d1",
+    t: "Build a Steam Plant",
+    c: function() {
+      return countDef("steam") >= 1;
+    },
+    rw: {
+      m: 1200,
+      t: 500
+    }
+  }, {
+    id: "d2",
+    t: "Fuel production 8+/s",
+    c: function() {
+      return S.fuelProd >= 8;
+    },
+    rw: {
+      m: 1000,
+      t: 400
+    }
+  }, {
+    id: "d3",
+    t: "Reach 350 population",
+    c: function() {
+      return S.pop >= 350;
+    },
+    rw: {
+      m: 1600,
+      t: 800
+    }
+  }, {
+    id: "d4",
+    t: "5 buildings at level 3+",
+    c: function() {
+      return countLvl(3) >= 5;
+    },
+    rw: {
+      m: 1200,
+      t: 600
+    }
+  }],
+  [{
+    id: "o1",
+    t: "Build an Oil Plant",
+    c: function() {
+      return countDef("plant") >= 1;
+    },
+    rw: {
+      m: 2500,
+      t: 1000
+    }
+  }, {
+    id: "o2",
+    t: "Pave 60 road tiles",
+    c: function() {
+      return statRoads() >= 60;
+    },
+    rw: {
+      m: 2000,
+      t: 800
+    }
+  }, {
+    id: "o3",
+    t: "Reach 600 population",
+    c: function() {
+      return S.pop >= 600;
+    },
+    rw: {
+      m: 3500,
+      t: 1500
+    }
+  }, {
+    id: "o4",
+    t: "Happiness 70 or more",
+    c: function() {
+      return S.hap >= 70;
+    },
+    rw: {
+      m: 2500,
+      t: 1200
+    }
+  }],
+  [{
+    id: "g1",
+    t: "Build a Solar Farm",
+    c: function() {
+      return countDef("solar") >= 1;
+    },
+    rw: {
+      m: 5000,
+      t: 2000
+    }
+  }, {
+    id: "g2",
+    t: "Build a University",
+    c: function() {
+      return countDef("univ") >= 1;
+    },
+    rw: {
+      m: 4000,
+      t: 2000
+    }
+  }, {
+    id: "g3",
+    t: "Reach 1000 population",
+    c: function() {
+      return S.pop >= 1000;
+    },
+    rw: {
+      m: 8000,
+      t: 4000
+    }
+  }, {
+    id: "g4",
+    t: "Jobs for 400 citizens",
+    c: function() {
+      return S.jobs >= 400;
+    },
+    rw: {
+      m: 6000,
+      t: 3000
+    }
+  }],
+  [{
+    id: "f1",
+    t: "Build a Fusion Reactor",
+    c: function() {
+      return countDef("fusion") >= 1;
+    },
+    rw: {
+      m: 40000,
+      t: 20000
+    }
+  }, {
+    id: "f2",
+    t: "Reach 2000 population",
+    c: function() {
+      return S.pop >= 2000;
+    },
+    rw: {
+      m: 60000,
+      t: 30000
+    }
+  }, {
+    id: "f3",
+    t: "Happiness 85 or more",
+    c: function() {
+      return S.hap >= 85;
+    },
+    rw: {
+      m: 50000,
+      t: 25000
+    }
+  }, {
+    id: "f4",
+    t: "FUTURE PERFECT — build a world-city!",
+    c: function() {
+      return S.pop >= 2500 && S.hap >= 80;
+    },
+    rw: {
+      m: 100000,
+      t: 50000
+    }
+  }]
+];
+
+function ageCost(a) {
+  return {
+    m: 400 * Math.pow(2, a),
+    t: 250 * Math.pow(2, a)
+  };
+}
+var SLOT = 0;
+
+function keyOf(slot) {
+  return "idleCity_s" + slot;
+}
+var S = null;
+
+function newState() {
+  return {
+    age: 0,
+    money: 500,
+    mats: 200,
+    fuel: 10,
+    food: 60,
+    waste: 0,
+    legacy: 0,
+    weather: 0,
+    weatherT: 90,
+    pop: 5,
+    hap: 50,
+    time: 0,
+    speed: 1,
+    tab: "zone",
+    tool: null,
+    sel: null,
+    questsDone: [],
+    buildings: [],
+    seed: (Date.now() % 100000) | 0 || 7,
+    cleared: [],
+    lastSave: Date.now(),
+    moneyRate: 0,
+    matsRate: 0,
+    fuelProd: 0,
+    fuelUse: 0,
+    powCap: 0,
+    powUse: 0,
+    cap: 0,
+    jobs: 0,
+    fun: 0,
+    pol: 0,
+    ach: [],
+    tech: [],
+    rp: 0,
+    pet: null,
+    petT: 150,
+    disT: 300,
+    chal: null,
+    medals: {},
+    dead: false,
+    warned: false,
+    tut: 0,
+    evtHap: 0,
+    evtHapBad: 0,
+    evtPow: 0,
+    evtT: 75
+  };
+}
+var map = [],
+  roadNet = [],
+  agents = [],
+  gT = null,
+  uiDirty = true,
+  hudT = 0,
+  terrainDirty = true;
+
+function genMap() {
+  var i, x, z;
+  srand(S.seed);
+  map = [];
+  for (z = 0; z < GH; z++) {
+    map[z] = [];
+    for (x = 0; x < GW; x++) map[z][x] = T.GRASS;
+  }
+  for (i = 0; i < 5; i++) blob(Math.floor(rnd() * GW), Math.floor(rnd() * GH), 2 + Math.floor(rnd() * 3), T.WATER);
+  var rx = 3 + Math.floor(rnd() * (GW - 6));
+  for (z = 0; z < GH; z++) {
+    map[z][rx] = T.WATER;
+    if (rnd() < 0.4) {
+      rx += rnd() < 0.5 ? -1 : 1;
+      if (rx > 1 && rx < GW - 2) map[z][rx] = T.WATER;
+    }
+  }
+  for (i = 0; i < 14; i++) blob(Math.floor(rnd() * GW), Math.floor(rnd() * GH), 1 + Math.floor(rnd() * 2), T.FOREST);
+  for (i = 0; i < 9; i++) {
+    var sx = Math.floor(rnd() * GW),
+      sz = Math.floor(rnd() * GH);
+    if (map[sz][sx] !== T.WATER) map[sz][sx] = T.STONE;
+  }
+  var cx = (GW >> 1) - 1,
+    cz = (GH >> 1) - 1;
+  for (z = cz - 1; z <= cz + 2; z++)
+    for (x = cx - 1; x <= cx + 2; x++)
+      if (x >= 0 && z >= 0 && x < GW && z < GH && map[z][x] !== T.WATER) map[z][x] = T.GRASS;
+  S.buildings = [];
+  S.buildings.push({
+    d: "hall",
+    x: cx,
+    y: cz,
+    lvl: 1,
+    dev: 1,
+    xp: 0,
+    st: 1
+  });
+  for (i = 0; i < 5; i++) {
+    var ry = cz + 2;
+    if (ry < GH && map[ry][cx + i] !== T.WATER) map[ry][cx + i] = T.ROAD;
+  }
+  buildRoadNet();
+  terrainDirty = true;
+}
+
+function blob(x0, z0, r, t) {
+  var x, z, dx, dz;
+  for (z = Math.max(0, z0 - r); z <= Math.min(GH - 1, z0 + r); z++)
+    for (x = Math.max(0, x0 - r); x <= Math.min(GW - 1, x0 + r); x++) {
+      dx = x - x0;
+      dz = z - z0;
+      if (dx * dx + dz * dz <= r * r + (rnd() < 0.4 ? 1 : 0) && x > 0 && z > 0 && x < GW - 1 && z < GH - 1) map[z][x] = t;
+    }
+}
+
+function tileAt(x, z) {
+  return (x < 0 || z < 0 || x >= GW || z >= GH) ? -1 : map[z][x];
+}
+
+function bAt(x, z) {
+  var i, b;
+  for (i = 0; i < S.buildings.length; i++) {
+    b = S.buildings[i];
+    var sz = DEFS[b.d].size || 1;
+    if (x >= b.x && z >= b.y && x < b.x + sz && z < b.y + sz) return b;
+  }
+  return null;
+}
+
+function buildRoadNet() {
+  var q = [],
+    i, b, x, z, k, nx, nz;
+  roadNet = [];
+  for (z = 0; z < GH; z++) {
+    roadNet[z] = [];
+    for (x = 0; x < GW; x++) roadNet[z][x] = false;
+  }
+  for (i = 0; i < S.buildings.length; i++)
+    if (S.buildings[i].d === "hall") {
+      b = S.buildings[i];
+      var hs = DEFS[b.d].size || 1;
+      for (var hx = 0; hx < hs; hx++)
+        for (var hz = 0; hz < hs; hz++) {
+          q.push([b.x + hx, b.y + hz]);
+          roadNet[b.y + hz][b.x + hx] = true;
+        }
+    }
+  while (q.length) {
+    k = q.shift();
+    x = k[0];
+    z = k[1];
+    var dirs = [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1]
+    ];
+    for (i = 0; i < 4; i++) {
+      nx = x + dirs[i][0];
+      nz = z + dirs[i][1];
+      if (nx < 0 || nz < 0 || nx >= GW || nz >= GH) continue;
+      if (roadNet[nz][nx] || map[nz][nx] !== T.ROAD) continue;
+      roadNet[nz][nx] = true;
+      q.push([nx, nz]);
+    }
+  }
+}
+
+function connectedToNet(x, z) {
+  var dirs = [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1]
+    ],
+    i, nx, nz;
+  for (i = 0; i < 4; i++) {
+    nx = x + dirs[i][0];
+    nz = z + dirs[i][1];
+    if (nx < 0 || nz < 0 || nx >= GW || nz >= GH) continue;
+    if (roadNet[nz][nx]) return true;
+  }
+  return false;
+}
+
+function canPlace(id, x, z) {
+  var d = DEFS[id],
+    sz = d.size || 1,
+    i, j, t;
+  for (j = 0; j < sz; j++)
+    for (i = 0; i < sz; i++) {
+      t = tileAt(x + i, z + j);
+      if (t === T.WATER || t === T.ROAD || t < 0) return false;
+      if (bAt(x + i, z + j)) return false;
+    }
+  return true;
+}
+
+function forestOn(x, z) {
+  return tileAt(x, z) === T.FOREST;
+}
+
+function placeCost(id, x, z) {
+  var d = DEFS[id],
+    c = {
+      m: d.cost ? d.cost.m : 0,
+      t: d.cost ? d.cost.t : 0
+    };
+  if (forestOn(x, z)) {
+    c.m = Math.round(c.m * 1.2);
+    c.t += 10;
+  }
+  if (id === "road" && hasTech("t_eng")) c.m = Math.round(c.m * 0.7);
+  return c;
+}
+
+function pay(c) {
+  if (S.money >= c.m && S.mats >= c.t) {
+    S.money -= c.m;
+    S.mats -= c.t;
+    return true;
+  }
+  return false;
+}
+
+function tryBuild(id, x, z) {
+  var d = DEFS[id];
+  if (id === "demol") {
+    demolishAt(x, z);
+    return;
+  }
+  if (d.age > S.age) {
+    toast("Not unlocked yet");
+    return;
+  }
+  if (d.tech && S.tech.indexOf(d.tech) < 0) {
+    toast("Requires " + techName(d.tech) + " research");
+    return;
+  }
+  if (!canPlace(id, x, z)) {
+    toast("Blocked — clear land, avoid water/roads");
+    return;
+  }
+  if (d.zone || d.cat === "svc" || d.cat === "util" || d.cat === "wonder") {
+    if (!connectedToNet(x, z)) {
+      toast("Needs a road connection to the Town Hall");
+      return;
+    }
+  }
+  if (d.unique) {
+    var u = 0,
+      j;
+    for (j = 0; j < S.buildings.length; j++)
+      if (S.buildings[j].d === d.id) u++;
+    if (u > 0) {
+      toast("Only one " + d.name + " per city!");
+      return;
+    }
+  }
+  var c = placeCost(id, x, z);
+  if (S.money < c.m || S.mats < c.t) {
+    toast("Not enough " + (S.money < c.m ? "money" : "materials"));
+    return;
+  }
+  if (id === "road") {
+    if (!gestSnap) {
+      takeSnap();
+      gestSnap = true;
+    }
+  } else takeSnap();
+  pay(c);
+  if (forestOn(x, z)) {
+    S.cleared.push([x, z]);
+    map[z][x] = T.GRASS;
+    terrainDirty = true;
+  }
+  if (id === "road") {
+    map[z][x] = T.ROAD;
+    terrainDirty = true;
+    buildRoadNet();
+  } else {
+    S.buildings.push({
+      d: id,
+      x: x,
+      y: z,
+      lvl: 0,
+      dev: 0,
+      xp: 0,
+      st: 1
+    });
+  }
+  uiDirty = true;
+}
+
+function demolishAt(x, z) {
+  var b = bAt(x, z);
+  if (!b) return;
+  var d = DEFS[b.d];
+  if (d.noDemol) {
+    toast("The Town Hall cannot be demolished");
+    return;
+  }
+  if (!gestSnap) {
+    takeSnap();
+    gestSnap = true;
+  }
+  if (b.dev >= 1 && d.cost) {
+    S.money += Math.round(d.cost.m * 0.25);
+    S.mats += Math.round(d.cost.t * 0.25);
+  }
+  S.buildings.splice(S.buildings.indexOf(b), 1);
+  if (S.sel === b) S.sel = null;
+  toast("Demolished — 25% refund");
+  uiDirty = true;
+}
+
+function countZone(zn) {
+  var n = 0,
+    i;
+  for (i = 0; i < S.buildings.length; i++)
+    if (DEFS[S.buildings[i].d].zone === zn && S.buildings[i].dev >= 1) n++;
+  return n;
+}
+
+function countDef(id) {
+  var n = 0,
+    i;
+  for (i = 0; i < S.buildings.length; i++)
+    if (S.buildings[i].d === id && S.buildings[i].dev >= 1) n++;
+  return n;
+}
+
+function countLvl(l) {
+  var n = 0,
+    i;
+  for (i = 0; i < S.buildings.length; i++)
+    if (S.buildings[i].lvl >= l) n++;
+  return n;
+}
+
+function statRoads() {
+  var n = 0,
+    x, z;
+  for (z = 0; z < GH; z++)
+    for (x = 0; x < GW; x++)
+      if (map[z][x] === T.ROAD) n++;
+  return n;
+}
+
+function svcCovered(b, svc) {
+  var i, s, d, dx, dz;
+  for (i = 0; i < S.buildings.length; i++) {
+    s = S.buildings[i];
+    d = DEFS[s.d];
+    if (d.svc !== svc || s.dev < 1) continue;
+    dx = Math.max(Math.abs(s.x - b.x), Math.abs(s.y - b.y));
+    if (dx <= d.r) return true;
+  }
+  return false;
+}
+
+function maxLvlOf(b) {
+  var m = 2 + S.age;
+  if (DEFS[b.d].zone && svcCovered(b, "edu")) m += 1;
+  return Math.min(m, 9);
+}
+
+function svcNear(b, list) {
+  var i, s, dx;
+  for (i = 0; i < list.length; i++) {
+    s = list[i];
+    dx = Math.max(Math.abs(s.x - b.x), Math.abs(s.y - b.y));
+    if (dx <= DEFS[s.d].r) return true;
+  }
+  return false;
+}
+
+function computeCity() {
+  var i, b, d;
+  var cap = 0,
+    jobs = 0,
+    powUse = 0,
+    powCap = 0,
+    fuelUse = 0,
+    fuelProd = 0,
+    matsProd = 0,
+    fun = 0,
+    pol = 0,
+    income = 0,
+    upkeep = 0,
+    consN = 0;
+  var rN = 0,
+    rSafe = 0,
+    rHealth = 0,
+    rEdu = 0,
+    rPol = 0,
+    foodProd = 0,
+    wasteCap = 0,
+    wonders = 0,
+    polCut = 0,
+    rpP = 0,
+    dmgN = 0;
+  var ageNeedsPow = S.age >= 4;
+  var sun = nightAmt() > 0.4 ? 0.3 : 1;
+  var svcs = {
+    safety: [],
+    health: [],
+    edu: [],
+    waste: []
+  };
+  for (i = 0; i < S.buildings.length; i++) {
+    b = S.buildings[i];
+    d = DEFS[b.d];
+    if (d.svc && b.dev >= 1) svcs[d.svc].push(b);
+  }
+  for (i = 0; i < S.buildings.length; i++) {
+    b = S.buildings[i];
+    d = DEFS[b.d];
+    if (b.dev < 1) {
+      consN++;
+      continue;
+    }
+    if (b.st === 0) {
+      dmgN++;
+      continue;
+    }
+    if (d.zone === "R") {
+      rN++;
+      cap += d.cap * b.lvl;
+      if (svcNear(b, svcs.safety)) rSafe++;
+      if (svcNear(b, svcs.health)) rHealth++;
+      if (svcNear(b, svcs.edu)) rEdu++;
+    } else if (d.zone === "C") {
+      jobs += d.jobs * b.lvl;
+      income += 0.35 * b.lvl;
+    } else if (d.zone === "I") {
+      jobs += d.jobs * b.lvl;
+      matsProd += 1.0 * b.lvl;
+      fuelUse += d.fuelUse * b.lvl;
+      pol += d.pol + b.lvl;
+      rPol++;
+    } else if (d.zone === "F") {
+      jobs += d.jobs * b.lvl;
+      fun += d.fun * b.lvl;
+    } else if (d.zone === "D") {
+      fun += d.fun;
+    } else if (d.cat === "util") {
+      if (d.powCap) powCap += d.powCap * (d.k === "solar" ? sun : 1);
+      if (d.bat) powCap += d.bat * (sun < 1 ? 1 : 0);
+      if (d.fuel) fuelProd += d.fuel;
+      if (d.mats) matsProd += d.mats;
+      if (d.food) foodProd += d.food * Math.max(1, b.lvl);
+      if (d.fuelUse) fuelUse += d.fuelUse;
+      jobs += d.jobs || 0;
+      pol += d.pol || 0;
+    } else if (d.cat === "svc") {
+      jobs += 1;
+      upkeep += d.upkeep || 0;
+      if (d.waste) wasteCap += d.waste * b.lvl;
+      if (d.polCut) polCut += d.polCut;
+      if (b.d === "school") rpP += 0.04;
+      else if (b.d === "lib") rpP += 0.07;
+      else if (b.d === "univ") rpP += 0.12;
+    } else if (d.k === "wonder") {
+      wonders++;
+    }
+  }
+  if (ageNeedsPow)
+    for (i = 0; i < S.buildings.length; i++) {
+      b = S.buildings[i];
+      d = DEFS[b.d];
+      if (b.dev >= 1 && d.pow) powUse += d.pow * b.lvl;
+    }
+  S.cap = cap;
+  S.jobs = jobs;
+  S.fun = fun;
+  S.pol = pol;
+  S.powCap = powCap * (hasTech("t_grid") ? 1.2 : 1);
+  S.powUse = powUse;
+  S.fuelProd = fuelProd;
+  S.fuelUse = fuelUse;
+  S.matsProd = matsProd;
+  S.consN = consN;
+  S.upkeep = upkeep;
+  S.incomeBase = income;
+  S.rN = rN;
+  S.rSafe = rSafe;
+  S.rHealth = rHealth;
+  S.rEdu = rEdu;
+  S.rPol = rPol;
+  S.foodProd = foodProd * (S.weather === 1 ? 1.3 : 1) * (hasTech("t_agri") ? 1.25 : 1);
+  S.foodUse = S.pop * 0.045;
+  S.wasteCap = wasteCap;
+  S.wasteGen = (S.pop * 0.02 + rPol * 0.15) * (S.age < 1 ? 0.5 : 1) * (hasTech("t_recy") ? 0.8 : 1);
+  S.wonders = wonders;
+  S.dmgN = dmgN;
+  S.pol = Math.max(0, pol - polCut);
+  S.traffic = S.pop / Math.max(10, statRoads() * (hasTech("t_transit") ? 14 : 10));
+  S.eduCov = rN > 0 ? rEdu / rN : 0;
+  S.rpRate = rpP * (hasTech("t_edu") ? 1.25 : 1);
+  S.employed = Math.min(S.pop, jobs);
+  S.ageNeedsPow = ageNeedsPow;
+}
+
+function blockers() {
+  var out = [];
+  if (S.pop >= S.cap) out.push("No housing capacity — zone more Residential");
+  if (S.hap < 40) out.push("Too unhappy — add Fun zones & services");
+  if (S.ageNeedsPow && S.powUse > S.powCap) out.push("Power shortage — build power plants");
+  if (S.age >= 4 && S.fuelUse > S.fuelProd) out.push("Fuel shortage — build fuel production");
+  if (S.consN > 0 && S.mats < 1) out.push("Construction stalled — need materials (industry/quarry)");
+  if (S.food <= 0.5) out.push("Food shortage — build Farms");
+  if (S.waste > 25) out.push(S.age < 1 ? "Waste piling up — build a Compost Heap" : "Waste piling up — build Waste Depots");
+  return out;
+}
+
+function simTick(dt) {
+  var i, b, d;
+  if (S.dead) return;
+  S.time += dt;
+  computeCity();
+  S.evtHap = Math.max(0, S.evtHap - dt);
+  S.evtHapBad = Math.max(0, S.evtHapBad - dt);
+  S.evtPow = Math.max(0, S.evtPow - dt);
+  S.evtT -= dt;
+  if (S.evtT <= 0) {
+    S.evtT = 100 + Math.floor(rnd() * 120);
+    if (rnd() < 0.55) fireEvent();
+  }
+  var pCap = S.powCap * (S.evtPow > 0 ? 0.8 : 1) * (S.weather === 3 ? 0.9 : 1);
+  var shortage = 1;
+  if (S.ageNeedsPow && S.powUse > pCap) shortage = Math.min(shortage, pCap / Math.max(1, S.powUse));
+  S.weatherT -= dt;
+  if (S.weatherT <= 0) setWeather();
+  var fuelOK = S.fuelUse <= S.fuelProd ? 1 : (S.fuelProd / Math.max(0.001, S.fuelUse));
+  if (S.age < 4) fuelOK = 1;
+  S.shortage = shortage;
+  S.fuelOK = fuelOK;
+  S.fuel = Math.min(9999, S.fuel + Math.max(0, S.fuelProd - S.fuelUse) * dt);
+  S.food = Math.max(0, Math.min(99999, S.food + (S.foodProd - S.foodUse) * dt));
+  S.waste = Math.max(0, Math.min(9999, S.waste + (S.wasteGen - S.wasteCap) * dt));
+  S.rp = Math.min(99999, (S.rp || 0) + (S.rpRate || 0) * dt);
+  for (i = 0; i < S.buildings.length; i++) {
+    b = S.buildings[i];
+    if ((b.rep || 0) > 0) {
+      b.rep -= dt;
+      if (b.rep <= 0) {
+        b.rep = 0;
+        b.st = 1;
+        uiDirty = true;
+      }
+    }
+  }
+  if (S.age >= 2 && S.pop >= 50) {
+    S.disT -= dt;
+    if (S.disT <= 0) {
+      triggerDisaster();
+      S.disT = 240 + Math.floor(rnd() * 240);
+    }
+  }
+  if (!S.pet) {
+    S.petT -= dt;
+    if (S.petT <= 0) newPetition();
+  }
+  checkChal();
+  var funNeed = S.fun / Math.max(1, S.pop * 0.10 + 5);
+  var svc = 0;
+  if (S.rN > 0) svc = (S.rSafe / S.rN) * 8 + (S.rHealth / S.rN) * 8 + (S.rEdu / S.rN) * 6;
+  var polPen = Math.min(25, S.pol * Math.max(0, (S.rPol ? S.rN / Math.max(1, S.rPol) : 1)) * 0.8);
+  var unemp = S.jobs > 0 ? Math.max(0, (S.pop - S.jobs) / Math.max(1, S.pop)) : (S.pop > 20 ? 0.8 : 0);
+  var h = 42 + (hasTech("t_med") ? 5 : 0) + Math.min(25, funNeed * 25) + Math.min(22, svc) - polPen - (S.ageNeedsPow && S.powUse > pCap ? 12 : 0) - (S.age >= 4 && S.fuelUse > S.fuelProd ? 8 : 0) + (S.evtHap > 0 ? 10 : 0) - (S.evtHapBad > 0 ? 8 : 0) + (S.wonders * 6) - (S.food <= 0.5 ? 10 : 0) - (S.waste > 25 ? 6 : 0) - (S.traffic > 1 ? Math.min(10, (S.traffic - 1) * 6) : 0) - (S.weather === 2 ? 3 : 0) - unemp * 15;
+  S.brk = {
+    fun: Math.min(25, funNeed * 25),
+    svc: Math.min(22, svc),
+    pol: polPen,
+    pow: (S.ageNeedsPow && S.powUse > pCap) ? 12 : 0,
+    fuel: (S.age >= 4 && S.fuelUse > S.fuelProd) ? 8 : 0,
+    food: (S.food <= 0.5 ? 10 : 0),
+    waste: (S.waste > 25 ? 6 : 0),
+    traf: (S.traffic > 1 ? Math.min(10, (S.traffic - 1) * 6) : 0),
+    snow: (S.weather === 2 ? 3 : 0),
+    unemp: unemp * 15,
+    won: S.wonders * 6,
+    evt: (S.evtHap > 0 ? 10 : 0) - (S.evtHapBad > 0 ? 8 : 0)
+  };
+  if (S.pop < 10) h = Math.max(h, 55);
+  S.hap = Math.max(0, Math.min(100, h));
+  if (!S.dead) {
+    if (S.hap < 20 && !S.warned) {
+      S.warned = true;
+      toast("⚠ Citizens are miserable — add Fun zones & services NOW or the city collapses!");
+    }
+    if (S.hap >= 35) S.warned = false;
+    if (S.hap <= 0) {
+      S.dead = true;
+      S.speed = 0;
+      showGameOver();
+      saveGame();
+    }
+  }
+  var empRatio = S.jobs > 0 ? Math.min(1, S.pop / S.jobs) : 0;
+  var money = (S.pop * 0.16 + S.incomeBase * empRatio * shortage * fuelOK) * AGES[S.age].mult * (1 + S.legacy * 0.25 + S.wonders * 0.05 + Math.min(0.3, (S.eduCov || 0) * 0.3)) * (hasTech("t_trade") ? 1.15 : 1) * (hasTech("t_ai") ? 1.2 : 1);
+  money -= S.upkeep;
+  S.money = Math.max(0, S.money + money * dt);
+  S.moneyRate = money;
+  var mm = S.matsProd * shortage * (S.age >= 4 ? fuelOK : 1);
+  S.mats = Math.min(999999, S.mats + mm * dt);
+  S.matsRate = mm;
+  if (S.pop < S.cap && S.hap >= 40 && S.food > 0.5) {
+    var gr = Math.min(0.5, 0.02 + S.cap * 0.0015) * (S.hap / 60) * shortage * (S.weather === 2 ? 0.8 : 1) * (S.traffic > 1 ? Math.max(0.4, 1 / S.traffic) : 1) * (hasTech("t_med") ? 1.1 : 1);
+    S.pop = Math.min(S.cap, S.pop + gr * dt);
+  } else if (S.hap < 25 && S.pop > 5) {
+    S.pop = Math.max(5, S.pop - S.pop * 0.02 * dt);
+  }
+  for (i = 0; i < S.buildings.length; i++) {
+    b = S.buildings[i];
+    d = DEFS[b.d];
+    if (b.d === "hall") continue;
+    if (!connectedToNet(b.x, b.y)) continue;
+    if (b.dev < 1) {
+      var take = Math.min(1.5 * dt, S.mats, 1.5 * dt);
+      S.mats -= take;
+      b.dev = Math.min(1, b.dev + take / 30);
+      if (b.dev >= 1 && b.lvl === 0) {
+        b.lvl = 1;
+        b.xp = 0;
+        toast(DEFS[b.d].name + " built!");
+        uiDirty = true;
+      }
+      continue;
+    }
+    if (d.zone && b.lvl < maxLvlOf(b) && S.hap >= 45) {
+      var ok = 1;
+      if (d.zone === "I" && S.age >= 4 && (S.fuelUse > S.fuelProd || S.powUse > S.powCap)) ok = 0;
+      b.xp += dt * ok * shortage;
+      if (b.xp >= 90 * b.lvl) {
+        b.xp = 0;
+        b.lvl++;
+        toast(DEFS[b.d].name + " → level " + b.lvl);
+        uiDirty = true;
+      }
+    }
+  }
+  checkQuests();
+}
+
+function checkQuests() {
+  var i, q, list = QUESTS[S.age],
+    done = false;
+  for (i = 0; i < list.length; i++) {
+    q = list[i];
+    if (S.questsDone.indexOf(q.id) >= 0) continue;
+    if (q.c()) {
+      S.questsDone.push(q.id);
+      if (q.rw.m) S.money += q.rw.m;
+      if (q.rw.t) S.mats += q.rw.t;
+      toast("✔ " + q.t + "  (+" + (q.rw.m || 0) + "💰 +" + (q.rw.t || 0) + "🧱)");
+      done = true;
+    }
+  }
+  if (done) uiDirty = true;
+}
+
+function questsComplete() {
+  var i, list = QUESTS[S.age];
+  for (i = 0; i < list.length; i++)
+    if (S.questsDone.indexOf(list[i].id) < 0) return false;
+  return true;
+}
+
+function tryAgeUp() {
+  if (S.age >= AGES.length - 1) {
+    toast("You reached the final age!");
+    return;
+  }
+  if (!questsComplete()) {
+    toast("Finish this age's quests first");
+    return;
+  }
+  var c = ageCost(S.age);
+  if (S.money < c.m || S.mats < c.t) {
+    toast("Need " + c.m + "💰 + " + c.t + "🧱");
+    return;
+  }
+  S.money -= c.m;
+  S.mats -= c.t;
+  S.age++;
+  uiDirty = true;
+  terrainDirty = true;
+  toast("✨ Welcome to the " + AGES[S.age].n + "!");
+}
+
+function saveGame() {
+  var i, out = [];
+  for (i = 0; i < S.buildings.length; i++) {
+    var b = S.buildings[i];
+    out.push([b.d, b.x, b.y, b.lvl, Math.round(b.dev * 100), Math.round(b.xp)]);
+  }
+  var roads = [],
+    x, z;
+  for (z = 0; z < GH; z++)
+    for (x = 0; x < GW; x++)
+      if (map[z][x] === T.ROAD) roads.push([x, z]);
+  var data = {
+    v: 1,
+    age: S.age,
+    money: S.money,
+    mats: S.mats,
+    fuel: S.fuel,
+    food: S.food,
+    waste: S.waste,
+    legacy: S.legacy,
+    pop: S.pop,
+    time: S.time,
+    seed: S.seed,
+    questsDone: S.questsDone,
+    buildings: out,
+    roads: roads,
+    cleared: S.cleared,
+    lastSave: Date.now(),
+    tut: S.tut,
+    dead: S.dead,
+    warned: S.warned,
+    ach: S.ach,
+    tech: S.tech,
+    rp: S.rp,
+    petT: S.petT,
+    disT: S.disT,
+    chal: S.chal,
+    medals: S.medals
+  };
+  try {
+    localStorage.setItem(keyOf(SLOT), JSON.stringify(data));
+  } catch (e) {}
+}
+
+function loadGame(slot) {
+  if (slot === undefined) slot = SLOT;
+  var raw = null;
+  try {
+    raw = localStorage.getItem(keyOf(slot));
+  } catch (e) {}
+  if (!raw) return false;
+  var data;
+  try {
+    data = JSON.parse(raw);
+  } catch (e) {
+    return false;
+  }
+  S = newState();
+  S.age = data.age || 0;
+  S.money = data.money || 0;
+  S.mats = data.mats || 0;
+  S.fuel = data.fuel || 0;
+  S.food = typeof data.food === "number" ? data.food : 60;
+  S.waste = data.waste || 0;
+  S.legacy = data.legacy || 0;
+  S.pop = data.pop || 5;
+  S.time = data.time || 0;
+  S.seed = data.seed || 7;
+  S.questsDone = data.questsDone || [];
+  S.cleared = data.cleared || [];
+  genMap();
+  var i, k;
+  for (i = 0; i < (data.buildings || []).length; i++) {
+    k = data.buildings[i];
+    if (k[0] === "hall") {
+      S.buildings = S.buildings.filter(function(b) {
+        return b.d !== "hall";
+      });
+    }
+    S.buildings.push({
+      d: k[0],
+      x: k[1],
+      y: k[2],
+      lvl: k[3],
+      dev: k[4] / 100,
+      xp: k[5],
+      st: 1
+    });
+  }
+  for (i = 0; i < (data.cleared || []).length; i++) {
+    var c = S.cleared[i];
+    if (map[c[1]] && map[c[1]][c[0]] === T.FOREST) map[c[1]][c[0]] = T.GRASS;
+  }
+  for (i = 0; i < (data.roads || []).length; i++) {
+    var rd = data.roads[i];
+    if (map[rd[1]] && map[rd[1]][rd[0]] !== T.WATER) map[rd[1]][rd[0]] = T.ROAD;
+  }
+  buildRoadNet();
+  terrainDirty = true;
+  S.tut = data.tut || 0;
+  S.dead = !!data.dead;
+  S.warned = !!data.warned;
+  S.ach = data.ach || [];
+  S.tech = data.tech || [];
+  S.rp = data.rp || 0;
+  S.petT = data.petT || 150;
+  S.disT = data.disT || 300;
+  S.pet = null;
+  S.chal = data.chal || null;
+  S.medals = data.medals || {};
+  if (S.dead) S.speed = 0;
+  var elapsed = Math.min(4 * 3600, (Date.now() - (data.lastSave || Date.now())) / 1000);
+  if (elapsed > 5) {
+    var steps = Math.floor(elapsed / 2),
+      pop0 = S.pop,
+      m0 = S.money,
+      q0 = S.questsDone.length,
+      st;
+    for (st = 0; st < steps; st++) simTick(2);
+    var dP = Math.floor(S.pop - pop0),
+      dM = Math.round(S.money - m0);
+    toast("🌅 While away (" + fmt(elapsed) + "): " + (dP >= 0 ? "+" : "") + dP + "👥 · " + (dM >= 0 ? "+" : "") + dM + "💰 · " + (S.questsDone.length - q0) + " quests · " + Math.round(S.food) + "🍖");
+  }
+  return true;
+}
+
+function fmt(sec) {
+  var h = Math.floor(sec / 3600),
+    m = Math.floor((sec % 3600) / 60);
+  return (h ? h + "h " : "") + m + "m";
+}
+var cv = document.getElementById("game"),
+  ctx = cv.getContext("2d");
+ctx.imageSmoothingEnabled = false;
+var cam = {
+    z: 1,
+    ox: 0,
+    oy: 0
+  },
+  cw = 780,
+  ch = 520,
+  cssW = 0,
+  cssH = 0,
+  chkT = 0;
+
+function camS() {
+  return Math.min(cw / (GW * TS), ch / (GH * TS)) * cam.z;
+}
+
+function camClamp() {
+  var s = camS(),
+    WW = GW * TS * s,
+    WH = GH * TS * s;
+  cam.ox = WW <= cw ? (cw - WW) / 2 : Math.min(0, Math.max(cw - WW, cam.ox));
+  cam.oy = WH <= ch ? (ch - WH) / 2 : Math.min(0, Math.max(ch - WH, cam.oy));
+}
+
+function zoomAt(cx, cy, f) {
+  userZoomed = true;
+  var s1 = camS(),
+    wx = (cx - cam.ox) / s1,
+    wy = (cy - cam.oy) / s1;
+  cam.z = Math.max(1, Math.min(4, cam.z * f));
+  var s2 = camS();
+  cam.ox = cx - wx * s2;
+  cam.oy = cy - wy * s2;
+  camClamp();
+}
+
+function resizeCanvas() {
+  var r = cv.getBoundingClientRect();
+  var w = r.width || 780,
+    h = r.height || 520;
+  cssW = w;
+  cssH = h;
+  var d = Math.min(2, window.devicePixelRatio || 1);
+  var pw = Math.max(120, Math.round(w * d)),
+    ph = Math.max(120, Math.round(h * d));
+  var area = pw * ph,
+    budget = 2600000;
+  if (area > budget) {
+    var k = Math.sqrt(budget / area);
+    pw = Math.max(120, Math.round(pw * k));
+    ph = Math.max(120, Math.round(ph * k));
+  }
+  if (pw !== cv.width || ph !== cv.height) {
+    cv.width = pw;
+    cv.height = ph;
+  }
+  cw = cv.width;
+  ch = cv.height;
+  ctx.imageSmoothingEnabled = false;
+  camClamp();
+}
+
+function isMobile() {
+  return (window.innerWidth || 980) < 700;
+}
+var userZoomed = false;
+
+function mobileDefaultView() {
+  if (!isMobile()) return;
+  var f = Math.min(cw / (GW * TS), ch / (GH * TS));
+  cam.z = Math.max(1, Math.min(3.5, (cw / (16 * TS)) / f));
+  var hb = S.buildings && S.buildings[0];
+  if (hb) {
+    cam.ox = cw / 2 - (hb.x + 1) * TS * camS();
+    cam.oy = ch / 2 - (hb.y + 1) * TS * camS();
+  }
+  camClamp();
+}
+
+function onResize() {
+  resizeCanvas();
+  if (!userZoomed) mobileDefaultView();
+}
+window.addEventListener("resize", onResize);
+window.addEventListener("orientationchange", function() {
+  setTimeout(onResize, 150);
+});
+if (window.ResizeObserver) new ResizeObserver(function() {
+  onResize();
+}).observe(el("mapwrap"));
+
+function prerenderTerrain() {
+  if (!gT) gT = document.createElement("canvas");
+  gT.width = GW * TS;
+  gT.height = GH * TS;
+  var g = gT.getContext("2d"),
+    a = AGES[S.age],
+    x, z, t, i;
+  for (z = 0; z < GH; z++)
+    for (x = 0; x < GW; x++) {
+      t = map[z][x];
+      var px = x * TS,
+        py = z * TS,
+        shade = ((x * 7 + z * 13) % 5) * 4;
+      if (t === T.WATER) {
+        g.fillStyle = "#1d4e89";
+        g.fillRect(px, py, TS, TS);
+        g.fillStyle = "rgba(140,200,255,0.25)";
+        if ((x + z) % 3 === 0) g.fillRect(px + 4, py + 8, TS - 9, 2);
+      } else if (t === T.ROAD) {
+        g.fillStyle = a.road;
+        g.fillRect(px, py, TS, TS);
+        g.fillStyle = "rgba(255,255,255,0.15)";
+        g.fillRect(px + TS / 2 - 1, py, 2, TS);
+        g.fillRect(px, py + TS / 2 - 1, TS, 2);
+      } else {
+        g.fillStyle = a.ground;
+        g.fillRect(px, py, TS, TS);
+        g.fillStyle = "rgba(0,0,0," + (shade / 200) + ")";
+        g.fillRect(px, py, TS, TS);
+        if (t === T.FOREST) {
+          g.fillStyle = "#2e5d2a";
+          g.fillRect(px + 6, py + 8, 12, 14);
+          g.fillStyle = "#1e4620";
+          g.fillRect(px + 9, py + 4, 6, 8);
+          g.fillStyle = "#5b3d24";
+          g.fillRect(px + 11, py + 18, 3, 5);
+        }
+        if (t === T.STONE) {
+          g.fillStyle = "#8d8d92";
+          g.fillRect(px + 7, py + 9, 11, 9);
+          g.fillStyle = "#b8b8bd";
+          g.fillRect(px + 9, py + 7, 6, 5);
+        }
+      }
+    }
+}
+
+function drawBuilding(b) {
+  var d = DEFS[b.d],
+    a = AGES[S.age],
+    px = b.x * TS,
+    py = b.y * TS;
+  if (b.d === "hall") {
+    drawHall(px, py, a);
+    return;
+  }
+  if (b.dev < 1) {
+    ctx.fillStyle = "#6b5b3a";
+    ctx.fillRect(px + 3, py + 3, TS - 6, TS - 6);
+    ctx.fillStyle = "#3a3225";
+    ctx.fillRect(px + 5, py + 5, TS - 10, TS - 10);
+    ctx.fillStyle = "#fde047";
+    ctx.fillRect(px + 4, py + TS - 5, (TS - 8) * b.dev, 3);
+    return;
+  }
+  var lvl = b.lvl,
+    v = (b.x * 7 + b.y * 11) % 3;
+  if (d.zone === "R") drawHouse(px, py, lvl, a, v);
+  else if (d.zone === "C") drawShop(px, py, lvl, a, v);
+  else if (d.zone === "I") drawFactory(px, py, lvl, a, v);
+  else if (d.zone === "F") drawPark(px, py, lvl, a, v);
+  else if (d.k === "fuel" || d.k === "mine" || d.k === "oil" || d.k === "farm" || d.k === "batt" || d.k === "park") drawUtil(px, py, d, a);
+  else if (d.k === "plant" || d.k === "solar" || d.k === "fusion") drawPlant(px, py, d, a, lvl);
+  else if (d.k === "wonder") drawWonder(px, py, d, a);
+  else if (d.cat === "svc") drawSvc(px, py, d, a);
+}
+
+function drawHall(px, py, a) {
+  var s = TS * 2;
+  ctx.fillStyle = a.wall;
+  ctx.fillRect(px + 3, py + 5, s - 6, s - 9);
+  ctx.fillStyle = a.roof;
+  ctx.fillRect(px + 1, py + 1, s - 2, 8);
+  ctx.fillStyle = a.accent;
+  ctx.fillRect(px + s / 2 - 3, py + 9, 6, s - 14);
+  ctx.font = "16px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("🏛", px + s / 2, py + s / 2 + 6);
+}
+
+function drawHouse(px, py, lvl, a, v) {
+  var h = 10 + lvl * 3,
+    i;
+  if (v === 0) {
+    ctx.fillStyle = a.wall;
+    ctx.fillRect(px + 4, py + TS - 4 - h, TS - 8, h);
+    ctx.fillStyle = a.roof;
+    for (i = 0; i < 4; i++) ctx.fillRect(px + 2 + i * 3, py + TS - 7 - h - i * 2, TS - 4 - i * 6, 2);
+    ctx.fillStyle = "#3a3225";
+    ctx.fillRect(px + TS / 2 - 2, py + TS - 8, 5, 6);
+    ctx.fillStyle = a.glass;
+    ctx.fillRect(px + 7, py + TS - 2 - h, 4, 4);
+    ctx.fillRect(px + TS - 11, py + TS - 2 - h, 4, 4);
+    if (lvl >= 3) {
+      ctx.fillStyle = a.accent;
+      ctx.fillRect(px + TS - 8, py + TS - 11 - h, 3, 6);
+    }
+  } else if (v === 1) {
+    var w = 6 + lvl * 3;
+    ctx.fillStyle = a.wall;
+    ctx.fillRect(px + 5, py + TS - 4 - w, TS - 10, w);
+    ctx.fillStyle = a.roof;
+    ctx.fillRect(px + 5, py + TS - 4 - w - 2, TS - 10, 3);
+    ctx.fillStyle = a.glass;
+    for (i = 0; i < lvl + 1; i++) ctx.fillRect(px + 7, py + TS - 2 - w + i * 3, TS - 14, 2);
+    ctx.fillStyle = a.accent;
+    ctx.fillRect(px + 5, py + TS - 4 - w - 4, 2, 4);
+  } else {
+    ctx.fillStyle = a.wall;
+    ctx.fillRect(px + 3, py + TS - 3 - h, TS - 6, h);
+    ctx.fillStyle = a.roof;
+    ctx.fillRect(px + 6, py + TS - 4 - h - (h > 14 ? 5 : 3), TS - 12, 4);
+    ctx.fillStyle = a.accent;
+    ctx.fillRect(px + 8, py + TS - 1 - h, TS - 16, 2);
+    ctx.fillStyle = a.glass;
+    ctx.fillRect(px + 9, py + TS - 6, 8, 4);
+    ctx.beginPath();
+    ctx.arc(px + TS - 8, py + TS - 2 - h, 2, 0, 7);
+    ctx.fill();
+  }
+}
+
+function drawShop(px, py, lvl, a, v) {
+  var h = 12 + lvl * 4,
+    i;
+  if (v === 0) {
+    ctx.fillStyle = a.wall;
+    ctx.fillRect(px + 3, py + TS - 3 - h, TS - 6, h);
+    ctx.fillStyle = lvl >= 3 ? a.glass : "#fde047";
+    ctx.fillRect(px + 5, py + TS - 6, TS - 10, 5);
+    ctx.fillStyle = a.roof;
+    for (i = 0; i < 5; i++) ctx.fillRect(px + 3 + i * 4, py + TS - 9, 3, 3);
+    ctx.fillStyle = a.accent;
+    ctx.fillRect(px + 3, py + TS - 5 - h, TS - 6, 2);
+  } else if (v === 1) {
+    ctx.fillStyle = a.wall;
+    ctx.fillRect(px + 6, py + TS - 3 - h, TS - 12, h);
+    ctx.fillStyle = a.glass;
+    for (i = 0; i < lvl + 1; i++) ctx.fillRect(px + 8, py + TS - 1 - h + i * 4, TS - 16, 3);
+    ctx.fillStyle = a.roof;
+    ctx.fillRect(px + 6, py + TS - 3 - h - 2, TS - 12, 3);
+    if (lvl >= 3) {
+      ctx.fillStyle = a.accent;
+      ctx.fillRect(px + TS / 2 - 1, py + TS - 8 - h, 2, 5);
+    }
+  } else {
+    ctx.fillStyle = a.wall;
+    ctx.fillRect(px + 2, py + TS - 3 - h, TS - 4, h);
+    ctx.fillStyle = a.roof;
+    for (i = 0; i < 3; i++) ctx.fillRect(px + 2 + i * 2, py + TS - 5 - h - i * 2, TS - 4 - i * 4, 2);
+    ctx.fillStyle = Math.sin(S.time * 3 + b_ii) > 0 ? a.accent : a.glass;
+    ctx.fillRect(px + TS / 2 - 4, py + TS - 8, 8, 3);
+  }
+}
+
+function drawFactory(px, py, lvl, a, v) {
+  var h = 11 + lvl * 2,
+    i;
+  if (v === 0) {
+    ctx.fillStyle = a.wall;
+    ctx.fillRect(px + 2, py + TS - 3 - h, TS - 4, h);
+    ctx.fillStyle = a.roof;
+    for (i = 0; i < 3; i++) ctx.fillRect(px + 3 + i * 7, py + TS - 5 - h, 5, 3);
+    ctx.fillStyle = a.glass;
+    for (i = 0; i < Math.min(3, lvl); i++) ctx.fillRect(px + 6 + i * 6, py + TS - 6, 4, 3);
+    ctx.fillStyle = a.accent;
+    ctx.fillRect(px + 2, py + TS - 2 - h, TS - 4, 2);
+  } else if (v === 1) {
+    ctx.fillStyle = a.wall;
+    ctx.fillRect(px + 2, py + TS - 8, TS - 4, 5);
+    ctx.fillStyle = "#9aa2ad";
+    ctx.beginPath();
+    ctx.arc(px + 7, py + 12, 5, 0, 7);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(px + 18, py + 12, 5, 0, 7);
+    ctx.fill();
+    ctx.fillStyle = a.roof;
+    ctx.beginPath();
+    ctx.arc(px + 7, py + 10, 5, 3.14, 6.28);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(px + 18, py + 10, 5, 3.14, 6.28);
+    ctx.fill();
+    ctx.fillStyle = a.accent;
+    ctx.fillRect(px + 7, py + 17, 11, 2);
+    if (lvl >= 3) {
+      ctx.fillStyle = a.glass;
+      ctx.fillRect(px + 3, py + TS - 7, TS - 6, 2);
+    }
+  } else {
+    ctx.fillStyle = a.wall;
+    ctx.fillRect(px + 2, py + TS - 3 - h, TS - 4, h);
+    ctx.fillStyle = a.roof;
+    ctx.fillRect(px + 2, py + TS - 5 - h, TS - 4, 3);
+    ctx.fillStyle = "#555f6e";
+    ctx.fillRect(px + 5, py + TS - 12 - h, 4, 8);
+    ctx.fillRect(px + 16, py + TS - 14 - h, 4, 10);
+    if (Math.sin(S.time * 2 + b_ii) > 0.2) {
+      ctx.fillStyle = "rgba(200,200,200,0.5)";
+      ctx.fillRect(px + 6, py + TS - 16 - h, 3, 3);
+      ctx.fillRect(px + 17, py + TS - 18 - h, 3, 3);
+    }
+    ctx.fillStyle = a.accent;
+    ctx.fillRect(px + 6, py + TS - 2 - h + 4, TS - 12, 3);
+  }
+}
+
+function drawPark(px, py, lvl, a, v) {
+  var i, cx = px + TS / 2,
+    cy = py + TS / 2 + 3;
+  if (v === 0) {
+    ctx.fillStyle = "#3f7a3a";
+    ctx.fillRect(px + 2, py + 2, TS - 4, TS - 4);
+    ctx.fillStyle = "#2e5d2a";
+    ctx.fillRect(px + 4, py + 5, 7, 9);
+    ctx.fillStyle = "#4c8f43";
+    ctx.fillRect(px + 14, py + 7, 6, 7);
+    if (lvl >= 2) {
+      ctx.fillStyle = "#7dd3fc";
+      ctx.fillRect(px + 10, py + 13, 6, 5);
+      ctx.fillStyle = "#e0f2fe";
+      ctx.fillRect(px + 11, py + 14, 2, 2);
+    }
+    if (lvl >= 3) {
+      ctx.fillStyle = a.accent;
+      ctx.fillRect(px + 3, py + 17, TS - 6, 3);
+    }
+  } else if (v === 1) {
+    ctx.fillStyle = "#3f7a3a";
+    ctx.fillRect(px + 2, py + 2, TS - 4, TS - 4);
+    var ang = S.time * 0.8 + b_ii;
+    ctx.strokeStyle = a.accent;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 8, 0, 7);
+    ctx.stroke();
+    for (i = 0; i < 4; i++) {
+      var an = ang + i * 1.57;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(an) * 8, cy + Math.sin(an) * 8);
+      ctx.stroke();
+      ctx.fillStyle = i % 2 ? a.glass : a.roof;
+      ctx.fillRect(cx + Math.cos(an) * 8 - 1.5, cy + Math.sin(an) * 8 - 1.5, 3, 3);
+    }
+    ctx.fillStyle = a.accent;
+    ctx.fillRect(cx - 1, cy, 2, 6);
+  } else {
+    ctx.fillStyle = "#5f8a5a";
+    ctx.fillRect(px + 2, py + 2, TS - 4, TS - 4);
+    ctx.fillStyle = "#9aa2ad";
+    ctx.fillRect(px + 5, py + 9, TS - 10, 10);
+    ctx.fillStyle = "#7dd3fc";
+    ctx.fillRect(px + 7, py + 11, TS - 14, 6);
+    var ph = Math.sin(S.time * 4 + b_ii) * 2;
+    ctx.fillStyle = "#e0f2fe";
+    ctx.fillRect(cx - 1, py + 9 + ph, 2, 5);
+    if (lvl >= 2) {
+      ctx.fillStyle = a.accent;
+      ctx.fillRect(px + 4, py + 4, 3, 3);
+      ctx.fillRect(px + TS - 7, py + 4, 3, 3);
+    }
+    if (lvl >= 3) {
+      ctx.fillStyle = "#fde047";
+      ctx.fillRect(cx - 2, py + 4, 4, 4);
+    }
+  }
+}
+
+function drawUtil(px, py, d, a) {
+  ctx.fillStyle = a.wall;
+  ctx.fillRect(px + 3, py + 5, TS - 6, TS - 9);
+  ctx.fillStyle = a.roof;
+  ctx.fillRect(px + 3, py + 4, TS - 6, 4);
+  ctx.font = "13px sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText(d.ic, px + 6, py + 18);
+}
+
+function drawPlant(px, py, d, a, lvl) {
+  if (d.k === "solar") {
+    var i;
+    ctx.fillStyle = "#1e3a5f";
+    ctx.fillRect(px + 2, py + 2, TS - 4, TS - 4);
+    for (i = 0; i < 3; i++) {
+      ctx.fillStyle = "#3b82f6";
+      ctx.fillRect(px + 4, py + 4 + i * 7, TS - 8, 5);
+      ctx.fillStyle = "#93c5fd";
+      ctx.fillRect(px + 5, py + 5 + i * 7, TS - 11, 2);
+    }
+    return;
+  }
+  if (d.k === "fusion") {
+    ctx.fillStyle = "#2b1d46";
+    ctx.fillRect(px + 2, py + 2, TS - 4, TS - 4);
+    var glow = 0.5 + 0.4 * Math.sin(S.time * 3 + b_ii);
+    ctx.fillStyle = "rgba(125,249,255," + glow.toFixed(2) + ")";
+    ctx.beginPath();
+    ctx.arc(px + TS / 2, py + TS / 2, 8, 0, 7);
+    ctx.fill();
+    ctx.fillStyle = "#7df9ff";
+    ctx.beginPath();
+    ctx.arc(px + TS / 2, py + TS / 2, 4, 0, 7);
+    ctx.fill();
+    return;
+  }
+  ctx.fillStyle = a.wall;
+  ctx.fillRect(px + 2, py + 6, TS - 4, TS - 9);
+  ctx.fillStyle = "#9aa2ad";
+  ctx.fillRect(px + 4, py + 2, 7, 9);
+  ctx.fillRect(px + 14, py + 2, 7, 9);
+  ctx.fillStyle = "rgba(200,210,220,0.5)";
+  ctx.fillRect(px + 6, py + 1, 3, 3);
+  ctx.font = "11px sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("⚡", px + 10, py + 20);
+}
+
+function drawSvc(px, py, d, a) {
+  ctx.fillStyle = a.wall;
+  ctx.fillRect(px + 3, py + 4, TS - 6, TS - 8);
+  ctx.fillStyle = "#fde047";
+  ctx.fillRect(px + 3, py + 4, TS - 6, 3);
+  ctx.font = "13px sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText(d.ic, px + 7, py + 19);
+}
+
+function drawWonder(px, py, d, a) {
+  var g = 0.4 + 0.3 * Math.sin(S.time * 2 + b_ii);
+  ctx.fillStyle = "rgba(253,224,71," + g.toFixed(2) + ")";
+  ctx.beginPath();
+  ctx.arc(px + TS / 2, py + 12, 9, 0, 7);
+  ctx.fill();
+  ctx.fillStyle = a.wall;
+  ctx.fillRect(px + 3, py + TS - 9, TS - 6, 7);
+  ctx.fillStyle = a.roof;
+  ctx.fillRect(px + 5, py + TS - 12, TS - 10, 4);
+  ctx.font = "14px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(d.ic, px + TS / 2, py + 16);
+}
+var b_ii = 0;
+var HIST = {
+  last: -99,
+  pop: [],
+  hap: [],
+  mr: []
+};
+var SNAP = null,
+  gestSnap = false;
+
+function takeSnap() {
+  var r = [],
+    x, z;
+  for (z = 0; z < GH; z++)
+    for (x = 0; x < GW; x++)
+      if (map[z][x] === T.ROAD) r.push(x + "," + z);
+  SNAP = {
+    b: JSON.stringify(S.buildings),
+    r: r,
+    m: S.money,
+    t: S.mats
+  };
+}
+
+function undo() {
+  if (!SNAP) {
+    toast("Nothing to undo");
+    return;
+  }
+  S.buildings = JSON.parse(SNAP.b);
+  var rset = {},
+    i, k, x, z;
+  for (i = 0; i < SNAP.r.length; i++) rset[SNAP.r[i]] = 1;
+  for (z = 0; z < GH; z++)
+    for (x = 0; x < GW; x++) {
+      k = x + "," + z;
+      if (map[z][x] === T.ROAD && !rset[k]) map[z][x] = T.GRASS;
+    }
+  S.money = SNAP.m;
+  S.mats = SNAP.t;
+  SNAP = null;
+  buildRoadNet();
+  terrainDirty = true;
+  S.sel = null;
+  uiDirty = true;
+  computeCity();
+  updateHUD();
+  toast("↩ Last action undone");
+}
+
+function drawStats() {
+  var sc = el("statcv"),
+    c2 = sc.getContext("2d");
+  var W = sc.width || 240,
+    H = sc.height || 80;
+  c2.setTransform(1, 0, 0, 1, 0, 0);
+  c2.clearRect(0, 0, W, H);
+
+  function line(arr, col, max) {
+    if (arr.length < 2) return;
+    var i, sx = W / (arr.length - 1),
+      v;
+    c2.strokeStyle = col;
+    c2.lineWidth = 1.5;
+    c2.beginPath();
+    for (i = 0; i < arr.length; i++) {
+      v = H - 4 - (Math.max(0, arr[i]) / max) * (H - 10);
+      c2[i ? "lineTo" : "moveTo"](Math.round(i * sx), Math.round(v));
+    }
+    c2.stroke();
+  }
+  var mx = 10,
+    i;
+  for (i = 0; i < HIST.pop.length; i++) mx = Math.max(mx, HIST.pop[i]);
+  var lastMr = Math.abs(HIST.mr[HIST.mr.length - 1] || 5);
+  line(HIST.mr, "#60a5fa", Math.max(5, lastMr * 2));
+  line(HIST.hap, "#fde047", 100);
+  line(HIST.pop, "#4ade80", mx);
+}
+
+function drawMinimap() {
+  var mm = el("minimap"),
+    c2 = mm.getContext("2d");
+  var s = 3,
+    x, z, t, i, b;
+  c2.setTransform(1, 0, 0, 1, 0, 0);
+  c2.fillStyle = "#4f7f47";
+  c2.fillRect(0, 0, GW * s, GH * s);
+  var cols = ["#4f7f47", "#2563eb", "#2e5d2a", "#9aa2ad", "#8a8f9e"];
+  for (z = 0; z < GH; z++)
+    for (x = 0; x < GW; x++) {
+      t = map[z][x];
+      if (t === T.GRASS) continue;
+      c2.fillStyle = cols[t];
+      c2.fillRect(x * s, z * s, s, s);
+    }
+  var zc = {
+    R: "#e0d2b8",
+    C: "#60a5fa",
+    I: "#f59e0b",
+    F: "#34d399"
+  };
+  for (i = 0; i < S.buildings.length; i++) {
+    b = S.buildings[i];
+    if (b.dev < 1) continue;
+    c2.fillStyle = zc[DEFS[b.d].zone] || "#fde047";
+    var sz = DEFS[b.d].size || 1;
+    c2.fillRect(b.x * s, b.y * s, sz * s, sz * s);
+  }
+  var cs = camS();
+  c2.strokeStyle = "#fff";
+  c2.lineWidth = 1;
+  c2.strokeRect(-cam.ox / cs / TS * s, -cam.oy / cs / TS * s, cw / cs / TS * s, ch / cs / TS * s);
+}
+el("minimap").addEventListener("click", function(e) {
+  var r = el("minimap").getBoundingClientRect();
+  var x = (e.clientX - r.left) / r.width * GW,
+    y = (e.clientY - r.top) / r.height * GH;
+  var cs = camS();
+  cam.ox = cw / 2 - (x + 0.5) * TS * cs;
+  cam.oy = ch / 2 - (y + 0.5) * TS * cs;
+  camClamp();
+});
+el("zundo").addEventListener("click", undo);
+
+function render() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = "#071810";
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  var cs = camS();
+  ctx.setTransform(cs, 0, 0, cs, cam.ox, cam.oy);
+  ctx.drawImage(gT, 0, 0);
+  var i, b;
+  var vx0 = Math.max(0, Math.floor(-cam.ox / cs / TS) - 1),
+    vx1 = Math.min(GW - 1, Math.ceil((cv.width - cam.ox) / cs / TS) + 1);
+  var vy0 = Math.max(0, Math.floor(-cam.oy / cs / TS) - 1),
+    vy1 = Math.min(GH - 1, Math.ceil((cv.height - cam.oy) / cs / TS) + 1);
+  b_ii = 0;
+  for (i = 0; i < S.buildings.length; i++) {
+    b = S.buildings[i];
+    b_ii = i;
+    if (b.x + 2 < vx0 || b.x > vx1 || b.y + 2 < vy0 || b.y > vy1) continue;
+    drawBuilding(b);
+  }
+  for (i = 0; i < agents.length; i++) drawAgent(agents[i]);
+  var nA = nightAmt();
+  if (nA > 0.02) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = "rgba(8,12,40," + (nA * 0.45).toFixed(2) + ")";
+    ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.setTransform(cs, 0, 0, cs, cam.ox, cam.oy);
+    ctx.fillStyle = "rgba(253,224,71," + (0.5 + nA * 0.5).toFixed(2) + ")";
+    var x, z;
+    for (z = vy0; z <= vy1; z++)
+      for (x = vx0; x <= vx1; x++)
+        if (map[z][x] === T.ROAD) ctx.fillRect(x * TS + 11, z * TS + 11, 3, 3);
+  }
+  if (S.weather > 0) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    var wi, wpx, wpy;
+    if (S.weather === 1) {
+      ctx.strokeStyle = "rgba(148,197,255,0.4)";
+      ctx.lineWidth = 1;
+      for (wi = 0; wi < 26; wi++) {
+        wpx = (wi * 61 + Math.floor(S.time * 130)) % cv.width;
+        wpy = (wi * 97 + Math.floor(S.time * 340)) % cv.height;
+        ctx.beginPath();
+        ctx.moveTo(wpx, wpy);
+        ctx.lineTo(wpx - 4, wpy + 12);
+        ctx.stroke();
+      }
+    } else if (S.weather === 2) {
+      ctx.fillStyle = "rgba(255,255,255,0.8)";
+      for (wi = 0; wi < 26; wi++) {
+        wpx = (wi * 67 + Math.floor(S.time * 40)) % cv.width;
+        wpy = (wi * 89 + Math.floor(S.time * 90)) % cv.height;
+        ctx.fillRect(wpx, wpy, 2, 2);
+      }
+    } else {
+      ctx.fillStyle = "rgba(255,140,50,0.08)";
+      ctx.fillRect(0, 0, cv.width, cv.height);
+    }
+    ctx.setTransform(cs, 0, 0, cs, cam.ox, cam.oy);
+  }
+  if (S.sel) {
+    var s = S.sel,
+      sz = DEFS[s.d].size || 1;
+    ctx.strokeStyle = "#fde047";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(s.x * TS + 1, s.y * TS + 1, sz * TS - 2, sz * TS - 2);
+  }
+  if (hover && S.tool) {
+    var ok = S.tool === "demol" ? !!bAt(hover[0], hover[1]) : canPlace(S.tool, hover[0], hover[1]);
+    ctx.strokeStyle = ok ? "#4ade80" : "#f87171";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(hover[0] * TS + 1, hover[1] * TS + 1, TS - 2, TS - 2);
+    if (S.tool && DEFS[S.tool] && DEFS[S.tool].svc) drawRadius(hover[0], hover[1], DEFS[S.tool].r);
+  }
+  if (S.sel && DEFS[S.sel.d].svc) drawRadius(S.sel.x, S.sel.y, DEFS[S.sel.d].r);
+}
+
+function nightAmt() {
+  var p = (S.time % 240) / 240;
+  if (p < 0.7 || p > 0.95) return 0;
+  if (p < 0.8) return (p - 0.7) / 0.1;
+  if (p > 0.9) return (0.95 - p) / 0.05;
+  return 1;
+}
+
+function drawRadius(x, z, r) {
+  ctx.strokeStyle = "rgba(125,211,252,0.6)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc((x + 0.5) * TS, (z + 0.5) * TS, (r + 0.5) * TS, 0, 7);
+  ctx.stroke();
+}
+
+function drawAgent(a2) {
+  ctx.fillStyle = a2.c;
+  ctx.fillRect(a2.x * TS - 2, a2.y * TS - 2, a2.car ? 4 : 3, a2.car ? 3 : 3);
+}
+
+function updateAgents(dt) {
+  var want = Math.min(46, Math.floor(S.pop / 9));
+  while (agents.length < want) agents.push(mkAgent());
+  while (agents.length > want) agents.pop();
+  var i, a2;
+  for (i = 0; i < agents.length; i++) {
+    a2 = agents[i];
+    a2.t -= dt;
+    var spd = (a2.car ? 2.2 : 1.1) * dt;
+    var dx = a2.tx - a2.x,
+      dz = a2.tz - a2.y,
+      m = Math.sqrt(dx * dx + dz * dz);
+    if (m < 0.05 || a2.t <= 0) {
+      pickAgentTarget(a2);
+      continue;
+    }
+    a2.x += dx / m * spd;
+    a2.y += dz / m * spd;
+  }
+}
+
+function roadTiles() {
+  var out = [],
+    x, z;
+  for (z = 0; z < GH; z++)
+    for (x = 0; x < GW; x++)
+      if (roadNet[z][x]) out.push([x, z]);
+  return out;
+}
+
+function mkAgent() {
+  var rts = roadTiles(),
+    p = rts[Math.floor(rnd() * rts.length)] || [0, 0];
+  var a2 = {
+    x: p[0] + 0.5,
+    y: p[1] + 0.5,
+    tx: p[0] + 0.5,
+    ty: p[1] + 0.5,
+    t: 1,
+    car: false,
+    c: "#f8fafc"
+  };
+  pickAgentTarget(a2);
+  return a2;
+}
+
+function pickAgentTarget(a2) {
+  var gx = Math.floor(a2.x),
+    gz = Math.floor(a2.y),
+    dirs = [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1]
+    ],
+    opts = [],
+    i;
+  for (i = 0; i < 4; i++) {
+    var nx = gx + dirs[i][0],
+      nz = gz + dirs[i][1];
+    if (nx >= 0 && nz >= 0 && nx < GW && nz < GH && roadNet[nz][nx]) opts.push([nx, nz]);
+  }
+  var p = opts.length ? opts[Math.floor(rnd() * opts.length)] : [gx, gz];
+  a2.tx = p[0] + 0.5;
+  a2.tz = p[1] + 0.5;
+  a2.t = 20;
+  a2.car = S.age >= 4 && rnd() < 0.5;
+  a2.c = a2.car ? (S.age >= 6 ? "#7df9ff" : "#f8fafc") : (rnd() < 0.5 ? "#f8fafc" : "#fde047");
+}
+
+function el(id) {
+  return document.getElementById(id);
+}
+
+function toast(msg) {
+  var box = el("toasts");
+  while (box.children.length >= 4) box.removeChild(box.children[0]);
+  var t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = msg;
+  box.appendChild(t);
+  setTimeout(function() {
+    if (t.parentNode) t.parentNode.removeChild(t);
+  }, 4100);
+}
+
+function rebuildTabs() {
+  var i, h = "";
+  for (i = 0; i < CATS.length; i++) h += '<div class="tab' + (S.tab === CATS[i].id ? " on" : "") + '" data-tab="' + CATS[i].id + '">' + CATS[i].n + "</div>";
+  el("tabs").innerHTML = h;
+}
+
+function itemUnlocked(d) {
+  return d.age <= S.age && (!d.tech || S.tech.indexOf(d.tech) >= 0);
+}
+
+function itemLockedBy(d) {
+  if (d.tech && S.tech.indexOf(d.tech) < 0) return "Needs " + techName(d.tech) + " research";
+  return "Unlocks in " + AGES[d.age].n;
+}
+
+function rebuildItems() {
+  if (S.tab === "tech") {
+    renderTechTab();
+    return;
+  }
+  var i, d, h = "",
+    k, keys = Object.keys(DEFS);
+  for (i = 0; i < keys.length; i++) {
+    d = DEFS[keys[i]];
+    if (d.cat !== S.tab || d.id === "hall") continue;
+    var un = itemUnlocked(d);
+    var cost = d.cost ? ("💰" + d.cost.m + (d.cost.t ? " 🧱" + d.cost.t : "")) : "free";
+    h += '<div class="item' + (S.tool === d.id ? " sel" : "") + (un ? "" : " lock") + '" data-id="' + d.id + '">' + '<div class="ic">' + d.ic + '</div><div><div class="nm">' + d.name + '</div>' + '<div class="ct">' + (un ? cost : "") + "</div>" + (un ? "" : '<div class="lk">' + itemLockedBy(d) + "</div>") + "</div></div>";
+  }
+  el("items").innerHTML = h;
+}
+
+function updateQuests() {
+  var list = QUESTS[S.age],
+    i, q, h = "";
+  for (i = 0; i < list.length; i++) {
+    q = list[i];
+    var done = S.questsDone.indexOf(q.id) >= 0;
+    h += '<div class="quest' + (done ? " done" : "") + '">' + (done ? "✔ " : "○ ") + q.t + ' <span class="rw">+' + (q.rw.m || 0) + "💰 +" + (q.rw.t || 0) + "🧱</span></div>";
+  }
+  if (S.age >= AGES.length - 1 && questsComplete()) h += '<div class="quest done">🏆 WORLD-CITY COMPLETE — keep growing!</div>';
+  el("quests").innerHTML = h;
+  var aub = el("ageup");
+  if (S.age >= AGES.length - 1) {
+    aub.disabled = true;
+    aub.textContent = "FINAL AGE REACHED";
+  } else {
+    var c = ageCost(S.age),
+      ok = questsComplete();
+    aub.disabled = !ok;
+    aub.textContent = ok ? "⬆ ADVANCE AGE (" + c.m + "💰 " + c.t + "🧱)" : "⬆ COMPLETE QUESTS TO ADVANCE";
+  }
+  var asc = el("ascend"),
+    canA = S.age >= 7 && S.pop >= 2500;
+  asc.disabled = !canA;
+  asc.textContent = canA ? "🌟 ASCEND → Legacy " + (S.legacy + 1) + " (+" + ((S.legacy + 1) * 25) + "% income)" : "🌟 ASCEND — Fusion Age + 2500 pop";
+  var sb = el("btnSide");
+  if (sb) sb.className = "sbtn" + (S.age < AGES.length - 1 && questsComplete() ? " alert" : "");
+}
+
+function updateInfo() {
+  var h = "",
+    b = S.sel;
+  if (!b) {
+    var br = S.brk || {};
+    var h2 = '<div class="big">💗 City health — ' + Math.round(S.hap) + "/100</div>";
+    h2 += '<div class="row">➕ base 42 · fun +' + Math.round(br.fun || 0) + " · services +" + Math.round(br.svc || 0) + " · wonders +" + (br.won || 0) + " · events " + ((br.evt || 0) >= 0 ? "+" : "") + (br.evt || 0) + "</div>";
+    var negs = [];
+    if (br.pol) negs.push("pollution −" + Math.round(br.pol));
+    if (br.pow) negs.push("power −" + br.pow);
+    if (br.fuel) negs.push("fuel −" + br.fuel);
+    if (br.food) negs.push("FOOD −" + br.food);
+    if (br.waste) negs.push("waste −" + br.waste);
+    if (br.traf) negs.push("traffic −" + Math.round(br.traf));
+    if (br.unemp) negs.push("unemployment −" + Math.round(br.unemp));
+    if (br.snow) negs.push("snow −" + br.snow);
+    h2 += '<div class="row">' + (negs.length ? "➖ " + negs.join(" · ") : "➖ no penalties 🎉") + "</div>";
+    h2 += '<div class="row">🚗 traffic ' + (S.traffic || 0).toFixed(2) + "x · 🌾 food +" + S.foodProd.toFixed(1) + "/s vs −" + S.foodUse.toFixed(1) + "/s · 🗑 waste " + Math.round(S.waste) + "/" + S.wasteCap + "</div>";
+    h2 += '<div class="row">💡 Click a building to inspect it. Zones self-develop when road-connected.</div>';
+    el("info").innerHTML = h2;
+    return;
+  }
+  var d = DEFS[b.d];
+  h += '<div class="big">' + d.ic + " " + d.name + (d.zone ? " — level " + b.lvl + (d.zone && b.lvl < maxLvlOf(b) ? "/" + maxLvlOf(b) : "") : "") + "</div>";
+  h += '<div class="row">' + d.desc + "</div>";
+  if (b.dev < 1) h += '<div class="row">🏗 Under construction: ' + Math.round(b.dev * 100) + "%</div><div class='bar'><div style='width:" + (b.dev * 100) + "%'></div></div>";
+  if (d.zone) h += '<div class="row">Level progress: ' + Math.round(100 * b.xp / Math.max(1, 90 * b.lvl)) + "%</div><div class='bar'><div style='width:" + Math.min(100, 100 * b.xp / Math.max(1, 90 * b.lvl)) + "%'></div></div>";
+  if (d.zone === "R") h += "<div class='row'>👥 capacity " + d.cap * Math.max(1, b.lvl) + "</div>";
+  if (d.zone === "C") h += "<div class='row'>💼 jobs " + d.jobs * Math.max(1, b.lvl) + "</div>";
+  if (d.zone === "I") h += "<div class='row'>🧱 +" + (1.0 * Math.max(1, b.lvl)).toFixed(1) + "/s 🎈 pollution</div>";
+  if (d.zone === "F") h += "<div class='row'>🎉 fun +" + d.fun * Math.max(1, b.lvl) + "</div>";
+  if (!d.zone && d.cost) h += "<div class='row'>Cost was 💰" + d.cost.m + " 🧱" + d.cost.t + "</div>";
+  h += "<div class='row'>" + (connectedToNet(b.x, b.y) ? "🛣 road connected" : "⚠ NOT road connected") + "</div>";
+  if (!d.noDemol) h += '<div class="btn red" id="btnDemol">DEMOLISH</div>';
+  el("info").innerHTML = h;
+  var bd = el("btnDemol");
+  if (bd) bd.onclick = function() {
+    demolishAt(b.x, b.y);
+    updateInfo();
+  };
+}
+
+function updateHUD() {
+  el("agepill").textContent = AGES[S.age].n + (S.legacy > 0 ? " 🌟" + S.legacy : "");
+  el("rMoney").innerHTML = "💰<b>" + fmtN(S.money) + "</b> <span class='rate'>" + (S.moneyRate >= 0 ? "+" : "") + S.moneyRate.toFixed(1) + "/s</span>";
+  el("rMats").innerHTML = "🧱<b>" + fmtN(S.mats) + "</b> <span class='rate'>+" + (S.matsRate || 0).toFixed(1) + "/s</span>";
+  el("rFood").innerHTML = "🍖<b>" + fmtN(S.food) + "</b> <span class='rate'>" + (S.foodProd - S.foodUse >= 0 ? "+" : "") + (S.foodProd - S.foodUse).toFixed(1) + "/s</span>";
+  el("rFood").className = "res" + (S.food <= 0.5 ? " warn" : "");
+  el("rFuel").innerHTML = "⛽<b>" + fmtN(S.fuel) + "</b> <span class='rate'>+" + S.fuelProd.toFixed(1) + "/s</span>";
+  el("rPow").innerHTML = "⚡<b>" + Math.round(S.powUse) + "/" + Math.round(S.powCap) + "</b>";
+  el("rPow").className = "res" + (S.ageNeedsPow && S.powUse > S.powCap ? " warn" : "");
+  el("rRP").innerHTML = "🔬<b>" + fmtN(S.rp || 0) + "</b> <span class='rate'>+" + (S.rpRate || 0).toFixed(2) + "/s</span>";
+  el("rPop").innerHTML = "👥<b>" + Math.floor(S.pop) + "/" + S.cap + "</b>";
+  el("rHap").innerHTML = (S.hap >= 60 ? "😀" : S.hap >= 40 ? "🙂" : S.hap >= 25 ? "😐" : "😫") + "<b>" + Math.round(S.hap) + "</b>";
+  el("rHap").className = "res" + (S.hap < 40 ? " warn" : "");
+  var bs = blockers(),
+    sh = "";
+  if (bs.length === 0) sh += "<span class='ok'>✔ City is growing (idle)</span>";
+  else {
+    sh += "<span class='bad'>⏸ Growth paused:</span> " + bs.join(" · ");
+  }
+  sh += " <span style='color:#64748b'>| " + (S.jobs ? "jobs " + Math.round(S.jobs) + " (" + Math.round(S.employed) + " filled)" : "") + "</span>";
+  if (S.chal && !S.chal.done) {
+    var cc = chalById(S.chal.id);
+    if (cc) {
+      var left = Math.max(0, cc.deadline - (S.time - S.chal.t0));
+      sh += " <span style='color:#fbbf24'>| 🎯 " + cc.n + " " + Math.round(cc.prog() * 100) + "% · ⏱" + fmt(left) + " left</span>";
+    }
+  }
+  el("status").innerHTML = sh;
+  if (S.time - HIST.last >= 5) {
+    HIST.last = S.time;
+    HIST.pop.push(S.pop);
+    HIST.hap.push(S.hap);
+    HIST.mr.push(S.moneyRate);
+    if (HIST.pop.length > 90) {
+      HIST.pop.shift();
+      HIST.hap.shift();
+      HIST.mr.shift();
+    }
+  }
+  drawStats();
+  drawMinimap();
+  scanAlerts();
+  checkAch();
+  updatePetition();
+}
+
+function fmtN(n) {
+  n = Math.floor(n);
+  return n >= 10000 ? (n / 1000).toFixed(1) + "k" : String(n);
+}
+var hover = null,
+  dragging = false,
+  lastDrag = null;
+
+function canvasPos(e) {
+  var r = cv.getBoundingClientRect();
+  var s = camS();
+  var ix = (e.clientX - r.left) * (cw / (r.width || 1)),
+    iy = (e.clientY - r.top) * (ch / (r.height || 1));
+  return [Math.floor((ix - cam.ox) / (s * TS)), Math.floor((iy - cam.oy) / (s * TS))];
+}
+
+function act(x, z) {
+  if (x < 0 || z < 0 || x >= GW || z >= GH) return;
+  if (S.tool === "demol") {
+    demolishAt(x, z);
+    return;
+  }
+  if (S.tool) {
+    tryBuild(S.tool, x, z);
+    return;
+  }
+  var b = bAt(x, z);
+  S.sel = b;
+  updateInfo();
+}
+var mouseLC = null;
+cv.addEventListener("mousedown", function(e) {
+  var p = canvasPos(e);
+  dragging = true;
+  mouseLC = [e.clientX, e.clientY];
+  act(p[0], p[1]);
+  lastDrag = p;
+});
+cv.addEventListener("mousemove", function(e) {
+  var p = canvasPos(e);
+  hover = (p[0] >= 0 && p[1] >= 0 && p[0] < GW && p[1] < GH) ? p : null;
+  if (!dragging) return;
+  if (S.tool === "road" || S.tool === "demol") {
+    if (hover && (!lastDrag || lastDrag[0] !== p[0] || lastDrag[1] !== p[1])) {
+      act(p[0], p[1]);
+      lastDrag = p;
+    }
+  } else if (mouseLC) {
+    var r = cv.getBoundingClientRect();
+    cam.ox += (e.clientX - mouseLC[0]) * (cw / (r.width || 1));
+    cam.oy += (e.clientY - mouseLC[1]) * (ch / (r.height || 1));
+    mouseLC = [e.clientX, e.clientY];
+    camClamp();
+  }
+});
+window.addEventListener("mouseup", function() {
+  dragging = false;
+  lastDrag = null;
+  mouseLC = null;
+  gestSnap = false;
+});
+cv.addEventListener("contextmenu", function(e) {
+  e.preventDefault();
+  S.tool = null;
+  uiDirty = true;
+});
+cv.addEventListener("wheel", function(e) {
+  e.preventDefault();
+  var r = cv.getBoundingClientRect();
+  zoomAt((e.clientX - r.left) * (cw / (r.width || 1)), (e.clientY - r.top) * (ch / (r.height || 1)), e.deltaY < 0 ? 1.18 : 1 / 1.18);
+}, {
+  passive: false
+});
+var touchMode = null,
+  pinchD = 0,
+  tLC = null,
+  tMoved = false,
+  tStartTile = null,
+  lastTapT = -1e9,
+  lastTapP = null;
+cv.addEventListener("touchstart", function(e) {
+  e.preventDefault();
+  if (e.touches.length === 2) {
+    touchMode = "pinch";
+    var dx = e.touches[0].clientX - e.touches[1].clientX,
+      dy = e.touches[0].clientY - e.touches[1].clientY;
+    pinchD = Math.sqrt(dx * dx + dy * dy) || 1;
+    return;
+  }
+  var t = e.changedTouches[0],
+    p = canvasPos(t);
+  hover = p;
+  dragging = true;
+  lastDrag = p;
+  tMoved = false;
+  tLC = [t.clientX, t.clientY];
+  tStartTile = p;
+  if (S.tool) {
+    act(p[0], p[1]);
+    touchMode = "build";
+  } else touchMode = "pan";
+}, {
+  passive: false
+});
+cv.addEventListener("touchmove", function(e) {
+  e.preventDefault();
+  if (touchMode === "pinch") {
+    if (e.touches.length < 2) return;
+    var pdx = e.touches[0].clientX - e.touches[1].clientX,
+      pdy = e.touches[0].clientY - e.touches[1].clientY;
+    var pd = Math.sqrt(pdx * pdx + pdy * pdy) || 1;
+    var r = cv.getBoundingClientRect();
+    var mx = (e.touches[0].clientX + e.touches[1].clientX) / 2,
+      my = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    zoomAt((mx - r.left) * (cw / (r.width || 1)), (my - r.top) * (ch / (r.height || 1)), pd / pinchD);
+    pinchD = pd;
+    return;
+  }
+  var t = e.touches[0],
+    p = canvasPos(t);
+  hover = (p[0] >= 0 && p[1] >= 0 && p[0] < GW && p[1] < GH) ? p : null;
+  if (touchMode === "build") {
+    if (hover && (!lastDrag || lastDrag[0] !== p[0] || lastDrag[1] !== p[1])) {
+      act(p[0], p[1]);
+      lastDrag = p;
+    }
+  } else if (touchMode === "pan") {
+    var r2 = cv.getBoundingClientRect();
+    var ddx = t.clientX - tLC[0],
+      ddy = t.clientY - tLC[1];
+    if (Math.abs(ddx) + Math.abs(ddy) > 10) tMoved = true;
+    cam.ox += ddx * (cw / (r2.width || 1));
+    cam.oy += ddy * (ch / (r2.height || 1));
+    camClamp();
+    tLC = [t.clientX, t.clientY];
+  }
+}, {
+  passive: false
+});
+cv.addEventListener("touchend", function(e) {
+  e.preventDefault();
+  gestSnap = false;
+  if (touchMode === "pinch" && pinchD > 0 && e.touches.length === 1) {
+    touchMode = null;
+    dragging = false;
+    return;
+  }
+  if (touchMode === "pan" && !tMoved && tStartTile) {
+    var t2 = e.changedTouches[0];
+    var now2 = (performance.now && performance.now()) || 0;
+    if (now2 - lastTapT < 350 && lastTapP && Math.abs(t2.clientX - lastTapP[0]) < 44 && Math.abs(t2.clientY - lastTapP[1]) < 44) {
+      var r3 = cv.getBoundingClientRect();
+      zoomAt((t2.clientX - r3.left) * (cw / (r3.width || 1)), (t2.clientY - r3.top) * (ch / (r3.height || 1)), 1.55);
+      lastTapT = 0;
+      if (e.touches.length === 0) {
+        dragging = false;
+        lastDrag = null;
+        touchMode = null;
+        tLC = null;
+      }
+      return;
+    }
+    lastTapT = now2;
+    lastTapP = [t2.clientX, t2.clientY];
+    var fb = null,
+      fd = 99,
+      fi;
+    for (fi = 0; fi < S.buildings.length; fi++) {
+      var bb = S.buildings[fi],
+        dd = Math.abs(bb.x + 0.75 - tStartTile[0]) + Math.abs(bb.y + 0.75 - tStartTile[1]);
+      if (dd < fd) {
+        fd = dd;
+        fb = bb;
+      }
+    }
+    if (fb && fd <= 1.7) {
+      S.sel = fb;
+      uiDirty = true;
+      updateInfo();
+    } else act(tStartTile[0], tStartTile[1]);
+  }
+  if (e.touches.length === 0) {
+    dragging = false;
+    lastDrag = null;
+    touchMode = null;
+    tLC = null;
+  }
+}, {
+  passive: false
+});
+el("tabs").addEventListener("click", function(e) {
+  var t = e.target.closest(".tab");
+  if (!t) return;
+  S.tab = t.getAttribute("data-tab");
+  uiDirty = true;
+});
+el("items").addEventListener("click", function(e) {
+  var it = e.target.closest(".item");
+  if (!it) return;
+  if (S.tab === "tech") {
+    var tid = it.getAttribute("data-tech");
+    if (tid) buyTech(tid);
+    return;
+  }
+  var id = it.getAttribute("data-id"),
+    d = DEFS[id];
+  if (!itemUnlocked(d)) return;
+  S.tool = (S.tool === id) ? null : id;
+  S.sel = null;
+  uiDirty = true;
+  updateInfo();
+});
+
+function setSpeed(sp) {
+  S.speed = sp;
+  var i, all = document.querySelectorAll(".sbtn[data-sp]");
+  for (i = 0; i < all.length; i++) all[i].className = "sbtn" + (parseInt(all[i].getAttribute("data-sp"), 10) === S.speed ? " on" : "");
+}
+el("speedbox").addEventListener("click", function(e) {
+  var b2 = e.target.closest(".sbtn");
+  if (!b2) return;
+  if (b2.id === "btnReset") {
+    el("resetbox").style.display = "flex";
+    return;
+  }
+  setSpeed(parseInt(b2.getAttribute("data-sp"), 10));
+});
+el("resetNo").addEventListener("click", function() {
+  el("resetbox").style.display = "none";
+});
+el("resetYes").addEventListener("click", restartCity);
+el("ageup").addEventListener("click", tryAgeUp);
+el("zin").addEventListener("click", function() {
+  zoomAt(cw / 2, ch / 2, 1.3);
+});
+el("zout").addEventListener("click", function() {
+  zoomAt(cw / 2, ch / 2, 1 / 1.3);
+});
+el("zfit").addEventListener("click", function() {
+  cam.z = 1;
+  camClamp();
+});
+
+function setSideOpen(v) {
+  var sd = el("side"),
+    parts = sd.className ? sd.className.split(" ") : [],
+    has = parts.indexOf("open") >= 0;
+  if (v && !has) parts.push("open");
+  if (!v && has) parts = parts.filter(function(c) {
+    return c !== "open";
+  });
+  sd.className = parts.join(" ");
+}
+el("btnSide").addEventListener("click", function() {
+  var sd = el("side");
+  setSideOpen(sd.className.split(" ").indexOf("open") < 0);
+});
+el("sideclose").addEventListener("click", function() {
+  setSideOpen(false);
+});
+var TUT = [{
+  ic: "🏛",
+  t: "Welcome, Mayor! Your goal: grow a tiny Stone Age village into a Fusion Age world-city. Citizens live, work and build on their own — your job is to shape the city and keep it sustainable."
+}, {
+  ic: "🛣",
+  t: "Start by laying ROADS outward from the Town Hall (pick the ROAD tab and drag to paint). Buildings only work when connected to the Town Hall by road."
+}, {
+  ic: "🏠",
+  t: "Zone land (ZONES tab): RESIDENTIAL = housing, CORPORATE = jobs & income, FUN = happiness, INDUSTRIAL = materials. Zones self-construct, fill up and level up over time — for free."
+}, {
+  ic: "😀",
+  t: "SUSTAIN the city: happiness is life. Jobs + Fun + services raise it; pollution, unemployment, power/fuel shortages lower it. If happiness ever hits ZERO, your city collapses — game over!"
+}, {
+  ic: "⏸",
+  t: "Watch the STATUS BAR at the bottom — it always tells you exactly what's blocking growth. Use ⏸ / 1x / 2x / 4x to control time, and drag / pinch to pan & zoom the map."
+}, {
+  ic: "🎯",
+  t: "Complete QUESTS to ADVANCE THE AGE — each age unlocks new buildings, power plants, fuel and bigger growth. Close the city runs itself, even while you're away. Good luck, Mayor!"
+}];
+
+function showTut(i) {
+  S.tut = i;
+  var t = TUT[i];
+  el("tutic").textContent = t.ic;
+  el("tuttxt").textContent = t.t;
+  el("tutstep").textContent = (i + 1) + " / " + TUT.length;
+  el("tutnext").textContent = i >= TUT.length - 1 ? "LET'S BUILD ▸" : "NEXT ▸";
+  el("tut").style.display = "flex";
+}
+
+function endTut() {
+  S.tut = 99;
+  el("tut").style.display = "none";
+  saveGame();
+}
+el("tutnext").addEventListener("click", function() {
+  if (S.tut >= TUT.length - 1) endTut();
+  else showTut(S.tut + 1);
+});
+el("tutskip").addEventListener("click", endTut);
+el("btnHelp").addEventListener("click", function() {
+  showTut(0);
+});
+
+function showGameOver() {
+  el("gameover").innerHTML = '<div class="gocard"><div class="goic">💀</div><div class="gotitle">CITY COLLAPSED</div>' + '<div class="gorow">Happiness hit zero and your citizens abandoned the city.</div>' + '<div class="gorow">⏱ ruled ' + fmt(S.time) + ' · 🏛 ' + AGES[S.age].n + ' · 👥 ' + Math.floor(S.pop) + ' citizens</div>' + '<div id="tutbtns"><button class="tbtn go" id="btnGoRestart">⟳ REBUILD CITY</button></div></div>';
+  el("gameover").style.display = "flex";
+  el("btnGoRestart").addEventListener("click", restartCity);
+}
+
+function restartCity() {
+  try {
+    localStorage.removeItem(keyOf(SLOT));
+  } catch (e) {}
+  var lg = S.legacy || 0;
+  S = newState();
+  S.legacy = lg;
+  if (lg > 0) {
+    S.money += lg * 1500;
+    S.mats += lg * 600;
+  }
+  S.tut = 99;
+  genMap();
+  computeCity();
+  agents.length = 0;
+  EVLOG.length = 0;
+  seenCrit = {};
+  S.sel = null;
+  userZoomed = false;
+  mobileDefaultView();
+  S.sel = null;
+  el("gameover").style.display = "none";
+  el("resetbox").style.display = "none";
+  setSideOpen(false);
+  uiDirty = true;
+  rebuildTabs();
+  rebuildItems();
+  updateQuests();
+  updateInfo();
+  updateHUD();
+  saveGame();
+  toast("🌱 A new city rises. Good luck, Mayor!");
+}
+
+function tryAscend() {
+  if (S.age < 7 || S.pop < 2500) {
+    toast("Ascension unlocks in the FUSION AGE at 2500 population");
+    return;
+  }
+  S.legacy = (S.legacy || 0) + 1;
+  restartCity();
+  toast("🌟 ASCENDED! Legacy " + S.legacy + ": +" + (S.legacy * 25) + "% income forever");
+}
+el("ascend").addEventListener("click", tryAscend);
+var TECHS = [{
+  id: "t_edu",
+  n: "Writing",
+  ic: "✍️",
+  age: 1,
+  cost: 20,
+  d: "+25% research from all sources."
+}, {
+  id: "t_agri",
+  n: "Crop Rotation",
+  ic: "🌾",
+  age: 1,
+  cost: 30,
+  d: "+25% food from farms & domes."
+}, {
+  id: "t_trade",
+  n: "Currency",
+  ic: "🪙",
+  age: 2,
+  cost: 60,
+  req: "t_edu",
+  d: "+15% city income."
+}, {
+  id: "t_eng",
+  n: "Engineering",
+  ic: "📐",
+  age: 3,
+  cost: 120,
+  req: "t_trade",
+  d: "Roads cost 30% less."
+}, {
+  id: "t_med",
+  n: "Medicine",
+  ic: "💊",
+  age: 4,
+  cost: 220,
+  req: "t_agri",
+  d: "+5 happiness, +10% growth."
+}, {
+  id: "t_grid",
+  n: "Power Grid",
+  ic: "🔌",
+  age: 5,
+  cost: 350,
+  req: "t_eng",
+  d: "+20% power capacity."
+}, {
+  id: "t_recy",
+  n: "Zero Waste",
+  ic: "♻️",
+  age: 5,
+  cost: 400,
+  req: "t_med",
+  d: "Citizens produce 20% less waste."
+}, {
+  id: "t_transit",
+  n: "Mass Transit",
+  ic: "🚇",
+  age: 6,
+  cost: 600,
+  req: "t_grid",
+  d: "Roads carry 40% more traffic."
+}, {
+  id: "t_arch",
+  n: "Skyscrapers",
+  ic: "🏙",
+  age: 6,
+  cost: 800,
+  req: "t_grid",
+  d: "Unlocks the High-rise Tower zone."
+}, {
+  id: "t_ai",
+  n: "AI Administration",
+  ic: "🧠",
+  age: 7,
+  cost: 1500,
+  req: "t_arch",
+  d: "+20% city income."
+}];
+
+function hasTech(id) {
+  return S.tech.indexOf(id) >= 0;
+}
+
+function techName(id) {
+  for (var i = 0; i < TECHS.length; i++)
+    if (TECHS[i].id === id) return TECHS[i].n;
+  return id;
+}
+
+function buyTech(id) {
+  var t = null,
+    i;
+  for (i = 0; i < TECHS.length; i++)
+    if (TECHS[i].id === id) t = TECHS[i];
+  if (!t || hasTech(id)) return;
+  if (t.age > S.age || (t.req && !hasTech(t.req))) {
+    toast("Not available yet");
+    return;
+  }
+  if (S.rp < t.cost) {
+    toast("Not enough 🔬 research — " + t.cost + " needed");
+    return;
+  }
+  S.rp -= t.cost;
+  S.tech.push(id);
+  toast("🔬 Research complete: " + t.n + "!");
+  uiDirty = true;
+  computeCity();
+  updateHUD();
+  saveGame();
+}
+
+function renderTechTab() {
+  var h = '<div class="quest done">🔬 Research: ' + Math.floor(S.rp) + " pts · +" + (S.rpRate || 0).toFixed(2) + "/s from scholars</div>",
+    i, t, st;
+  for (i = 0; i < TECHS.length; i++) {
+    t = TECHS[i];
+    st = hasTech(t.id) ? " done" : (t.age <= S.age && (!t.req || hasTech(t.req)) ? "" : " lock");
+    h += '<div class="item tech' + st + '" data-tech="' + t.id + '">' + '<div class="ic">' + t.ic + '</div><div><div class="nm">' + t.n + '</div>' + '<div class="ct">' + t.d + '</div>' + (st === " done" ? '<div class="lk">✔ Researched</div>' : st === " lock" ? '<div class="lk">🔒 ' + (t.age > S.age ? "Unlocks in " + AGES[t.age].n : "Needs " + techName(t.req) + " research") + '</div>' : '<div class="lk">🔬 ' + t.cost + " research — click to unlock</div>") + "</div></div>";
+  }
+  el("items").innerHTML = h;
+}
+var PETS = [{
+  ic: "🎪",
+  t: "Fund a harvest festival",
+  d: "Citizens want to celebrate! Cost: 10% of your treasury. Big happiness boost.",
+  cost: 0.10,
+  hap: 120,
+  bad: 4
+}, {
+  ic: "🏥",
+  t: "Open a free clinic day",
+  d: "Healers ask for council funding. Cost: 250💰.",
+  flat: 250,
+  hap: 90,
+  bad: 3
+}, {
+  ic: "🌳",
+  t: "Plant a community garden",
+  d: "Green-thumbed volunteers need seeds. Cost: 150💰.",
+  flat: 150,
+  hap: 60,
+  bad: 2
+}, {
+  ic: "🚧",
+  t: "Repair the cobblestones",
+  d: "Drivers demand pothole repairs. Cost: 300💰.",
+  flat: 300,
+  hap: 80,
+  bad: 5
+}, {
+  ic: "📚",
+  t: "Endow a public library",
+  d: "Scholars request patronage. Cost: 200💰.",
+  flat: 200,
+  hap: 90,
+  bad: 3
+}, {
+  ic: "🪙",
+  t: "Raise council taxes",
+  d: "The treasury proposes a temporary levy: +600💰 now, but citizens grumble.",
+  gain: 600,
+  bad: 10
+}];
+
+function newPetition() {
+  S.pet = PETS[Math.floor(rnd() * PETS.length)];
+  S.petT = 220 + Math.floor(rnd() * 160);
+  toast("📜 A citizen petition awaits your decision");
+  uiDirty = true;
+}
+
+function applyPet(ok) {
+  var p = S.pet;
+  if (!p) return;
+  if (ok) {
+    var cost = p.gain ? 0 : (p.flat || Math.max(100, Math.round(S.money * (p.cost || 0))));
+    if (S.money < cost) {
+      toast("Not enough 💰 to grant this petition");
+      return;
+    }
+    S.money -= cost;
+    if (p.gain) S.money += p.gain;
+    if (p.hap) S.evtHap = Math.max(S.evtHap, p.hap);
+    toast("📜 Petition granted: " + p.t + (p.gain ? " (+" + p.gain + "💰)" : ""));
+  } else {
+    S.evtHapBad = Math.max(S.evtHapBad, p.bad * 8);
+    toast("📜 Petition declined — citizens are unimpressed");
+  }
+  S.pet = null;
+  S.petT = 220 + Math.floor(rnd() * 160);
+  saveGame();
+  computeCity();
+  updatePetition();
+  updateHUD();
+}
+
+function updatePetition() {
+  var ph = el("petph"),
+    box = el("petition");
+  if (!S.pet || S.dead) {
+    ph.style.display = "none";
+    box.innerHTML = "";
+    return;
+  }
+  ph.style.display = "";
+  box.innerHTML = '<div class="quest">' + S.pet.ic + " <b>" + S.pet.t + "</b> — " + S.pet.d + '</div>' + '<div class="prow"><button class="tbtn go" data-act="pa">✔ GRANT</button><button class="tbtn" data-act="pd">✖ DECLINE</button></div>';
+}
+
+function triggerDisaster() {
+  var pool = [],
+    i, b;
+  for (i = 0; i < S.buildings.length; i++) {
+    b = S.buildings[i];
+    if (b.d !== "hall" && b.dev >= 1 && b.st === 1) pool.push(b);
+  }
+  var hasFire = countDef("fire") >= 1,
+    hasWatch = countDef("watch") >= 1;
+  var r = rnd();
+  if (r < 0.45 && pool.length) {
+    b = pool[Math.floor(rnd() * pool.length)];
+    b.st = 0;
+    b.rep = (60 + rnd() * 60) * (hasFire ? 0.5 : 1);
+    EVLOG.unshift({
+      ic: "🔥",
+      n: "Fire at the " + DEFS[b.d].name,
+      t: S.time
+    });
+    if (EVLOG.length > 5) EVLOG.pop();
+    toast("🔥 Fire! The " + DEFS[b.d].name + " is offline" + (hasFire ? " — Fire Watch on the scene." : " — repairs will take a while."));
+  } else if (r < 0.72) {
+    S.evtPow = 50 + rnd() * 30;
+    EVLOG.unshift({
+      ic: "⚡",
+      n: "Blackout",
+      t: S.time
+    });
+    if (EVLOG.length > 5) EVLOG.pop();
+    toast("⚡ Blackout! Power output −20% while crews repair the grid.");
+  } else if (pool.length) {
+    var n = Math.max(1, Math.min(pool.length, Math.round((2 + rnd() * 2) * (hasWatch ? 0.5 : 1))));
+    for (i = 0; i < pool.length && n > 0; i++) {
+      b = pool[Math.floor(rnd() * pool.length)];
+      if (b.st === 1) {
+        b.st = 0;
+        b.rep = (90 + rnd() * 90) * (hasWatch ? 0.7 : 1);
+        n--;
+      }
+    }
+    S.evtHapBad = Math.max(S.evtHapBad, 40);
+    EVLOG.unshift({
+      ic: "🌋",
+      n: "Earthquake!",
+      t: S.time
+    });
+    if (EVLOG.length > 5) EVLOG.pop();
+    toast("🌋 Earthquake! Buildings damaged — repair crews are working.");
+  } else return;
+  uiDirty = true;
+}
+var EVENTS = [{
+  ic: "🎪",
+  n: "Festival",
+  age: 0,
+  f: function() {
+    S.evtHap = 60;
+    return "A street festival lifts the city's mood (+10 happiness, 60s)!";
+  }
+}, {
+  ic: "📦",
+  n: "Supply convoy",
+  age: 0,
+  f: function() {
+    var g = Math.round(40 + 20 * AGES[S.age].mult);
+    S.mats += g;
+    return "A trade convoy brings " + g + " materials!";
+  }
+}, {
+  ic: "💰",
+  n: "Trade boom",
+  age: 1,
+  f: function() {
+    var g = Math.round(60 * AGES[S.age].mult);
+    S.money += g;
+    return "Merchants thrive — +" + g + " money!";
+  }
+}, {
+  ic: "👷",
+  n: "Migration wave",
+  age: 2,
+  f: function() {
+    if (S.pop >= S.cap) return false;
+    S.pop = Math.min(S.cap, S.pop + Math.max(2, S.cap * 0.05));
+    return "Word of your city spreads — new residents arrive!";
+  }
+}, {
+  ic: "🔥",
+  n: "Fire scare",
+  age: 2,
+  f: function() {
+    if (S.rN > 0 && S.rSafe >= S.rN * 0.5) return "A small fire was contained by your watch — no harm done!";
+    S.evtHapBad = 40;
+    return "A fire scare panics citizens (−8 happiness, 40s). Fire Watch coverage would protect you!";
+  }
+}, {
+  ic: "⚡",
+  n: "Grid strain",
+  age: 4,
+  f: function() {
+    if (S.powUse <= 0) return false;
+    S.evtPow = 60;
+    return "Heat wave strains the grid — power output −20% for 60s!";
+  }
+}];
+var EVLOG = [];
+
+function fireEvent() {
+  var pool = [],
+    i, e;
+  for (i = 0; i < EVENTS.length; i++)
+    if (EVENTS[i].age <= S.age) pool.push(EVENTS[i]);
+  if (!pool.length) return;
+  e = pool[Math.floor(rnd() * pool.length)];
+  var txt = e.f();
+  if (txt === false) return;
+  EVLOG.unshift({
+    ic: e.ic,
+    n: e.n,
+    t: S.time
+  });
+  if (EVLOG.length > 5) EVLOG.pop();
+  toast(e.ic + " " + txt);
+}
+
+function setWeather() {
+  var r = rnd(),
+    w = r < 0.5 ? 0 : r < 0.72 ? 1 : r < 0.86 ? 2 : 3;
+  S.weather = w;
+  S.weatherT = 90 + Math.floor(rnd() * 120);
+  var nm = ["☀️ Clear skies over the city", "🌧 Rain showers — farms +30% food!", "❄️ Snowfall — growth −20%, happiness −3", "🔥 Heat wave — power output −10%"][w];
+  EVLOG.unshift({
+    ic: ["☀️", "🌧", "❄️", "🔥"][w],
+    n: nm.slice(2).split(" —")[0],
+    t: S.time
+  });
+  if (EVLOG.length > 5) EVLOG.pop();
+  toast(nm);
+}
+var seenCrit = {};
+
+function bestOf(ids) {
+  var i, d;
+  for (i = ids.length - 1; i >= 0; i--) {
+    d = DEFS[ids[i]];
+    if (d.age <= S.age) return d;
+  }
+  return null;
+}
+
+function scanAlerts() {
+  var a = [],
+    i, b;
+  var pCap = S.powCap * (S.evtPow > 0 ? 0.8 : 1) * (S.weather === 3 ? 0.9 : 1);
+  if (!S.dead) {
+    if (S.cap === 0) a.push({
+      sev: 0,
+      ic: "🏠",
+      t: "No housing yet",
+      d: "Zone RESIDENTIAL so citizens can move in.",
+      ids: ["zoneR"]
+    });
+    else if (S.pop >= S.cap) a.push({
+      sev: 2,
+      ic: "🏠",
+      t: "Housing full",
+      d: "Growth stopped — " + Math.floor(S.pop) + " citizens have nowhere to live.",
+      ids: ["zoneR"]
+    });
+    if (S.hap < 20) a.push({
+      sev: 2,
+      ic: "😫",
+      t: "Miserable citizens",
+      d: "Collapse risk! Add fun zones & services now.",
+      ids: ["zoneF"]
+    });
+    else if (S.hap < 40) a.push({
+      sev: 1,
+      ic: "🙁",
+      t: "Happiness low",
+      d: "Unemployment, pollution or shortages are dragging it down.",
+      ids: ["zoneF"]
+    });
+    if (S.ageNeedsPow && S.powUse > pCap) a.push({
+      sev: 2,
+      ic: "⚡",
+      t: "Power shortage",
+      d: "Need " + Math.ceil(S.powUse - pCap) + " more power — the whole city slows down.",
+      ids: ["plant", "nuke", "solar", "fusion", "steam"]
+    });
+    if (S.age >= 4 && S.fuelUse > S.fuelProd) a.push({
+      sev: 2,
+      ic: "⛽",
+      t: "Fuel shortage",
+      d: "Industry needs " + (S.fuelUse - S.fuelProd).toFixed(1) + "/s more fuel.",
+      ids: ["pump", "mine", "lumber"]
+    });
+    if (S.food <= 0.5) a.push({
+      sev: 2,
+      ic: "🍖",
+      t: "Food shortage",
+      d: "Citizens are starving — farms feed the city.",
+      ids: ["farm", "hydro"]
+    });
+    else if (S.food < 10 && S.foodProd < S.foodUse) a.push({
+      sev: 1,
+      ic: "🍖",
+      t: "Food running low",
+      d: Math.ceil(S.foodUse - S.foodProd) + "/s deficit — stock is nearly gone.",
+      ids: ["farm", "hydro"]
+    });
+    if (S.waste > 25) a.push({
+      sev: S.waste > 60 ? 2 : 1,
+      ic: "🗑",
+      t: "Waste piling up",
+      d: "Garbage is hurting happiness — expand waste capacity.",
+      ids: ["comp", "depot", "recycle"]
+    });
+    if (S.traffic > 1) a.push({
+      sev: S.traffic > 1.5 ? 2 : 1,
+      ic: "🚗",
+      t: "Traffic congestion",
+      d: "Roads at " + Math.round(S.traffic * 100) + "% capacity — citizens are stuck in jams.",
+      ids: ["road"]
+    });
+    if (S.consN > 0 && S.mats < 1) a.push({
+      sev: 1,
+      ic: "🏗",
+      t: "Construction stalled",
+      d: S.consN + " site(s) waiting for materials.",
+      ids: ["quarry"]
+    });
+    if ((S.dmgN || 0) > 0) a.push({
+      sev: 1,
+      ic: "🔥",
+      t: "Disaster recovery",
+      d: S.dmgN + " building(s) offline — repairing automatically.",
+      ids: ["fire", "watch"]
+    });
+    if (S.pop > 12 && S.jobs < S.pop * 0.6) a.push({
+      sev: 1,
+      ic: "💼",
+      t: "Not enough jobs",
+      d: Math.floor(S.pop - S.jobs) + " citizens unemployed.",
+      ids: ["zoneC"]
+    });
+    var dis = 0;
+    for (i = 0; i < S.buildings.length; i++) {
+      b = S.buildings[i];
+      if (b.d !== "hall" && !connectedToNet(b.x, b.y)) dis++;
+    }
+    if (dis > 0) a.push({
+      sev: 1,
+      ic: "🛣",
+      t: dis + " building(s) disconnected",
+      d: "Lay a road from the Town Hall to reach them.",
+      ids: ["road"]
+    });
+    if (S.hap >= 40 && questsComplete() && S.age < AGES.length - 1) a.push({
+      sev: 0,
+      ic: "🎯",
+      t: "Ready to advance age!",
+      d: "Quests complete — start the " + AGES[S.age + 1].n + ".",
+      ageup: 1
+    });
+  }
+  var keys = {},
+    crit = 0,
+    k;
+  for (i = 0; i < a.length; i++) {
+    if (a[i].sev === 2) crit++;
+    keys[a[i].t] = 1;
+    if (a[i].sev === 2 && !seenCrit[a[i].t]) {
+      seenCrit[a[i].t] = 1;
+      var sg = a[i].ids ? bestOf(a[i].ids) : null;
+      toast("🚨 " + a[i].ic + " " + a[i].t + (sg ? " — build " + sg.name : ""));
+    }
+  }
+  for (k in seenCrit)
+    if (!keys[k]) delete seenCrit[k];
+  var h = "",
+    sug;
+  for (i = 0; i < a.length; i++) {
+    sug = a[i].ids ? bestOf(a[i].ids) : null;
+    h += '<div class="alert s' + a[i].sev + '"><span class="aic">' + a[i].ic + '</span><div><b>' + a[i].t + '</b><div class="ad">' + a[i].d + '</div>' + (a[i].ageup ? '<div class="btn go" data-ageup="1">⬆ ADVANCE AGE</div>' : sug ? '<div class="btn go" data-tab="' + sug.cat + '" data-tool="' + sug.id + '">BUILD ' + sug.name.toUpperCase() + ' ▸</div>' : "") + '</div></div>';
+  }
+  if (!h) h = '<div class="none">✔ No alerts — city running smoothly</div>';
+  for (i = 0; i < EVLOG.length; i++) h += '<div class="evlog">' + EVLOG[i].ic + " " + EVLOG[i].n + " · " + fmt(Math.max(0, S.time - EVLOG[i].t)) + " ago</div>";
+  if (el("alerts").innerHTML !== h) el("alerts").innerHTML = h;
+  el("alertBadge").textContent = crit > 0 ? String(crit) : "0";
+  el("alertBadge").className = crit > 0 ? "" : "none";
+  el("btnAlerts").className = "sbtn" + (crit > 0 ? " alert" : "");
+}
+el("alerts").addEventListener("click", function(e) {
+  var b = e.target.closest(".go");
+  if (!b) return;
+  if (b.getAttribute("data-ageup") === "1") {
+    tryAgeUp();
+    return;
+  }
+  var tab = b.getAttribute("data-tab"),
+    tool = b.getAttribute("data-tool");
+  if (tab) S.tab = tab;
+  S.tool = tool || null;
+  S.sel = null;
+  uiDirty = true;
+  updateInfo();
+  setSideOpen(false);
+});
+el("btnAlerts").addEventListener("click", function() {
+  setSideOpen(true);
+});
+var ACH = [{
+  id: "p25",
+  ic: "👥",
+  n: "Village",
+  f: function() {
+    return S.pop >= 25;
+  }
+}, {
+  id: "p60",
+  ic: "👥",
+  n: "Town",
+  f: function() {
+    return S.pop >= 60;
+  }
+}, {
+  id: "p120",
+  ic: "🏙",
+  n: "City",
+  f: function() {
+    return S.pop >= 120;
+  }
+}, {
+  id: "p200",
+  ic: "🏙",
+  n: "Metropolis",
+  f: function() {
+    return S.pop >= 200;
+  }
+}, {
+  id: "p350",
+  ic: "🌆",
+  n: "Mega-city",
+  f: function() {
+    return S.pop >= 350;
+  }
+}, {
+  id: "p600",
+  ic: "🌃",
+  n: "Sprawl",
+  f: function() {
+    return S.pop >= 600;
+  }
+}, {
+  id: "p1000",
+  ic: "🌟",
+  n: "Millennium",
+  f: function() {
+    return S.pop >= 1000;
+  }
+}, {
+  id: "p2500",
+  ic: "🌟",
+  n: "Ascension-ready",
+  f: function() {
+    return S.pop >= 2500;
+  }
+}, {
+  id: "a3",
+  ic: "🏛",
+  n: "Industrialist",
+  f: function() {
+    return S.age >= 3;
+  }
+}, {
+  id: "a5",
+  ic: "⚡",
+  n: "Modern Mayor",
+  f: function() {
+    return S.age >= 5;
+  }
+}, {
+  id: "a7",
+  ic: "🌌",
+  n: "Fusion Founder",
+  f: function() {
+    return S.age >= 7;
+  }
+}, {
+  id: "h60",
+  ic: "😊",
+  n: "Happy folks",
+  f: function() {
+    return S.hap >= 60;
+  }
+}, {
+  id: "h85",
+  ic: "🥳",
+  n: "Utopia",
+  f: function() {
+    return S.hap >= 85;
+  }
+}, {
+  id: "r15",
+  ic: "🛣",
+  n: "Road crew",
+  f: function() {
+    return roadN() >= 15;
+  }
+}, {
+  id: "r60",
+  ic: "🛣",
+  n: "Grid linked",
+  f: function() {
+    return roadN() >= 60;
+  }
+}, {
+  id: "r150",
+  ic: "🕸",
+  n: "Master network",
+  f: function() {
+    return roadN() >= 150;
+  }
+}, {
+  id: "m10",
+  ic: "💰",
+  n: "First profit",
+  f: function() {
+    return S.money >= 10000;
+  }
+}, {
+  id: "m100",
+  ic: "💰",
+  n: "Tycoon",
+  f: function() {
+    return S.money >= 100000;
+  }
+}, {
+  id: "m1m",
+  ic: "🏦",
+  n: "Mogul",
+  f: function() {
+    return S.money >= 1000000;
+  }
+}, {
+  id: "w1",
+  ic: "🗿",
+  n: "Monumental",
+  f: function() {
+    return S.wonders >= 1;
+  }
+}, {
+  id: "w4",
+  ic: "🗽",
+  n: "Landmark collector",
+  f: function() {
+    return S.wonders >= 4;
+  }
+}, {
+  id: "w8",
+  ic: "🗼",
+  n: "World heritage",
+  f: function() {
+    return S.wonders >= 8;
+  }
+}, {
+  id: "q10",
+  ic: "📋",
+  n: "Quest taker",
+  f: function() {
+    return S.questsDone.length >= 10;
+  }
+}, {
+  id: "q25",
+  ic: "📋",
+  n: "Quest master",
+  f: function() {
+    return S.questsDone.length >= 25;
+  }
+}, {
+  id: "f5",
+  ic: "🌾",
+  n: "Breadbasket",
+  f: function() {
+    var n = 0;
+    for (var i = 0; i < S.buildings.length; i++)
+      if (S.buildings[i].d === "farm") n++;
+    return n >= 5;
+  }
+}, {
+  id: "e90",
+  ic: "🎓",
+  n: "Enlightened",
+  f: function() {
+    return S.rN > 0 && S.rEdu >= S.rN * 0.9;
+  }
+}, {
+  id: "s1",
+  ic: "🌟",
+  n: "Legacy founder",
+  f: function() {
+    return S.legacy >= 1;
+  }
+}, {
+  id: "s3",
+  ic: "🌟",
+  n: "Dynasty",
+  f: function() {
+    return S.legacy >= 3;
+  }
+}, {
+  id: "t5",
+  ic: "🔬",
+  n: "Technologist",
+  f: function() {
+    return S.tech.length >= 5;
+  }
+}, {
+  id: "t10",
+  ic: "🧠",
+  n: "Singularity",
+  f: function() {
+    return S.tech.length >= 10;
+  }
+}];
+
+function roadN() {
+  var x, z, n = 0;
+  for (z = 0; z < GH; z++)
+    for (x = 0; x < GW; x++)
+      if (map[z][x] === T.ROAD) n++;
+  return n;
+}
+
+function checkAch() {
+  var i, unlocked = false;
+  for (i = 0; i < ACH.length; i++) {
+    if (S.ach.indexOf(ACH[i].id) < 0) {
+      var ok = false;
+      try {
+        ok = ACH[i].f();
+      } catch (e) {}
+      if (ok) {
+        S.ach.push(ACH[i].id);
+        toast("🏆 Achievement: " + ACH[i].n);
+        unlocked = true;
+      }
+    }
+  }
+  if (unlocked) saveGame();
+  var h = "",
+    n = 0;
+  for (i = 0; i < ACH.length; i++) {
+    var on = S.ach.indexOf(ACH[i].id) >= 0;
+    if (on) n++;
+    h += '<span class="achi' + (on ? " on" : "") + '" title="' + ACH[i].n + '">' + (on ? ACH[i].ic : "🔒") + "</span>";
+  }
+  el("ach").innerHTML = h;
+  el("achn").textContent = n + "/" + ACH.length;
+}
+
+function slotSummary(i) {
+  var raw = null;
+  try {
+    raw = localStorage.getItem(keyOf(i));
+  } catch (e) {}
+  if (!raw) return null;
+  try {
+    var d = JSON.parse(raw);
+    return AGES[d.age || 0].n + " · " + Math.floor(d.pop || 0) + "👥 · " + (d.legacy || 0) + "🌟";
+  } catch (e) {
+    return null;
+  }
+}
+
+function updateSavesModal() {
+  var h = "",
+    i, s;
+  for (i = 0; i < 3; i++) {
+    s = slotSummary(i);
+    h += '<button class="tbtn' + (i === SLOT ? " go" : "") + '" data-slot="' + i + '">' + (i === SLOT ? "▸ " : "") + "SLOT " + (i + 1) + (s ? " · " + s : " — empty") + "</button>";
+  }
+  el("slotlist").innerHTML = h;
+  el("expbox").value = "";
+}
+
+function switchSlot(i) {
+  if (i === SLOT) return;
+  saveGame();
+  SLOT = i;
+  EVLOG.length = 0;
+  seenCrit = {};
+  if (!loadGame(i)) {
+    S = newState();
+    genMap();
+  }
+  S.sel = null;
+  userZoomed = false;
+  mobileDefaultView();
+  computeCity();
+  terrainDirty = true;
+  uiDirty = true;
+  agents.length = 0;
+  rebuildTabs();
+  rebuildItems();
+  updateQuests();
+  updateInfo();
+  updateHUD();
+  updateSavesModal();
+  toast("💾 Switched to slot " + (i + 1));
+}
+
+function exportCode() {
+  saveGame();
+  var raw = null;
+  try {
+    raw = localStorage.getItem(keyOf(SLOT));
+  } catch (e) {}
+  if (!raw) {
+    toast("Nothing to export");
+    return;
+  }
+  el("expbox").value = "IDLE1:" + btoa(raw);
+  el("expbox").select && el("expbox").select();
+  toast("📤 Export code ready — copy it somewhere safe");
+}
+
+function importCode() {
+  var v = (el("impbox").value || "").trim();
+  if (v.indexOf("IDLE1:") !== 0) {
+    toast("❌ Invalid code");
+    return;
+  }
+  var raw = null;
+  try {
+    raw = atob(v.slice(6));
+    JSON.parse(raw);
+  } catch (e) {
+    toast("❌ Corrupted code");
+    return;
+  }
+  try {
+    localStorage.setItem(keyOf(SLOT), raw);
+  } catch (e) {
+    toast("❌ Could not save");
+    return;
+  }
+  EVLOG.length = 0;
+  seenCrit = {};
+  if (!loadGame(SLOT)) {
+    S = newState();
+    genMap();
+  }
+  S.sel = null;
+  userZoomed = false;
+  mobileDefaultView();
+  computeCity();
+  terrainDirty = true;
+  uiDirty = true;
+  agents.length = 0;
+  rebuildTabs();
+  rebuildItems();
+  updateQuests();
+  updateInfo();
+  updateHUD();
+  el("impbox").value = "";
+  toast("📥 City imported into slot " + (SLOT + 1));
+}
+el("btnSaves").addEventListener("click", function() {
+  updateSavesModal();
+  exportCode();
+  el("savesbox").style.display = "flex";
+});
+el("savesClose").addEventListener("click", function() {
+  el("savesbox").style.display = "none";
+});
+el("btnImport").addEventListener("click", importCode);
+el("petition").addEventListener("click", function(e) {
+  var btn = e.target.closest(".tbtn");
+  if (!btn) return;
+  var a = btn.getAttribute("data-act");
+  if (a === "pa") applyPet(true);
+  else if (a === "pd") applyPet(false);
+});
+var CHALS = [{
+  id: "c_boom",
+  ic: "🏘",
+  n: "Boom Town",
+  d: "Reach 100 population. Deadline: 15 min.",
+  goal: 100,
+  prog: function() {
+    return Math.min(1, S.pop / 100);
+  },
+  win: function() {
+    return S.pop >= 100;
+  },
+  deadline: 900,
+  gold: 480,
+  silver: 720
+}, {
+  id: "c_tycoon",
+  ic: "💰",
+  n: "Tycoon",
+  d: "Hold 25,000💰 at once. Deadline: 20 min.",
+  goal: 25000,
+  prog: function() {
+    return Math.min(1, S.money / 25000);
+  },
+  win: function() {
+    return S.money >= 25000;
+  },
+  deadline: 1200,
+  gold: 600,
+  silver: 900
+}, {
+  id: "c_green",
+  ic: "🌿",
+  n: "Green City",
+  d: "Reach 150 population while keeping waste under 10. Deadline: 30 min.",
+  goal: 150,
+  prog: function() {
+    return Math.min(1, S.pop / 150) * (S.waste > 10 ? 0.75 : 1);
+  },
+  win: function() {
+    return S.pop >= 150 && S.waste <= 10;
+  },
+  deadline: 1800,
+  gold: 900,
+  silver: 1500
+}];
+
+function chalById(id) {
+  for (var i = 0; i < CHALS.length; i++)
+    if (CHALS[i].id === id) return CHALS[i];
+  return null;
+}
+
+function startChal(id) {
+  if (S.chal && !S.chal.done) {
+    toast("Finish or cancel the active challenge first");
+    return;
+  }
+  S.chal = {
+    id: id,
+    t0: S.time,
+    done: 0
+  };
+  var c = chalById(id);
+  toast("🎯 Challenge started: " + c.n + " — " + c.d);
+  saveGame();
+  renderChal();
+}
+
+function cancelChal() {
+  if (!S.chal || S.chal.done) return;
+  S.chal.done = -1;
+  toast("🎯 Challenge cancelled");
+  saveGame();
+  renderChal();
+}
+
+function checkChal() {
+  var c0 = S.chal;
+  if (!c0 || c0.done) return;
+  var c = chalById(c0.id);
+  if (!c) {
+    S.chal = null;
+    return;
+  }
+  var el2 = S.time - c0.t0;
+  if (c.win()) {
+    var medal = el2 <= c.gold ? "gold" : (el2 <= c.silver ? "silver" : "bronze");
+    var old = S.medals[c0.id];
+    var rank = {
+      bronze: 1,
+      silver: 2,
+      gold: 3
+    };
+    S.medals[c0.id] = (!old || rank[medal] > rank[old]) ? medal : old;
+    c0.done = 1;
+    c0.res = medal;
+    toast("🏆 Challenge complete: " + c.n + " — " + medal.toUpperCase() + " medal (" + fmt(el2) + ")!");
+    EVLOG.unshift({
+      ic: "🏆",
+      n: c.n + " — " + medal + " medal",
+      t: S.time
+    });
+    if (EVLOG.length > 5) EVLOG.pop();
+    saveGame();
+  } else if (el2 > (c.deadline || 1800)) {
+    c0.done = -1;
+    toast("⏱ Challenge failed: " + c.n + " — time's up. Try again!");
+    saveGame();
+  }
+}
+
+function renderChal() {
+  var h = "",
+    i, c, m, active = S.chal && !S.chal.done ? S.chal.id : null;
+  for (i = 0; i < CHALS.length; i++) {
+    c = CHALS[i];
+    m = S.medals[c.id];
+    h += '<div class="quest' + (active === c.id ? " done" : "") + '">' + c.ic + " <b>" + c.n + "</b> — " + c.d + (m ? ' <span class="rw">' + (m === "gold" ? "🥇" : m === "silver" ? "🥈" : "🥉") + " won</span>" : "") + (active === c.id ? ' <span class="rw">▸ ACTIVE</span>' : "") + "</div>";
+  }
+  if (active) h += '<div class="prow"><button class="tbtn" data-ca="cx">✖ CANCEL CHALLENGE</button></div>';
+  el("challist").innerHTML = h;
+}
+el("btnChal").addEventListener("click", function() {
+  renderChal();
+  el("chalbox").style.display = "flex";
+});
+el("chalClose").addEventListener("click", function() {
+  el("chalbox").style.display = "none";
+});
+el("challist").addEventListener("click", function(e) {
+  var btn = e.target.closest(".tbtn");
+  if (btn) {
+    cancelChal();
+    return;
+  }
+  var q = e.target.closest(".quest");
+  if (!q) return;
+  for (var i = 0; i < CHALS.length; i++)
+    if (q.innerHTML.indexOf("<b>" + CHALS[i].n + "</b>") >= 0) {
+      startChal(CHALS[i].id);
+      return;
+    }
+});
+el("slotlist").addEventListener("click", function(e) {
+  var b = e.target.closest(".tbtn");
+  if (!b) return;
+  var s = parseInt(b.getAttribute("data-slot"), 10);
+  if (!isNaN(s)) switchSlot(s);
+});
+document.addEventListener("keydown", function(e) {
+  if (e.code === "Escape") {
+    S.tool = null;
+    uiDirty = true;
+  }
+  if (e.code === "Space") {
+    e.preventDefault();
+    setSpeed(S.speed > 0 ? 0 : 1);
+  }
+  if (e.code === "Digit1") setSpeed(1);
+  if (e.code === "Digit2") setSpeed(2);
+  if (e.code === "Digit4") setSpeed(4);
+  if (e.code === "Digit8") setSpeed(8);
+  if ((e.ctrlKey || e.metaKey) && e.code === "KeyZ") undo();
+});
+document.addEventListener("visibilitychange", function() {
+  if (document.hidden) saveGame();
+});
+try {
+  if (!localStorage.getItem(keyOf(0)) && localStorage.getItem("idleCitySave_v1")) {
+    localStorage.setItem(keyOf(0), localStorage.getItem("idleCitySave_v1"));
+    localStorage.removeItem("idleCitySave_v1");
+  }
+} catch (e) {}
+var loaded = loadGame();
+if (!loaded) {
+  S = newState();
+  genMap();
+}
+computeCity();
+onResize();
+rebuildTabs();
+rebuildItems();
+updateQuests();
+updateInfo();
+updateHUD();
+if (S.dead) showGameOver();
+else if (S.tut < 99) showTut(S.tut);
+var simAcc = 0,
+  last = performance.now(),
+  saveAcc = 0;
+
+function frame(now) {
+  if (document.hidden) {
+    last = now;
+    requestAnimationFrame(frame);
+    return;
+  }
+  if (now - last < 15) {
+    requestAnimationFrame(frame);
+    return;
+  }
+  var dt = Math.min(0.1, (now - last) / 1000);
+  last = now;
+  if (S.speed > 0) {
+    simAcc += dt * S.speed;
+    var steps = 0;
+    while (simAcc >= 1 && steps < 20) {
+      simTick(1);
+      simAcc -= 1;
+      steps++;
+    }
+    updateAgents(dt * S.speed);
+  }
+  saveAcc += dt;
+  if (saveAcc > 10) {
+    saveAcc = 0;
+    saveGame();
+  }
+  chkT += dt;
+  if (chkT > 1) {
+    chkT = 0;
+    var rr = cv.getBoundingClientRect();
+    if (Math.abs(rr.width - cssW) > 0.5 || Math.abs(rr.height - cssH) > 0.5) onResize();
+  }
+  hudT += dt;
+  if (uiDirty) {
+    uiDirty = false;
+    rebuildTabs();
+    rebuildItems();
+    updateQuests();
+    updateInfo();
+  }
+  if (hudT > 0.5) {
+    hudT = 0;
+    updateHUD();
+    updateQuests();
+  }
+  if (terrainDirty) {
+    terrainDirty = false;
+    prerenderTerrain();
+  }
+  render();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);

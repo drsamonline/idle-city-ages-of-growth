@@ -1,0 +1,22 @@
+# Normalise line endings to LF in the repository
+* text=auto eol=lf
+
+# Explicit types
+*.html  text eol=lf
+*.css   text eol=lf
+*.js    text eol=lf
+*.json  text eol=lf
+*.md    text eol=lf
+
+# Binary assets — never touch line endings
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
+
+# Generated single-file bundles (kept in the repo for direct download / Pages)
+index.html          linguist-generated=true
+idle-city.min.html  linguist-generated=true

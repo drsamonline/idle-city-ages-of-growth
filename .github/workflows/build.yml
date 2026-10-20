@@ -1,0 +1,35 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  verify-bundles:
+    name: Verify generated bundles are up to date
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dev dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Rebuild single-file bundles
+        run: node build/build.js
+
+      - name: Fail if committed bundles differ from src/
+        run: |
+          if ! git diff --quiet -- index.html idle-city.min.html; then
+            echo "::error::index.html / idle-city.min.html are out of date."
+            echo "Run 'node build/build.js' locally and commit the result."
+            git diff --stat -- index.html idle-city.min.html
+            exit 1
+          fi
+          echo "Bundles are up to date. ✅"

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<!--
+  IDLE CITY — Ages of Growth
+  Author: Dr. Sohil Momin  |  PolyForm Noncommercial License 1.0.0 (see LICENSE)
+  Please keep this author credit in any copy or substantial reuse.
+-->
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0b0e1a" />
+<meta name="color-scheme" content="dark" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>IDLE CITY — Ages of Growth — by Dr. Sohil Momin</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+<div id="top">
+<span class="logo">🏙 IDLE CITY</span>
+<div id="resrow">
+<span id="agepill">STONE AGE</span>
+<span class="res" id="rMoney">💰<b>0</b></span>
+<span class="res" id="rMats">🧱<b>0</b></span>
+<span class="res" id="rFood">🍖<b>0</b></span>
+<span class="res" id="rFuel">⛽<b>0</b></span>
+<span class="res" id="rPow">⚡<b>0/0</b></span>
+<span class="res" id="rRP">🔬<b>0</b></span>
+<span class="res" id="rPop">👥<b>0/0</b></span>
+<span class="res" id="rHap">🙂<b>0</b></span>
+</div>
+<div id="ctlrow">
+<button class="sbtn" id="btnSaves">💾</button>
+<button class="sbtn" id="btnChal">🎯</button>
+<button class="sbtn" id="btnHelp">?</button>
+<button class="sbtn" id="btnAlerts">🔔</button>
+<button class="sbtn" id="btnSide">🎯</button>
+<span id="speedbox">
+<button class="sbtn" data-sp="0">⏸</button>
+<button class="sbtn on" data-sp="1">1x</button>
+<button class="sbtn" data-sp="2">2x</button>
+<button class="sbtn" data-sp="4">4x</button>
+<button class="sbtn" data-sp="8">8x</button>
+<button class="sbtn" id="btnReset">⟲</button>
+</span>
+</div>
+</div>
+<div id="main">
+<div id="build">
+<div id="tabs"></div>
+<div id="items"></div>
+</div>
+<div id="mapwrap">
+<canvas id="game" width="780" height="520"></canvas>
+<div id="zoomui">
+<button class="zbtn" id="zundo">⤺</button>
+<button class="zbtn" id="zin">+</button>
+<button class="zbtn" id="zfit">⤢</button>
+<button class="zbtn" id="zout">−</button>
+</div>
+<div id="toasts"></div>
+<canvas id="minimap" width="132" height="84"></canvas>
+</div>
+<div id="side">
+<div class="ph">🔔 ALERTS <span id="alertBadge" class="none">0</span><button id="sideclose">✕</button></div>
+<div id="alerts"></div>
+<div class="ph">📋 CITY QUESTS</div>
+<div id="quests"></div>
+<div class="ph" id="petph" style="display:none">📜 CITIZEN PETITION</div>
+<div id="petition"></div>
+<button id="ageup">ADVANCE AGE</button>
+<button id="ascend">🌟 ASCEND</button>
+<div class="ph">📈 CITY TRENDS</div>
+<canvas id="statcv" width="240" height="80"></canvas>
+<div class="ph">🏆 ACHIEVEMENTS <span id="achn">0/0</span></div>
+<div id="ach"></div>
+<div class="ph">🔎 INSPECTOR</div>
+<div id="info">Click a building to inspect it.</div>
+</div>
+</div>
+<div id="status"></div>
+<div id="tut">
+<div id="tutcard">
+<div id="tutic">🏛</div>
+<div id="tuttxt"></div>
+<div id="tutstep">1 / 6</div>
+<div id="tutbtns"><button class="tbtn" id="tutskip">SKIP TUTORIAL</button><button class="tbtn go" id="tutnext">NEXT ▸</button></div>
+</div>
+</div>
+<div id="gameover"></div>
+<div id="resetbox">
+<div class="gocard">
+<div class="gotitle">⟲ RESET CITY?</div>
+<div class="gorow">This erases your current city permanently and starts fresh in the Stone Age.</div>
+<div id="tutbtns"><button class="tbtn" id="resetNo">CANCEL</button><button class="tbtn go" id="resetYes">RESET</button></div>
+</div>
+</div>
+<div id="savesbox">
+<div class="gocard">
+<div class="gotitle">💾 CITY SAVES</div>
+<div class="gorow" id="slotlist"></div>
+<div class="gorow" style="font-size:10px">EXPORT — copy this code to move your city anywhere:</div>
+<textarea id="expbox" readonly></textarea>
+<div class="gorow" style="font-size:10px">IMPORT — paste a code below, then press import:</div>
+<textarea id="impbox"></textarea>
+<div id="tutbtns"><button class="tbtn" id="savesClose">CLOSE</button><button class="tbtn go" id="btnImport">IMPORT INTO SLOT</button></div>
+</div>
+</div>
+<div id="chalbox">
+<div class="gocard">
+<div class="gotitle">🎯 CITY CHALLENGES</div>
+<div id="challist"></div>
+<div id="tutbtns"><button class="tbtn" id="chalClose">CLOSE</button></div>
+</div>
+</div>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
