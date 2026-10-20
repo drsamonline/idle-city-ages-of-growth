@@ -1,8 +1,8 @@
 # Dependencies (dev-only build tools — not needed to play)
 node_modules/
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
+# package-lock.json IS committed for reproducible builds
 
 # Build / editor cruft
 *.log
