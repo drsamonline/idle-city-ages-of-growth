@@ -151,7 +151,7 @@ See **[docs/BUILDING.md](docs/BUILDING.md)** for details.
 │   └── workflows/build.yml # CI: fails if the bundles drift from src/
 ├── package.json            # dev scripts + dev-only dependencies
 ├── README.md
-├── LICENSE                 # MIT — © Dr. Sohil Momin
+├── LICENSE                 # PolyForm Noncommercial 1.0.0 — © Dr. Sohil Momin
 ├── ATTRIBUTION.md          # original author + third-party notices
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
