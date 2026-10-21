@@ -38,7 +38,6 @@ Lay roads, zone land, generate power and keep your citizens happy — the city r
 
 <img src="assets/screenshot-desktop.png" alt="IDLE CITY — Ages of Growth, Industrial Age city with roads, zones and utilities" width="860">
 
-# 🏙 IDLE CITY — Ages of Growth
 
 **A single-file idle city-builder that grows from a Stone Age village into a Fusion Age world-city.**
 

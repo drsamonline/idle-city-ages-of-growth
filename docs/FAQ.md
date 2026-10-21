@@ -86,9 +86,10 @@ file and are never shipped.
 <details>
 <summary><b>Can I use this in my own project / modify it?</b></summary>
 
-Yes — it's released under the **MIT License**, so you can use, modify and redistribute it, even
-commercially. **You must keep the copyright notice and author credit** (**Dr. Sohil Momin**) —
-see [LICENSE](../LICENSE) and [ATTRIBUTION.md](../ATTRIBUTION.md).
+Yes — it's released under the **PolyForm Noncommercial License 1.0.0**, so you can use, modify and
+share it for **non-commercial** purposes. **Commercial use requires a separate licence**, and
+**you must keep the copyright notice and author credit** (**Dr. Sohil Momin**) — see
+[LICENSE](../LICENSE) and [ATTRIBUTION.md](../ATTRIBUTION.md).
 </details>
 
 <details>
