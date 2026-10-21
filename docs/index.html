@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<script>document.documentElement.className = "js";</script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>IDLE CITY — Ages of Growth · Single-file idle city-builder by Dr. Sohil Momin</title>
+<meta name="description" content="IDLE CITY — Ages of Growth is a single-file idle city-builder in plain HTML, CSS and vanilla JavaScript. Grow a Stone Age village into a Fusion Age world-city across 8 ages — roads, zoning, power, quests, research, disasters and ascension. Zero dependencies, no build step, fully offline." />
+<meta name="keywords" content="idle game, city builder, incremental game, idle city, single file game, vanilla javascript, canvas 2d, offline game, zero dependencies, stone age to fusion age, browser game, mobile city builder, dr sohil momin, ages of growth" />
+<meta name="author" content="Dr. Sohil Momin" />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<meta name="theme-color" content="#faf6f0" />
+<link rel="canonical" href="https://drsamonline.github.io/idle-city-ages-of-growth/" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="IDLE CITY — Ages of Growth" />
+<meta property="og:title" content="IDLE CITY — Ages of Growth — an idle city-builder in one HTML file" />
+<meta property="og:description" content="Build roads, zone land, generate power and keep citizens happy while your city grows from a Stone Age village to a Fusion Age world-city. 8 ages, 36 quests, 10 techs, 3 challenges, zero dependencies." />
+<meta property="og:url" content="https://drsamonline.github.io/idle-city-ages-of-growth/" />
+<meta property="og:image" content="https://socialify.git.ci/drsamonline/idle-city-ages-of-growth/image?name=1&amp;owner=1&amp;description=1&amp;language=1&amp;theme=Light&amp;font=Inter" />
+<meta property="og:image:alt" content="IDLE CITY — Ages of Growth" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="IDLE CITY — Ages of Growth — an idle city-builder in one HTML file" />
+<meta name="twitter:description" content="Grow a Stone Age village into a Fusion Age world-city across 8 ages. Plain HTML + CSS + vanilla JS, one file, no dependencies, fully offline." />
+<meta name="twitter:image" content="https://socialify.git.ci/drsamonline/idle-city-ages-of-growth/image?name=1&amp;owner=1&amp;description=1&amp;language=1&amp;theme=Light&amp;font=Inter" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23faf6f0'/%3E%3Crect x='5' y='18' width='5' height='9' fill='%23a9663a'/%3E%3Crect x='12' y='13' width='5' height='14' fill='%235a8296'/%3E%3Crect x='19' y='7' width='5' height='20' fill='%2322d3ee'/%3E%3C/svg%3E" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "IDLE CITY — Ages of Growth",
+  "alternateName": "IDLE CITY",
+  "url": "https://drsamonline.github.io/idle-city-ages-of-growth/",
+  "description": "A single-file idle city-builder that grows from a Stone Age village into a Fusion Age world-city. Lay roads, zone land, generate power and keep citizens happy across 8 ages. Plain HTML, CSS and vanilla JavaScript on one canvas, with no dependencies and no build step.",
+  "image": "https://socialify.git.ci/drsamonline/idle-city-ages-of-growth/image?name=1&owner=1&description=1&language=1&theme=Light&font=Inter",
+  "genre": ["Idle game", "City-building", "Incremental", "Simulation"],
+  "gamePlatform": ["Web browser", "Desktop", "Mobile"],
+  "playMode": "SinglePlayer",
+  "applicationCategory": "Game",
+  "operatingSystem": "Any modern web browser",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "author": {
+    "@type": "Person",
+    "name": "Dr. Sohil Momin",
+    "url": "https://github.com/drsamonline"
+  },
+  "creator": {
+    "@type": "Person",
+    "name": "Dr. Sohil Momin"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Dr. Sohil Momin"
+  },
+  "license": "https://github.com/drsamonline/idle-city-ages-of-growth/blob/main/LICENSE",
+  "codeRepository": "https://github.com/drsamonline/idle-city-ages-of-growth",
+  "softwareVersion": "1.1.0",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+  }
+}
+</script>
+
+<style>
+:root{
+  /* progression palette — the page itself advances through the ages */
+  --era-0:#a9663a; --era-1:#bd8b4c; --era-2:#8c8177; --era-3:#6f7d78;
+  --era-4:#5a8296; --era-5:#3f93ad; --era-6:#2aa7c4; --era-7:#22d3ee;
+
+  --paper:#faf6f0; --paper-2:#f3ece2; --card:#fffdf9; --ink:#2b2320;
+  --ink-soft:#5c5049; --ink-faint:#8a7c72; --line:#e4d9cb; --line-2:#d6c7b4;
+  --clay:#a9663a; --bronze:#bd8b4c; --cyan:#1596b3; --cyan-ink:#0f7a93;
+
+  --radius:16px; --radius-sm:10px; --radius-lg:26px;
+  --shadow:0 1px 2px rgba(43,35,32,.05), 0 10px 30px -12px rgba(43,35,32,.18);
+  --shadow-lg:0 2px 4px rgba(43,35,32,.06), 0 30px 60px -22px rgba(43,35,32,.28);
+  --maxw:1120px;
+  --serif:ui-serif,Georgia,"Iowan Old Style","Palatino Linotype",Palatino,"Times New Roman",serif;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Inter,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --grad:linear-gradient(90deg,var(--era-0),var(--era-1),var(--era-2),var(--era-3),var(--era-4),var(--era-5),var(--era-6),var(--era-7));
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:17px;line-height:1.65;
+  overflow-x:hidden;
+  background-image:
+    radial-gradient(1100px 620px at 82% -8%, rgba(34,211,238,.10), transparent 60%),
+    radial-gradient(1000px 620px at 6% 4%, rgba(169,102,58,.13), transparent 62%);
+  background-attachment:fixed;
+}
+img{max-width:100%;display:block;height:auto}
+a{color:var(--cyan-ink);text-decoration-thickness:1px;text-underline-offset:3px}
+a:hover{color:var(--clay)}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:700;line-height:1.12;letter-spacing:-.015em;margin:0}
+p{margin:0 0 1em}
+.wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 22px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint)}
+.lead{font-size:1.12rem;color:var(--ink-soft)}
+.skip{position:absolute;left:-9999px}
+.skip:focus{left:12px;top:12px;z-index:100;background:#fff;padding:10px 14px;border-radius:8px;border:1px solid var(--line-2)}
+
+/* ---------- sticky nav ---------- */
+.nav{position:sticky;top:0;z-index:50;background:rgba(250,246,240,.82);backdrop-filter:blur(12px) saturate(1.2);border-bottom:1px solid var(--line);transition:box-shadow .25s ease,background .25s ease}
+.nav.scrolled{box-shadow:0 8px 26px -18px rgba(43,35,32,.5);background:rgba(250,246,240,.94)}
+.nav-in{display:flex;align-items:center;gap:18px;height:64px}
+.brand{display:flex;align-items:center;gap:11px;font-family:var(--serif);font-weight:700;font-size:1.12rem;color:var(--ink);text-decoration:none;letter-spacing:-.01em;white-space:nowrap}
+.brand svg{flex:none}
+.brand small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);font-weight:400}
+.nav-links{display:flex;gap:4px;margin-left:auto;align-items:center}
+.nav-links a{font-size:14.5px;color:var(--ink-soft);text-decoration:none;padding:8px 12px;border-radius:9px;transition:background .18s,color .18s}
+.nav-links a:hover{background:var(--paper-2);color:var(--ink)}
+.nav-cta{font-size:14px;font-weight:650;text-decoration:none;color:#fff;background:var(--ink);padding:9px 16px;border-radius:999px;transition:transform .18s,background .18s}
+.nav-cta:hover{background:var(--clay);color:#fff;transform:translateY(-1px)}
+.nav-burger{display:none;margin-left:auto;background:none;border:1px solid var(--line-2);border-radius:10px;padding:8px 10px;cursor:pointer}
+.nav-burger span{display:block;width:18px;height:2px;background:var(--ink);margin:3px 0;border-radius:2px}
+@media(max-width:860px){
+  .nav-links{display:none}
+  .nav-links.open{display:flex;position:absolute;top:64px;left:0;right:0;flex-direction:column;align-items:stretch;background:var(--paper);border-bottom:1px solid var(--line);padding:10px 16px 16px;gap:2px}
+  .nav-links.open a{padding:11px 12px}
+  .nav-burger{display:block}
+  .nav-cta{display:none}
+}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--sans);font-size:15.5px;font-weight:650;text-decoration:none;border-radius:999px;padding:14px 26px;border:1px solid transparent;cursor:pointer;transition:transform .18s,box-shadow .18s,background .18s,color .18s}
+.btn svg{flex:none}
+.btn-primary{background:var(--ink);color:#fff;box-shadow:var(--shadow)}
+.btn-primary:hover{background:var(--clay);color:#fff;transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.btn-ghost{background:transparent;color:var(--ink);border-color:var(--line-2)}
+.btn-ghost:hover{background:var(--paper-2);transform:translateY(-2px)}
+.btn-row{display:flex;flex-wrap:wrap;gap:12px}
+
+/* ---------- hero ---------- */
+.hero{padding:74px 0 34px}
+.hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:52px;align-items:center}
+@media(max-width:940px){.hero-grid{grid-template-columns:1fr;gap:38px}}
+.hero h1{font-size:clamp(2.5rem,5.6vw,4.05rem)}
+.hero h1 .em{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .pitch{font-size:clamp(1.06rem,1.5vw,1.24rem);color:var(--ink-soft);max-width:36ch;margin:20px 0 28px}
+.pill{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;margin-bottom:22px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--era-7);box-shadow:0 0 0 4px rgba(34,211,238,.18);animation:pulse 2.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+/* era timeline motif */
+.timeline{margin-top:30px}
+.tl-track{position:relative;height:10px;border-radius:999px;background:var(--grad);overflow:hidden}
+.tl-track::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-100%);animation:sweep 5.5s ease-in-out infinite}
+@keyframes sweep{0%{transform:translateX(-100%)}55%,100%{transform:translateX(100%)}}
+.tl-labels{display:flex;justify-content:space-between;margin-top:9px;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint)}
+.tl-labels span{flex:1;text-align:center}
+.tl-labels span:first-child{text-align:left}
+.tl-labels span:last-child{text-align:right}
+@media(max-width:560px){.tl-labels span:nth-child(even){display:none}}
+
+/* stat tiles */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
+@media(max-width:520px){.stats{grid-template-columns:1fr}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 16px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--era-0)}
+.stat:nth-child(1)::before{background:var(--era-0)}
+.stat:nth-child(2)::before{background:var(--era-5)}
+.stat:nth-child(3)::before{background:var(--era-7)}
+.stat .k{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint)}
+.stat .v{font-family:var(--serif);font-size:2rem;font-weight:700;line-height:1.05;margin:8px 0 2px;letter-spacing:-.02em}
+.stat .s{font-size:12.5px;color:var(--ink-faint)}
+
+/* hero visual card */
+.hero-visual{position:relative}
+.shot-frame{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:10px;box-shadow:var(--shadow-lg)}
+.shot-frame img{border-radius:18px;border:1px solid var(--line)}
+.shot-tag{position:absolute;left:-8px;bottom:22px;background:var(--ink);color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:8px 14px;border-radius:999px;box-shadow:var(--shadow)}
+.era-chip{position:absolute;right:-6px;top:18px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);box-shadow:var(--shadow)}
+
+/* ---------- era band ---------- */
+.band{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper-2);margin-top:56px}
+.band-in{padding:38px 0}
+.band h2{font-size:clamp(1.4rem,2.6vw,1.9rem)}
+.era-rail{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-top:24px}
+@media(max-width:900px){.era-rail{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:520px){.era-rail{grid-template-columns:repeat(2,1fr)}}
+.era{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px 12px 13px;position:relative;overflow:hidden}
+.era .bar{position:absolute;top:0;left:0;right:0;height:4px}
+.era .n{font-family:var(--mono);font-size:10px;color:var(--ink-faint)}
+.era .nm{font-family:var(--serif);font-weight:700;font-size:1rem;margin-top:3px}
+.era .mx{font-family:var(--mono);font-size:11.5px;color:var(--cyan-ink);margin-top:3px}
+
+/* ---------- sections ---------- */
+section{padding:74px 0}
+.sec-head{max-width:64ch;margin-bottom:38px}
+.sec-head h2{font-size:clamp(1.75rem,3.4vw,2.5rem)}
+.sec-head p{margin-top:14px;color:var(--ink-soft)}
+
+/* features */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.cards{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px 22px;box-shadow:var(--shadow);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--line-2)}
+.card .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--paper-2);border:1px solid var(--line);margin-bottom:15px}
+.card h3{font-size:1.2rem;margin-bottom:8px}
+.card p{font-size:15px;color:var(--ink-soft);margin:0}
+.card .era-tick{position:absolute;top:0;right:0;width:64px;height:5px;border-bottom-left-radius:8px}
+
+/* how it works */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;counter-reset:step}
+@media(max-width:900px){.steps{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.steps{grid-template-columns:1fr}}
+.step{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px 22px;position:relative;box-shadow:var(--shadow)}
+.step .num{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:#fff;background:var(--ink);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;margin-bottom:14px}
+.step h3{font-size:1.08rem;margin-bottom:7px}
+.step p{font-size:14.5px;color:var(--ink-soft);margin:0}
+.step:nth-child(1) .num{background:var(--era-0)}
+.step:nth-child(2) .num{background:var(--era-3)}
+.step:nth-child(3) .num{background:var(--era-5)}
+.step:nth-child(4) .num{background:var(--era-7);color:#06333d}
+
+/* screenshots */
+.shots{display:grid;grid-template-columns:1.35fr .65fr;gap:18px}
+@media(max-width:820px){.shots{grid-template-columns:1fr}}
+.shots .col{display:grid;gap:18px}
+.shot{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.shot img{border-bottom:1px solid var(--line);width:100%}
+.shot figcaption{padding:12px 16px;font-size:13.5px;color:var(--ink-soft)}
+.shot figcaption b{color:var(--ink);font-family:var(--serif)}
+
+/* demo */
+.demo{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;box-shadow:var(--shadow)}
+.demo .txt{flex:1;min-width:240px}
+.demo h3{font-size:1.15rem;margin-bottom:6px}
+.demo p{margin:0;font-size:14.5px;color:var(--ink-soft)}
+
+/* get started */
+.start{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:30px;box-shadow:var(--shadow)}
+.start-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+@media(max-width:820px){.start-grid{grid-template-columns:1fr}}
+pre{background:#241d19;color:#f4ece2;border-radius:var(--radius-sm);padding:16px 18px;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.7;margin:0}
+pre .c{color:#9d8f83}
+.start h3{font-size:1.15rem;margin-bottom:12px}
+.start ul{margin:0;padding-left:0;list-style:none}
+.start li{display:flex;gap:10px;font-size:15px;color:var(--ink-soft);margin-bottom:11px}
+.start li svg{flex:none;margin-top:3px}
+
+/* faq */
+.faq{max-width:860px}
+.faq details{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);margin-bottom:11px;box-shadow:var(--shadow);overflow:hidden}
+.faq summary{cursor:pointer;padding:17px 20px;font-family:var(--serif);font-weight:700;font-size:1.06rem;list-style:none;display:flex;justify-content:space-between;gap:16px;align-items:center}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"";width:11px;height:11px;border-right:2px solid var(--ink-faint);border-bottom:2px solid var(--ink-faint);transform:rotate(45deg);transition:transform .22s;flex:none;margin-top:-3px}
+.faq details[open] summary::after{transform:rotate(-135deg);margin-top:3px}
+.faq details p{margin:0;padding:0 20px 19px;font-size:15px;color:var(--ink-soft)}
+
+/* badges */
+.badge-strip{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.badge-strip img{height:20px}
+.cbadge{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;background:var(--paper-2);border:1px solid var(--line-2);color:var(--ink-soft);border-radius:999px;padding:5px 12px}
+.cbadge b{color:var(--ink);font-weight:650}
+.cbadge.clay{border-color:#e0c3a8;background:#fbeee0;color:#8a4f28}
+.cbadge.bronze{border-color:#e3cfa4;background:#faf1dc;color:#8a6626}
+.cbadge.cyan{border-color:#a9e3ee;background:#e4f7fb;color:#0f7a93}
+.cbadge.dark{border-color:var(--ink);background:var(--ink);color:#f4ece2}
+.cbadge.dark b{color:#fff}
+
+/* footer */
+footer{border-top:1px solid var(--line);background:var(--paper-2);margin-top:20px}
+.foot-in{padding:48px 0 40px;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:30px}
+@media(max-width:760px){.foot-in{grid-template-columns:1fr;gap:24px}}
+.foot-in h4{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:14px}
+.foot-in a{display:block;font-size:14.5px;color:var(--ink-soft);text-decoration:none;margin-bottom:9px}
+.foot-in a:hover{color:var(--clay)}
+.foot-brand p{font-size:14.5px;color:var(--ink-soft);max-width:38ch}
+.foot-bottom{border-top:1px solid var(--line);padding:20px 0 40px;display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center;font-size:13.5px;color:var(--ink-faint)}
+.foot-bottom a{color:var(--ink-soft)}
+.grad-rule{height:4px;background:var(--grad)}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+html.no-js .reveal{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  .reveal{opacity:1;transform:none}
+  .tl-track::after{display:none}
+}
+:focus-visible{outline:2.5px solid var(--cyan-ink);outline-offset:3px;border-radius:4px}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- ================= NAV ================= -->
+<nav class="nav" id="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="#top">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="7" fill="#f3ece2" stroke="#e4d9cb"/>
+        <rect x="5" y="18" width="5" height="9" fill="#a9663a"/>
+        <rect x="12" y="13" width="5" height="14" fill="#5a8296"/>
+        <rect x="19" y="7" width="5" height="20" fill="#22d3ee"/>
+      </svg>
+      <span>IDLE CITY<small>Ages of Growth</small></span>
+    </a>
+    <button class="nav-burger" id="burger" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    <div class="nav-links" id="navlinks">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#screens">Screenshots</a>
+      <a href="#start">Get started</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/drsamonline/idle-city-ages-of-growth" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <a class="nav-cta" href="play/">Play now</a>
+  </div>
+</nav>
+
+<main id="main">
+<span id="top"></span>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="pill"><span class="dot"></span> v1.1.0 · single file · offline-ready</span>
+      <h1>IDLE CITY —<br><span class="em">Ages of Growth</span></h1>
+      <p class="pitch">A single-file idle city-builder that grows from a Stone Age village into a Fusion Age world-city — you shape the city, it runs itself.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="play/">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v14l11-7-11-7z"/></svg>
+          Play the game
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/drsamonline/idle-city-ages-of-growth" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          View on GitHub
+        </a>
+      </div>
+
+      <div class="timeline" aria-hidden="true">
+        <div class="tl-track"></div>
+        <div class="tl-labels">
+          <span>Stone</span><span>Bronze</span><span>Iron</span><span>Medieval</span>
+          <span>Industrial</span><span>Modern</span><span>Digital</span><span>Fusion</span>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="k">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+            Population
+          </div>
+          <div class="v">2,500+</div>
+          <div class="s">citizens to reach Ascension</div>
+        </div>
+        <div class="stat">
+          <div class="k">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 14l4-5 3 3 5-7"/></svg>
+            Production
+          </div>
+          <div class="v">8.0&times;</div>
+          <div class="s">income multiplier at the Fusion Age</div>
+        </div>
+        <div class="stat">
+          <div class="k">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.6 1.2 6.6L12 17.8 6.1 20.2l1.2-6.6L2.5 9l6.6-.9L12 2z"/></svg>
+            Prestige
+          </div>
+          <div class="v">+25%</div>
+          <div class="s">Legacy bonus carried per ascension</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual reveal">
+      <span class="era-chip">Industrial Age</span>
+      <div class="shot-frame">
+        <img src="assets/screenshot-desktop.png" width="860" height="540" alt="IDLE CITY — Ages of Growth running in the Industrial Age, showing a city with roads, zones and utilities" />
+      </div>
+      <span class="shot-tag">Live on canvas</span>
+    </div>
+  </div>
+</header>
+
+<!-- ================= ERA BAND ================= -->
+<div class="band">
+  <div class="wrap band-in">
+    <span class="eyebrow">The progression</span>
+    <h2>Eight ages, each one a bigger economy</h2>
+    <div class="era-rail">
+      <div class="era"><span class="bar" style="background:var(--era-0)"></span><div class="n">Age 0</div><div class="nm">Stone</div><div class="mx">&times;1.0</div></div>
+      <div class="era"><span class="bar" style="background:var(--era-1)"></span><div class="n">Age 1</div><div class="nm">Bronze</div><div class="mx">&times;1.3</div></div>
+      <div class="era"><span class="bar" style="background:var(--era-2)"></span><div class="n">Age 2</div><div class="nm">Iron</div><div class="mx">&times;1.6</div></div>
+      <div class="era"><span class="bar" style="background:var(--era-3)"></span><div class="n">Age 3</div><div class="nm">Medieval</div><div class="mx">&times;2.0</div></div>
+      <div class="era"><span class="bar" style="background:var(--era-4)"></span><div class="n">Age 4</div><div class="nm">Industrial</div><div class="mx">&times;2.6</div></div>
+      <div class="era"><span class="bar" style="background:var(--era-5)"></span><div class="n">Age 5</div><div class="nm">Modern</div><div class="mx">&times;3.5</div></div>
+      <div class="era"><span class="bar" style="background:var(--era-6)"></span><div class="n">Age 6</div><div class="nm">Digital</div><div class="mx">&times;5.0</div></div>
+      <div class="era"><span class="bar" style="background:var(--era-7)"></span><div class="n">Age 7</div><div class="nm">Fusion</div><div class="mx">&times;8.0</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FEATURES ================= -->
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Features</span>
+      <h2>Everything a city needs, in one file</h2>
+      <p>No frameworks, no libraries, no build step, no network. The whole game is one HTML page that renders a living city on a single canvas.</p>
+    </div>
+    <div class="cards">
+      <article class="card reveal">
+        <span class="era-tick" style="background:var(--era-0)"></span>
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a9663a" stroke-width="2" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg></div>
+        <h3>8 Ages of progress</h3>
+        <p>Stone → Bronze → Iron → Medieval → Industrial → Modern → Digital → Fusion. Each age unlocks buildings, power, fuel and a bigger growth multiplier.</p>
+      </article>
+      <article class="card reveal">
+        <span class="era-tick" style="background:var(--era-2)"></span>
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8c8177" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+        <h3>Tile city-builder</h3>
+        <p>Lay roads, zone Residential / Corporate / Industrial / Fun districts, and place utilities, services, decor and world wonders on a procedural 44&times;28 map.</p>
+      </article>
+      <article class="card reveal">
+        <span class="era-tick" style="background:var(--era-3)"></span>
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6f7d78" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg></div>
+        <h3>Living simulation</h3>
+        <p>Zones self-construct, fill with citizens and level up on their own. Agents drive along your road network, with a day/night cycle and weather.</p>
+      </article>
+      <article class="card reveal">
+        <span class="era-tick" style="background:var(--era-4)"></span>
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5a8296" stroke-width="2" aria-hidden="true"><path d="M12 2v6M12 22v-6"/><path d="M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M2 12h6M22 12h-6M4.9 19.1l4.2-4.2M14.9 9.1l4.2-4.2"/></svg></div>
+        <h3>Real economy</h3>
+        <p>Money, Materials, Food, Fuel, Power, Research and Happiness — all connected. Growth pauses the moment something runs short, and the status bar tells you exactly what.</p>
+      </article>
+      <article class="card reveal">
+        <span class="era-tick" style="background:var(--era-5)"></span>
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3f93ad" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3"/></svg></div>
+        <h3>Quests, tech &amp; challenges</h3>
+        <p>36 quests gate the ages, 10 research techs reshape the economy, and 3 timed challenges award medals for the fastest cities.</p>
+      </article>
+      <article class="card reveal">
+        <span class="era-tick" style="background:var(--era-6)"></span>
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2aa7c4" stroke-width="2" aria-hidden="true"><path d="M12 3l9 6-9 6-9-6 9-6z"/><path d="M3 15l9 6 9-6"/></svg></div>
+        <h3>Events &amp; disasters</h3>
+        <p>Festivals, trade booms, migration waves, fires and earthquakes keep a run unpredictable — and citizens file petitions you can accept or refuse.</p>
+      </article>
+      <article class="card reveal">
+        <span class="era-tick" style="background:var(--era-1)"></span>
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bd8b4c" stroke-width="2" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg></div>
+        <h3>Full save system</h3>
+        <p>3 save slots, an autosave every ~10 seconds, and a shareable export/import code to move a city between devices — all kept in your browser.</p>
+      </article>
+      <article class="card reveal">
+        <span class="era-tick" style="background:var(--era-7)"></span>
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.6 1.2 6.6L12 17.8 6.1 20.2l1.2-6.6L2.5 9l6.6-.9L12 2z"/></svg></div>
+        <h3>Ascension &amp; Legacy</h3>
+        <p>Reach the Fusion Age with 2,500+ citizens to Ascend — carrying a permanent Legacy bonus of +25% income into your next city.</p>
+      </article>
+      <article class="card reveal">
+        <span class="era-tick" style="background:var(--era-4)"></span>
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5a8296" stroke-width="2" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg></div>
+        <h3>Fully responsive &amp; zero dependencies</h3>
+        <p>A purpose-built mobile layout with touch pan and pinch-zoom down to 320 px wide — and not a single runtime library to load.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">How it works</span>
+      <h2>Four moves, endless cities</h2>
+      <p>The city runs itself while you watch, plan and expand. Your job is to keep it sustainable — because if happiness ever hits zero, the run is over.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><div class="num">01</div><h3>Lay roads</h3><p>Paint roads outward from the Town Hall. Buildings only work when a road connects them back to it.</p></div>
+      <div class="step reveal"><div class="num">02</div><h3>Zone the land</h3><p>Residential houses citizens, Corporate gives jobs and income, Industrial makes materials, Fun raises happiness.</p></div>
+      <div class="step reveal"><div class="num">03</div><h3>Watch the status bar</h3><p>It always names what is blocking growth — no housing, no power, no fuel, unhappy citizens and more.</p></div>
+      <div class="step reveal"><div class="num">04</div><h3>Advance the age</h3><p>Complete the age's quests, press Advance Age, and unlock the next era — then Ascend at the Fusion Age.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SCREENSHOTS ================= -->
+<section id="screens">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Screenshots &amp; demo</span>
+      <h2>See the city grow</h2>
+      <p>The same build you can play in your browser right now — nothing to install, nothing to sign up for.</p>
+    </div>
+    <div class="shots">
+      <figure class="shot reveal" style="margin:0">
+        <img src="assets/screenshot-desktop.png" width="860" height="540" alt="Desktop view of IDLE CITY — Ages of Growth with the build panel, canvas map and side panel" />
+        <figcaption><b>Desktop</b> — the full layout: build tabs, the 44&times;28 canvas map, and the side panel for quests, alerts and trends.</figcaption>
+      </figure>
+      <div class="col">
+        <figure class="shot reveal" style="margin:0">
+          <img src="assets/screenshot-mobile.png" width="360" height="640" alt="Mobile view of IDLE CITY — Ages of Growth with the responsive top bar and touch controls" />
+          <figcaption><b>Mobile</b> — a purpose-built layout with touch pan and pinch-zoom down to 320 px.</figcaption>
+        </figure>
+        <figure class="shot reveal" style="margin:0">
+          <img src="assets/screenshot-tutorial.png" width="860" height="540" alt="The in-game tutorial card guiding the player through the first steps" />
+          <figcaption><b>Tutorial</b> — six guided steps walk you through your first roads, zones and utilities.</figcaption>
+        </figure>
+        <figure class="shot reveal" style="margin:0">
+          <img src="assets/screenshot-saves.png" width="860" height="540" alt="The save and export dialog showing three slots and an export code" />
+          <figcaption><b>Saves</b> — 3 slots, autosave, and a shareable export/import code.</figcaption>
+        </figure>
+      </div>
+    </div>
+    <div class="demo reveal">
+      <div class="txt">
+        <h3>Play the live demo</h3>
+        <p>The full game, served from this repository's GitHub Pages — desktop or mobile, online or off.</p>
+      </div>
+      <a class="btn btn-primary" href="play/">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v14l11-7-11-7z"/></svg>
+        Launch the game
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= GET STARTED ================= -->
+<section id="start">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Get started</span>
+      <h2>Play in one click — or run it from source</h2>
+      <p>There is no install step, no server and no internet connection required to play.</p>
+    </div>
+    <div class="start reveal">
+      <div class="start-grid">
+        <div>
+          <h3>Just play it</h3>
+          <ul>
+            <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#a9663a" stroke-width="2.4" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span>Open the <a href="play/">live demo</a> — nothing to download.</span></li>
+            <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#a9663a" stroke-width="2.4" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span>Or download <code>idle-city.min.html</code> (minified) and double-click it.</span></li>
+            <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#a9663a" stroke-width="2.4" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span>Prefer readable code? <code>index.html</code> is the same game, un-minified.</span></li>
+            <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#a9663a" stroke-width="2.4" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span>Works offline in any modern browser, on desktop and mobile.</span></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Run from source</h3>
+<pre><span class="c"># clone the repository</span>
+git clone https://github.com/drsamonline/idle-city-ages-of-growth.git
+cd idle-city-ages-of-growth
+
+<span class="c"># just open src/index.html, or serve it:</span>
+python3 -m http.server 8000
+
+<span class="c"># rebuild the single-file bundles (dev only)</span>
+npm install
+node build/build.js</pre>
+          <p style="margin:16px 0 0;font-size:14px;color:var(--ink-faint)">Play needs nothing but a browser. Rebuilding the bundles needs Node.js 18+.</p>
+        </div>
+      </div>
+      <div class="badge-strip" style="margin-top:26px">
+        <span class="cbadge clay"><b>Zero</b> dependencies</span>
+        <span class="cbadge bronze"><b>Single</b> HTML file</span>
+        <span class="cbadge cyan"><b>Offline</b> ready</span>
+        <span class="cbadge dark">v1.1.0</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2>Questions, answered</h2>
+    </div>
+    <div class="faq">
+      <details class="reveal" open>
+        <summary>How do I play it? Do I need to install anything?</summary>
+        <p>No. Download <code>idle-city.min.html</code> (or <code>index.html</code>) and double-click it, or open the <a href="play/">live demo</a>. It runs in any modern browser, fully offline, with no installation, no server and no internet connection.</p>
+      </details>
+      <details class="reveal">
+        <summary>My buildings aren't working or nothing is growing.</summary>
+        <p>Almost always roads. A building only functions when a road connects it back to the Town Hall. Read the status bar at the bottom — it names the exact blocker (no housing capacity, no power, fuel shortage, unemployed citizens).</p>
+      </details>
+      <details class="reveal">
+        <summary>Why did my city collapse?</summary>
+        <p>Happiness reached zero — that's the game-over condition. Happiness falls with pollution, unemployment, power and fuel shortages, waste and bad weather, and rises with jobs, Fun districts, services and decor.</p>
+      </details>
+      <details class="reveal">
+        <summary>How do I advance to the next Age?</summary>
+        <p>Complete all the quests for your current Age, then press Advance Age in the side panel. The button only lights up when the set is finished.</p>
+      </details>
+      <details class="reveal">
+        <summary>What is Ascension and Legacy?</summary>
+        <p>Once you reach the Fusion Age with 2,500+ citizens, Ascend to start a brand-new city while keeping a permanent Legacy bonus of +25% income per ascension.</p>
+      </details>
+      <details class="reveal">
+        <summary>Does it work on my phone?</summary>
+        <p>Yes — mobile is a first-class target. The layout adapts down to 320 px wide, the top bar wraps so the speed controls stay reachable, and you can drag to pan and pinch to zoom. Add it to your home screen for a full-screen, app-like experience.</p>
+      </details>
+      <details class="reveal">
+        <summary>Is my progress saved? Where?</summary>
+        <p>Yes. There are 3 save slots plus an autosave every ~10 seconds. Saves live in your browser's own localStorage — nothing is sent anywhere. Use the Export code to back up a city or move it to another device.</p>
+      </details>
+      <details class="reveal">
+        <summary>Is it really one file with no dependencies?</summary>
+        <p>Yes. No frameworks, no libraries at runtime, no external images, fonts or data, no analytics and no network calls. The dev tools (terser and html-minifier-terser) are only used to build the minified file and are never shipped.</p>
+      </details>
+      <details class="reveal">
+        <summary>Can I use or modify it in my own project?</summary>
+        <p>It is released under the PolyForm Noncommercial License 1.0.0 — free for personal, hobby, study, teaching, research and other non-commercial use. Attribution is mandatory: credit Dr. Sohil Momin and link the original repository. Commercial use requires a separate paid licence. See the repository's LICENSE and ATTRIBUTION.md.</p>
+      </details>
+      <details class="reveal">
+        <summary>Something's broken or I have an idea. Where do I say so?</summary>
+        <p>Open an issue on the <a href="https://github.com/drsamonline/idle-city-ages-of-growth/issues" target="_blank" rel="noopener">repository</a>. Please include your browser and OS, whether it's desktop or mobile, and what the status bar said.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BADGES ================= -->
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="badge-strip reveal">
+      <img src="https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg" alt="License: PolyForm Noncommercial 1.0.0" onerror="this.style.display='none'" />
+      <img src="https://img.shields.io/badge/version-1.1.0-blue.svg" alt="Version 1.1.0" onerror="this.style.display='none'" />
+      <img src="https://img.shields.io/badge/dependencies-0-brightgreen" alt="Dependencies: 0" onerror="this.style.display='none'" />
+      <img src="https://img.shields.io/badge/single--file-yes-blueviolet" alt="Single file: yes" onerror="this.style.display='none'" />
+      <img src="https://img.shields.io/badge/offline-ready-success" alt="Offline ready" onerror="this.style.display='none'" />
+      <img src="https://img.shields.io/badge/mobile-friendly-success" alt="Mobile friendly" onerror="this.style.display='none'" />
+      <img src="https://img.shields.io/badge/Canvas-2D-4ade80" alt="Canvas 2D" onerror="this.style.display='none'" />
+      <span class="cbadge clay"><b>PolyForm</b> Noncommercial 1.0.0</span>
+      <span class="cbadge bronze"><b>v1.1.0</b></span>
+      <span class="cbadge cyan"><b>0</b> dependencies</span>
+      <span class="cbadge dark"><b>8</b> ages</span>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="grad-rule"></div>
+  <div class="wrap foot-in">
+    <div class="foot-brand">
+      <h4>IDLE CITY — Ages of Growth</h4>
+      <p>A single-file idle city-builder that grows from a Stone Age village into a Fusion Age world-city. Plain HTML, CSS and vanilla JavaScript — one file, no dependencies, endless cities.</p>
+      <div class="badge-strip" style="margin-top:16px">
+        <span class="cbadge clay"><b>Built by</b> Dr. Sohil Momin</span>
+      </div>
+    </div>
+    <div>
+      <h4>Project</h4>
+      <a href="play/">Play the game</a>
+      <a href="https://github.com/drsamonline/idle-city-ages-of-growth" target="_blank" rel="noopener">Source on GitHub</a>
+      <a href="https://github.com/drsamonline/idle-city-ages-of-growth/releases" target="_blank" rel="noopener">Releases</a>
+      <a href="https://github.com/drsamonline/idle-city-ages-of-growth/issues" target="_blank" rel="noopener">Report an issue</a>
+    </div>
+    <div>
+      <h4>Docs</h4>
+      <a href="https://github.com/drsamonline/idle-city-ages-of-growth/blob/main/docs/GAMEPLAY.md" target="_blank" rel="noopener">Gameplay guide</a>
+      <a href="https://github.com/drsamonline/idle-city-ages-of-growth/blob/main/docs/ARCHITECTURE.md" target="_blank" rel="noopener">Architecture</a>
+      <a href="https://github.com/drsamonline/idle-city-ages-of-growth/blob/main/docs/BUILDING.md" target="_blank" rel="noopener">Building &amp; publishing</a>
+      <a href="https://github.com/drsamonline/idle-city-ages-of-growth/blob/main/LICENSE" target="_blank" rel="noopener">Licence</a>
+    </div>
+  </div>
+  <div class="wrap foot-bottom">
+    <span>&copy; 2026 Dr. Sohil Momin · PolyForm Noncommercial License 1.0.0</span>
+    <span>Built by Dr. Sohil Momin · <a href="https://github.com/drsamonline/idle-city-ages-of-growth" target="_blank" rel="noopener">github.com/drsamonline/idle-city-ages-of-growth</a></span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var nav = document.getElementById('nav');
+  var onScroll = function(){ nav.classList.toggle('scrolled', window.scrollY > 8); };
+  onScroll();
+  window.addEventListener('scroll', onScroll, {passive:true});
+
+  var burger = document.getElementById('burger');
+  var links = document.getElementById('navlinks');
+  if(burger && links){
+    burger.addEventListener('click', function(){
+      var open = links.classList.toggle('open');
+      burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    links.addEventListener('click', function(e){
+      if(e.target.tagName === 'A'){ links.classList.remove('open'); burger.setAttribute('aria-expanded','false'); }
+    });
+  }
+
+  var items = document.querySelectorAll('.reveal');
+  if(reduce || !('IntersectionObserver' in window)){
+    items.forEach(function(el){ el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, {rootMargin:'0px 0px -8% 0px', threshold:0.12});
+    items.forEach(function(el){ io.observe(el); });
+  }
+
+  // subtle era-timeline nudge: the page's own palette advances as you scroll the ages
+  var track = document.querySelector('.tl-track');
+  if(track && !reduce){
+    window.addEventListener('scroll', function(){
+      var p = Math.min(1, window.scrollY / Math.max(1, document.body.scrollHeight - window.innerHeight));
+      track.style.filter = 'saturate(' + (1 + p * 0.5).toFixed(2) + ')';
+    }, {passive:true});
+  }
+})();
+</script>
+</body>
+</html>

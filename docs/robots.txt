@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://drsamonline.github.io/idle-city-ages-of-growth/sitemap.xml
