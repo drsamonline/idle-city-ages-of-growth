@@ -26,7 +26,6 @@ Lay roads, zone land, generate power and keep your citizens happy — the city r
 ![Offline ready](https://img.shields.io/badge/offline-ready-success)
 ![Mobile friendly](https://img.shields.io/badge/mobile-friendly-success)
 
-### ▶ [Play the live demo](https://drsamonline.github.io/idle-city-ages-of-growth/play/) &nbsp;·&nbsp; 🌐 [Landing page](https://drsamonline.github.io/idle-city-ages-of-growth/) &nbsp;·&nbsp; 📦 [Repository](https://github.com/drsamonline/idle-city-ages-of-growth)
 
 **Author: [Dr. Sohil Momin](https://github.com/drsamonline)**
 
@@ -151,7 +150,7 @@ See **[docs/BUILDING.md](docs/BUILDING.md)** for details.
 │   └── workflows/build.yml # CI: fails if the bundles drift from src/
 ├── package.json            # dev scripts + dev-only dependencies
 ├── README.md
-├── LICENSE                 # PolyForm Noncommercial 1.0.0 — © Dr. Sohil Momin
+├── LICENSE                 # MIT — © Dr. Sohil Momin
 ├── ATTRIBUTION.md          # original author + third-party notices
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
