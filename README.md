@@ -8,6 +8,8 @@
 
 **▶ [Play the live demo](https://drsamonline.github.io/idle-city-ages-of-growth/play/)** &nbsp;·&nbsp; **🌐 [Landing page](https://drsamonline.github.io/idle-city-ages-of-growth/)** &nbsp;·&nbsp; **[Source](https://github.com/drsamonline/idle-city-ages-of-growth)**
 
+**Download:** [Windows (.exe)](https://github.com/drsamonline/idle-city-ages-of-growth/releases/latest/download/idle-city-ages-of-growth-portable.exe) &nbsp;·&nbsp; [Android (.apk)](https://github.com/drsamonline/idle-city-ages-of-growth/releases/latest/download/idle-city-ages-of-growth.apk)
+
 </div>
 
 ---
