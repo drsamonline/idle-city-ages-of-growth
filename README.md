@@ -4,7 +4,7 @@
 
 **A single-file idle city-builder that grows from a Stone Age village into a Fusion Age world-city.**
 
-[![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE) ![Version](https://img.shields.io/badge/version-1.1.0-blue.svg) ![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen) ![Offline](https://img.shields.io/badge/offline-ready-success) ![Mobile](https://img.shields.io/badge/mobile-friendly-success)
+[![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE) ![Version](https://img.shields.io/badge/version-1.1.0-blue.svg) ![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen) ![Offline](https://img.shields.io/badge/offline-ready-success) ![Mobile](https://img.shields.io/badge/mobile-friendly-success) [![All projects](https://img.shields.io/badge/All%20projects-drsamonline.github.io-22d3ee)](https://drsamonline.github.io/)
 
 **▶ [Play the live demo](https://drsamonline.github.io/idle-city-ages-of-growth/play/)** &nbsp;·&nbsp; **🌐 [Landing page](https://drsamonline.github.io/idle-city-ages-of-growth/)** &nbsp;·&nbsp; **[Source](https://github.com/drsamonline/idle-city-ages-of-growth)**
 
