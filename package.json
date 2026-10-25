@@ -27,7 +27,8 @@
   },
   "scripts": {
     "build": "node build/build.js",
-    "serve": "python3 -m http.server 8000"
+    "serve": "python3 -m http.server 8000",
+    "test": "node test/build.test.js"
   },
   "devDependencies": {
     "terser": "^5.51.2",
