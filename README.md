@@ -2,6 +2,12 @@
 
 # 🏙 IDLE CITY — Ages of Growth
 
+<!-- shot:start -->
+
+![Screenshot](docs/shot.png)
+
+<!-- shot:end -->
+
 **A single-file idle city-builder that grows from a Stone Age village into a Fusion Age world-city.**
 Lay roads, zone land, generate power and keep your citizens happy — the city runs itself while you watch, plan and expand.
 
