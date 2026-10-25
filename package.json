@@ -1,6 +1,6 @@
 {
   "name": "idle-city-ages-of-growth",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A single-file idle city-builder that grows from a Stone Age village into a Fusion Age world-city.",
   "keywords": [
     "idle-game",
@@ -17,7 +17,7 @@
   "license": "PolyForm-Noncommercial-1.0.0",
   "private": true,
   "type": "commonjs",
-  "homepage": "https://github.com/drsamonline/idle-city-ages-of-growth#readme",
+  "homepage": "https://github.com/drsamonline/idle-city-ages-of-growth",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/drsamonline/idle-city-ages-of-growth.git"
