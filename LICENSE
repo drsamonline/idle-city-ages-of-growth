@@ -1,51 +1,4 @@
-# License
-
-**IDLE CITY — Ages of Growth**
-Copyright (c) 2026 Dr. Sohil Momin. All rights reserved.
-
-This project is released as **source-available** under the
-**[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0)**,
-with a **mandatory attribution** requirement. In plain words:
-
-| | |
-|---|---|
-| :white_check_mark: **Free** | Use, study, modify and share it for **non-commercial** purposes. |
-| :memo: **Credit required** | Every copy, fork and **derivative work must credit the author and link the original repository** (see *Required Notice* below). |
-| :briefcase: **Commercial use** | **Not permitted** without a separate paid licence obtained from the author. |
-| :warning: **No warranty** | Provided "as is", without warranty of any kind. |
-
-> **Note on "open source":** because commercial use is restricted, this licence is
-> *source-available* (sometimes called *fair source*) rather than OSI-approved open source.
-> See `ATTRIBUTION.md` for details and alternatives.
-
----
-
-## Required Notice
-
-The PolyForm Noncommercial License requires that the following plain-text
-`Required Notice:` lines travel with the software. **This is the attribution requirement.**
-
-    Required Notice: IDLE CITY — Ages of Growth — Copyright (c) 2026 Dr. Sohil Momin.
-    Required Notice: You must credit the author, "Dr. Sohil Momin", and link the original
-    Required Notice: repository — https://github.com/drsamonline/idle-city-ages-of-growth —
-    Required Notice: in every copy, fork and derivative work.
-
----
-
-## Commercial licensing
-
-Commercial use is **not** a permitted purpose under the PolyForm Noncommercial License.
-To use IDLE CITY — Ages of Growth, or any derivative of it, for any commercial purpose,
-you must first obtain a separate written commercial licence from the copyright holder.
-
-* **Copyright holder:** Dr. Sohil Momin
-* **Repository:** https://github.com/drsamonline/idle-city-ages-of-growth
-* **How to request:** open an issue titled *"Commercial licence request"* on the repository,
-  or contact the author through GitHub (https://github.com/drsamonline).
-
----
-
-## Full licence text
+Required Notice: Copyright 2026 Dr Sohil Momin
 
 # PolyForm Noncommercial License 1.0.0
 
@@ -62,7 +15,7 @@ your licenses.
 The licensor grants you a copyright license for the
 software to do everything you might do with the software
 that would otherwise infringe the licensor's copyright
-in it for any permitted purpose.  However, you may
+in it for any permitted purpose. However, you may
 only distribute the software according to [Distribution
 License](#distribution-license) and make changes or new works
 based on the software according to [Changes and New Works
@@ -71,7 +24,7 @@ License](#changes-and-new-works-license).
 ## Distribution License
 
 The licensor grants you an additional copyright license
-to distribute copies of the software.  Your license
+to distribute copies of the software. Your license
 to distribute covers distributing the software with
 changes and new works permitted by [Changes and New Works
 License](#changes-and-new-works-license).
@@ -82,7 +35,7 @@ You must ensure that anyone who gets a copy of any part of
 the software from you also gets a copy of these terms or the
 URL for them above, as well as copies of any plain-text lines
 beginning with `Required Notice:` that the licensor provided
-with the software.  For example:
+with the software. For example:
 
 > Required Notice: Copyright Yoyodyne, Inc. (http://example.com)
 
@@ -128,7 +81,7 @@ law. These terms do not limit them.
 
 These terms do not allow you to sublicense or transfer any of
 your licenses to anyone else, or prevent the licensor from
-granting licenses to anyone else.  These terms do not imply
+granting licenses to anyone else. These terms do not imply
 any other licenses.
 
 ## Patent Defense
@@ -146,7 +99,7 @@ violated any of these terms, or done anything with the software
 not covered by your licenses, your licenses can nonetheless
 continue if you come into full compliance with these terms,
 and take practical steps to correct past violations, within
-32 days of receiving notice.  Otherwise, all your licenses
+32 days of receiving notice. Otherwise, all your licenses
 end immediately.
 
 ## No Liability
@@ -168,10 +121,10 @@ terms.
 **Your company** is any legal entity, sole proprietorship,
 or other kind of organization that you work for, plus all
 organizations that have control over, are under the control of,
-or are under common control with that organization.  **Control**
+or are under common control with that organization. **Control**
 means ownership of substantially all the assets of an entity,
 or the power to direct its management and policies by vote,
-contract, or otherwise.  Control can be direct or indirect.
+contract, or otherwise. Control can be direct or indirect.
 
 **Your licenses** are all the licenses granted to you for the
 software under these terms.
