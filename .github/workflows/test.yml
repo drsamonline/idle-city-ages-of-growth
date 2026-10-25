@@ -1,0 +1,34 @@
+# The proof that the shipped files ARE the source.
+#
+# index.html and idle-city.min.html are BUILD OUTPUTS of src/. Nothing compared
+# them to src/, so three script blocks (a smoke test and the backup/restore
+# buttons) were appended to the built index.html by hand and never reached src/ —
+# the next build would have deleted them, and the minified build never had them.
+# This fails the moment the artefacts and the source disagree.
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-is-the-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install
+      - name: The committed files are the build of src/
+        run: npm test
