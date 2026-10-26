@@ -40,7 +40,7 @@ Published to GitHub with GitHub Pages, and relicensed.
 - Repository metadata: topics, description, homepage.
 - `Required Notice` attribution lines embedded in `LICENSE`, `ATTRIBUTION.md` and the source headers.
 
-> **Note for reusers:** if you were relying on the previous MIT licence, be aware that the current
+> **Note for reusers:** if you were relying on the previous PolyForm Noncommercial licence, be aware that the current
 > version restricts commercial use. Code obtained under the earlier MIT release remains MIT for
 > that copy.
 
