@@ -86,12 +86,29 @@ for (const [pub, root] of [["docs/play/index.html", "index.html"],
 }
 
 /* ---- 5. nothing is lost by the build ----------------------------------- */
-// The three blocks that were being destroyed. Both artefacts must carry them.
+// The blocks that were being destroyed. Both artefacts must carry them.
+//
+// THIS LIST KEEPS GROWING, and it has to. The first version of this test named
+// only the smoke test, the backup export and the restore import — so on
+// 2026-10-26 the estate batch added an undo hook, a keyboard layer and a
+// mobile-width fix to the BUILT index.html and to the demo, and this test
+// stayed green while the minified build carried none of them. The batch had
+// reproduced the exact bug this file exists for, in a form the file could not
+// see. Every feature appended to a built file belongs in this list.
+const MUST_CARRY = [
+  ["the smoke test", "__smokeTest"],
+  ["the backup export", "__exportAll"],
+  ["the restore import", "__importAll"],
+  ["the undo hook", "__undo"],
+  ["the keyboard layer", "__keyboardHelp"],
+  ["the focus ring", ":focus-visible"],
+  ["the mobile width fix", "max-width:172px"],
+];
 for (const name of ["index.html", "idle-city.min.html"]) {
   const html = fs.readFileSync(path.join(repo, name), "utf8");
-  ok(name + " carries the smoke test", html.indexOf("__smokeTest") >= 0);
-  ok(name + " carries the backup export", html.indexOf("__exportAll") >= 0);
-  ok(name + " carries the restore import", html.indexOf("__importAll") >= 0);
+  for (const [label, marker] of MUST_CARRY) {
+    ok(name + " carries " + label, html.indexOf(marker) >= 0);
+  }
 }
 
 /* ---- 6. the build is a real build -------------------------------------- */

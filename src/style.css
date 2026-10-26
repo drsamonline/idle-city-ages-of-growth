@@ -160,7 +160,7 @@ body {
 }
 
 #build {
-  width: 172px;
+  max-width:172px;width:100%;
   background: #10142a;
   border-right: 2px solid #26304f;
   display: flex;
@@ -362,7 +362,7 @@ canvas#game {
 }
 
 #side {
-  width: 218px;
+  max-width:218px;width:100%;
   background: #10142a;
   border-left: 2px solid #26304f;
   display: flex;
@@ -742,11 +742,11 @@ canvas#game {
 
 @media (max-width:900px) {
   #build {
-    width: 132px;
+    max-width:132px;width:100%;
   }
 
   #side {
-    width: 152px;
+    max-width:152px;width:100%;
   }
 
   #top {
