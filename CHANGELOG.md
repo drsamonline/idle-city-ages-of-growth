@@ -1,11 +1,3 @@
-## 1.1.1 — 2026-10-25
-
-- **Licence: PolyForm Noncommercial 1.0.0.** Every repository now carries the canonical text
-  from polyformproject.org with the Required Notice line, and the four places a repo states
-  its licence agree: LICENSE, the SPDX headers, the README and package.json.
-- **The public demo is the app.** A build now fails if `docs/play/index.html` is not the app,
-  because a demo running older code is two code paths for one program.
-
 <div align="center">
 
 # 📓 Changelog
@@ -20,6 +12,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 </div>
 
 ## [Unreleased]
+
+- **The shipped bundles are back, and the demo is the app again.** The 2026-11-05 page sweep
+  deleted the root `index.html` and `idle-city.min.html` as "duplicate landing pages". They are
+  not landing pages: they are the build of `src/`, and `npm test` fails without them (it rebuilds
+  from source and requires the committed files to be byte-identical). `docs/play/index.html` had
+  also drifted two builds behind — it was missing the backup export, the restore import, the undo
+  hook, the keyboard layer, the focus ring and the mobile-width fix — so the public demo was
+  running older code than the app. Both are rebuilt from `src/` and the demo is re-synced:
+  **31 assertions, 0 failing**.
+
+## [1.1.1] — 2026-10-25
+
+- **Licence: PolyForm Noncommercial 1.0.0.** Every repository now carries the canonical text
+  from polyformproject.org with the Required Notice line, and the four places a repo states
+  its licence agree: LICENSE, the SPDX headers, the README and package.json.
+- **The public demo is the app.** A build now fails if `docs/play/index.html` is not the app,
+  because a demo running older code is two code paths for one program.
 
 ## [1.1.0] — 2026-10-20
 
