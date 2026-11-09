@@ -1847,6 +1847,24 @@ function loadGame(slot) {
   } catch (e) {
     return false;
   }
+  // The gate (src/save.js). Refuse a save this build cannot interpret; repair the
+  // one that is merely damaged. Either way the raw text is kept under a side key,
+  // so a refused or repaired city is never silently destroyed.
+  var gate = SaveIO.sanitise(data, { ages: AGES.length, gw: GW, gh: GH, ids: Object.keys(DEFS) });
+  if (!gate.ok) {
+    try {
+      localStorage.setItem(keyOf(slot) + ".refused", raw);
+    } catch (e) {}
+    if (typeof console !== "undefined" && console.warn) console.warn("save refused: " + gate.reason);
+    return false;
+  }
+  if (gate.repairs.length) {
+    try {
+      localStorage.setItem(keyOf(slot) + ".repaired", raw);
+    } catch (e) {}
+    if (typeof console !== "undefined" && console.warn) console.warn("save repaired: " + gate.repairs.join(", "));
+  }
+  data = gate.save;
   S = newState();
   S.age = data.age || 0;
   S.money = data.money || 0;
@@ -4027,6 +4045,14 @@ function importCode() {
     JSON.parse(raw);
   } catch (e) {
     toast("❌ Corrupted code");
+    return;
+  }
+  // Gate it BEFORE writing: an import used to overwrite the live slot and only
+  // then discover the code was not a city, so a bad paste cost the player the
+  // city they had.
+  var gate = SaveIO.sanitise(JSON.parse(raw), { ages: AGES.length, gw: GW, gh: GH, ids: Object.keys(DEFS) });
+  if (!gate.ok) {
+    toast("❌ Not a city: " + gate.reason);
     return;
   }
   try {

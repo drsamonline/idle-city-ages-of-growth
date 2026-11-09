@@ -13,6 +13,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+- **A bad save can no longer take the game down — and a bad import can no longer
+  overwrite a good city.** `loadGame()` used to copy whatever JSON it found straight
+  onto the live state: `age: 999` made `AGES[999]` undefined and threw on the next
+  render, a hand-edited `1e999` became `Infinity` so every cost comparison was false
+  forever, and a building off the grid or of an unknown type was placed anyway. A
+  `{}` was worse than either: it loaded as an empty, unplayable city. Import had the
+  same hole with a sting — it wrote the pasted code into the live slot *before*
+  checking it was a city, so a bad paste cost the player the city they had.
+  New `src/save.js` is a pure gate in front of both: it **refuses** what it cannot
+  interpret (not an object, a version this build does not know, buildings that are
+  not a list, a city with no Town Hall), **repairs** what is merely damaged (clamps
+  an age past the last age, caps an absurd balance, drops off-grid or unknown
+  buildings and roads, normalises every list the loader indexes) and names what it
+  did. The raw text is kept under a `.refused` / `.repaired` key, so nothing is
+  silently destroyed. `test/save.test.js` proves 41 cases; the build test gains a
+  marker so the gate cannot be lost by a rebuild. **74 assertions, 0 failing.**
+
 - **The shipped bundles are back, and the demo is the app again.** The 2026-11-05 page sweep
   deleted the root `index.html` and `idle-city.min.html` as "duplicate landing pages". They are
   not landing pages: they are the build of `src/`, and `npm test` fails without them (it rebuilds

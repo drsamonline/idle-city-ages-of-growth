@@ -103,6 +103,10 @@ const MUST_CARRY = [
   ["the keyboard layer", "__keyboardHelp"],
   ["the focus ring", ":focus-visible"],
   ["the mobile width fix", "max-width:172px"],
+  // the save gate is a string, so it survives the minifier's toplevel mangle —
+  // `SaveIO` itself does not, and a marker that the minified build cannot carry
+  // would be a test that only ever passes for one of the two files.
+  ["the save gate", "newer-version"],
 ];
 for (const name of ["index.html", "idle-city.min.html"]) {
   const html = fs.readFileSync(path.join(repo, name), "utf8");
