@@ -21,10 +21,10 @@
       "at": "2026-11-09T00:36:21Z"
     },
     ".github/workflows/build-apps.yml": {
-      "sha": "f39ed0b7f911e448dae429dad43ffd793ff7458a",
+      "sha": "25ce210cb4120dd3589c24259cc142658f19067d",
       "producer": "audit-2026-11-10",
       "class": "canonical",
-      "at": "2026-11-10T14:49:51Z"
+      "at": "2026-11-10T15:07:17Z"
     },
     "docs/play/idle-city.min.html": {
       "sha": "ee7e254caf8b307b3da2af805235735dbf64ce00",
@@ -45,5 +45,5 @@
       "at": "2026-11-09T00:36:21Z"
     }
   },
-  "updated": "2026-11-10T14:49:51Z"
+  "updated": "2026-11-10T15:07:17Z"
 }
