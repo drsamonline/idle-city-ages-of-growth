@@ -2,7 +2,7 @@
 
 # 🎮 Gameplay Guide
 
-[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](../LICENSE) ![Version](https://img.shields.io/badge/version-1.1.0-blue.svg) ![Author: Dr. Sohil Momin](https://img.shields.io/badge/author-Dr.%20Sohil%20Momin-blueviolet) ![Mobile friendly](https://img.shields.io/badge/mobile-friendly-success)
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](../LICENSE) ![Version](https://img.shields.io/badge/version-1.2.0-blue.svg) ![Author: Dr. Sohil Momin](https://img.shields.io/badge/author-Dr.%20Sohil%20Momin-blueviolet) ![Mobile friendly](https://img.shields.io/badge/mobile-friendly-success)
 
 *Everything you need to run a thriving city — from a Stone Age camp to a Fusion Age world-city.*
 

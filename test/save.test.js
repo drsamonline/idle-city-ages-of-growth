@@ -22,7 +22,9 @@ const OPTS = {
   ages: AGES,
   gw: 44,
   gh: 28,
-  ids: ["hall", "zoneR", "zoneC", "zoneI", "road", "park"]
+  ids: ["hall", "zoneR", "zoneC", "zoneI", "road", "park"],
+  // the real DEFS gives the Town Hall a 2x2 footprint; everything else is 1x1
+  sizes: { hall: 2 }
 };
 
 let passed = 0, failed = 0;
@@ -120,6 +122,55 @@ const roads = gate({
 });
 ok("valid roads survive", roads.ok && roads.save.roads.length === 1, roads.save && roads.save.roads.length);
 ok("off-grid roads are dropped", roads.repairs.indexOf("roads-dropped:4") >= 0, roads.repairs.join(","));
+
+/* ---- 3b. footprints and overlap (2026-11-12) ------------------------- */
+// bAt() returns the FIRST match, so a building that overlaps one kept earlier can
+// never be selected or demolished again, yet still counts toward population and
+// quests — and a duplicated `unique` wonder locks the real one out. The gate now
+// mirrors canPlace(): whole footprint on the grid, no shared ground.
+const overlap = gate({
+  v: 1,
+  buildings: [
+    ["hall", 20, 14, 1, 0, 0],   // 2x2 at 20,14 -> holds (20,14)(21,14)(20,15)(21,15)
+    ["zoneR", 21, 15, 1, 0, 0],  // inside the hall's footprint
+    ["zoneR", 5, 5, 1, 0, 0],    // clear
+    ["zoneR", 5, 5, 1, 0, 0],    // the same tile again
+    ["park", 6, 6, 1, 0, 0]      // clear
+  ]
+});
+ok("a building inside another's footprint is dropped", !overlap.save.buildings.some((b) => b[0] === "zoneR" && b[1] === 21), JSON.stringify(overlap.save.buildings));
+ok("a duplicated tile keeps one building", overlap.save.buildings.filter((b) => b[0] === "zoneR" && b[1] === 5 && b[2] === 5).length === 1, JSON.stringify(overlap.save.buildings));
+ok("the two clear buildings still load", overlap.save.buildings.length === 3, overlap.save.buildings.length);
+ok("the overlapped count is reported", overlap.repairs.indexOf("buildings-overlap:2") >= 0, overlap.repairs.join(","));
+ok("an overlapped save is repaired, not refused", overlap.ok === true, overlap.reason);
+
+// The whole footprint must fit on the grid, not just its origin: 44 wide means a
+// 2x2 at x=43 would draw off the map.
+const edge = gate({ v: 1, buildings: [["hall", 20, 14, 1, 0, 0], ["hall", 43, 27, 1, 0, 0]] });
+ok("a footprint running off the grid is dropped", edge.save.buildings.length === 1, edge.save.buildings.length);
+ok("an off-grid footprint is counted as dropped", edge.repairs.indexOf("buildings-dropped:1") >= 0, edge.repairs.join(","));
+const edgeZ = gate({ v: 1, buildings: [["hall", 20, 14, 1, 0, 0], ["hall", 10, 27, 1, 0, 0]] });
+ok("the same rule applies on the z axis", edgeZ.save.buildings.length === 1, edgeZ.save.buildings.length);
+
+// Dropping the duplicate must not quietly cost the city its Town Hall.
+const twinHall = gate({ v: 1, buildings: [["zoneR", 4, 4, 1, 0, 0], ["hall", 20, 14, 1, 0, 0], ["hall", 20, 14, 1, 0, 0]] });
+ok("a duplicated Town Hall keeps exactly one", twinHall.save.buildings.filter((b) => b[0] === "hall").length === 1);
+ok("and the city is still playable", twinHall.ok === true && SaveIO.hasHall(twinHall.save.buildings));
+
+// 1x1 callers (no sizes supplied) keep the old rule, so an older embed still works.
+const noSizes = gate({ v: 1, buildings: [["hall", 20, 14, 1, 0, 0], ["zoneR", 21, 15, 1, 0, 0]] }, { ages: AGES, gw: 44, gh: 28, ids: OPTS.ids });
+ok("without sizes a 1x1 neighbour is not treated as overlap", noSizes.save.buildings.length === 2, noSizes.save.buildings.length);
+ok("sizeOf defaults to 1 for an unknown id", SaveIO.sizeOf("nope", { hall: 2 }) === 1);
+ok("sizeOf reads the map", SaveIO.sizeOf("hall", { hall: 2 }) === 2);
+
+// Roads: a doubled tile is one road, not two.
+const dupRoads = gate({
+  v: 1,
+  buildings: [["hall", 20, 14, 1, 0, 0]],
+  roads: [[1, 2], [1, 2], [2, 2], [2, 2], [2, 2]]
+});
+ok("a duplicated road tile is kept once", dupRoads.save.roads.length === 2, dupRoads.save.roads.length);
+ok("the duplicated road count is reported", dupRoads.repairs.indexOf("roads-duplicate:3") >= 0, dupRoads.repairs.join(","));
 
 /* ---- 4. the shapes the loader indexes -------------------------------- */
 const shapes = gate({ v: 1, questsDone: "x", ach: null, tech: 7, cleared: {}, medals: "gold", chal: 5 });

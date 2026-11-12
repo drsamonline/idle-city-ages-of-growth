@@ -12,7 +12,7 @@
 Lay roads, zone land, generate power and keep your citizens happy — the city runs itself while you watch, plan and expand.
 
 [![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
 ![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)
 ![Single file](https://img.shields.io/badge/single--file-yes-blueviolet)
 ![Offline ready](https://img.shields.io/badge/offline-ready-success)

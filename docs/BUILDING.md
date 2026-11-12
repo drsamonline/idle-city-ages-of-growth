@@ -2,7 +2,7 @@
 
 # 🔧 Building & Publishing
 
-[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](../LICENSE) ![Version](https://img.shields.io/badge/version-1.1.0-blue.svg) ![Node.js](https://img.shields.io/badge/node-%E2%89%A518-339933?logo=node.js&logoColor=white) ![Build](https://img.shields.io/badge/build-node%20build%2Fbuild.js-informational)
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](../LICENSE) ![Version](https://img.shields.io/badge/version-1.2.0-blue.svg) ![Node.js](https://img.shields.io/badge/node-%E2%89%A518-339933?logo=node.js&logoColor=white) ![Build](https://img.shields.io/badge/build-node%20build%2Fbuild.js-informational)
 
 </div>
 

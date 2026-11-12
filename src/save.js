@@ -54,6 +54,13 @@ var SaveIO = (function () {
     return Array.isArray(v) ? v : [];
   }
 
+  // The footprint side of a building, in tiles. Unknown or absent -> 1x1, which
+  // is what the game's own `d.size || 1` falls back to.
+  function sizeOf(id, sizes) {
+    var s = sizes && typeof sizes === "object" ? sizes[id] : 1;
+    return isInt(s) && s > 0 ? s : 1;
+  }
+
   // The scalar fields, with the default and the range each one may hold.
   var FIELDS = [
     ["money", 0, 0, CAP],
@@ -77,7 +84,10 @@ var SaveIO = (function () {
     var gw = isInt(opt.gw) && opt.gw > 0 ? opt.gw : 1;
     var gh = isInt(opt.gh) && opt.gh > 0 ? opt.gh : 1;
     var ids = Array.isArray(opt.ids) ? opt.ids : null;
+    var sizes = isObj(opt.sizes) ? opt.sizes : null;
     var repairs = [];
+    // Ground already claimed by a building kept earlier in this save, as "x,z".
+    var taken = {};
 
     if (!isObj(raw)) return { ok: false, reason: "not-an-object", repairs: repairs };
     if (raw.v !== undefined && raw.v !== null) {
@@ -125,13 +135,35 @@ var SaveIO = (function () {
     // type or not on the grid is dropped rather than placed somewhere arbitrary.
     var buildings = [],
       droppedB = 0,
-      k;
+      overlappedB = 0,
+      k,
+      sz,
+      dx,
+      dz,
+      hit;
     var rawB = list(raw.buildings);
     for (i = 0; i < rawB.length; i++) {
       k = rawB[i];
       if (!Array.isArray(k) || k.length < 3) { droppedB++; continue; }
       if (typeof k[0] !== "string" || (ids && ids.indexOf(k[0]) < 0)) { droppedB++; continue; }
       if (!isInt(k[1]) || !isInt(k[2]) || k[1] < 0 || k[1] >= gw || k[2] < 0 || k[2] >= gh) { droppedB++; continue; }
+      // The whole footprint has to fit: canPlace() rejects a 2x2 whose far corner
+      // is off the grid, so a save that carries one is damage, not a city.
+      sz = sizeOf(k[0], sizes);
+      if (k[1] + sz > gw || k[2] + sz > gh) { droppedB++; continue; }
+      // And it cannot stand on ground a kept building already holds. bAt()
+      // returns the first match, so an overlapped building is unreachable and
+      // permanent; dropping it is the only repair that leaves a playable city.
+      hit = false;
+      for (dz = 0; dz < sz && !hit; dz++) {
+        for (dx = 0; dx < sz; dx++) {
+          if (taken[k[1] + dx + "," + (k[2] + dz)]) { hit = true; break; }
+        }
+      }
+      if (hit) { overlappedB++; continue; }
+      for (dz = 0; dz < sz; dz++) {
+        for (dx = 0; dx < sz; dx++) taken[k[1] + dx + "," + (k[2] + dz)] = true;
+      }
       buildings.push([
         k[0],
         k[1],
@@ -142,19 +174,26 @@ var SaveIO = (function () {
       ]);
     }
     if (droppedB) repairs.push("buildings-dropped:" + droppedB);
+    if (overlappedB) repairs.push("buildings-overlap:" + overlappedB);
     s.buildings = buildings;
 
     // Roads: [x, z], same rule.
     var roads = [],
-      droppedR = 0;
+      droppedR = 0,
+      dupR = 0,
+      seen = {};
     var rawR = list(raw.roads);
     for (i = 0; i < rawR.length; i++) {
       k = rawR[i];
       if (!Array.isArray(k) || k.length < 2) { droppedR++; continue; }
       if (!isInt(k[0]) || !isInt(k[1]) || k[0] < 0 || k[0] >= gw || k[1] < 0 || k[1] >= gh) { droppedR++; continue; }
+      // One road per tile: a doubled tile is the same road counted twice.
+      if (seen[k[0] + "," + k[1]]) { dupR++; continue; }
+      seen[k[0] + "," + k[1]] = true;
       roads.push([k[0], k[1]]);
     }
     if (droppedR) repairs.push("roads-dropped:" + droppedR);
+    if (dupR) repairs.push("roads-duplicate:" + dupR);
     s.roads = roads;
 
     // A city with no Town Hall cannot be played (nothing can be placed without
@@ -175,7 +214,8 @@ var SaveIO = (function () {
     VERSION: VERSION,
     CAP: CAP,
     sanitise: sanitise,
-    hasHall: hasHall
+    hasHall: hasHall,
+    sizeOf: sizeOf
   };
 
   if (typeof module !== "undefined" && module.exports) module.exports = api;

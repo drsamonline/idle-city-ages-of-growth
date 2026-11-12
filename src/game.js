@@ -1283,6 +1283,17 @@ function connectedToNet(x, z) {
   return false;
 }
 
+// The footprint map the save gate needs, built once from DEFS. The gate is pure
+// and cannot see DEFS, so the caller hands it over (src/save.js opt.sizes).
+var _defSizes = null;
+function defSizes() {
+  if (_defSizes) return _defSizes;
+  var m = {},
+    k;
+  for (k in DEFS) if (Object.prototype.hasOwnProperty.call(DEFS, k)) m[k] = DEFS[k].size || 1;
+  return (_defSizes = m);
+}
+
 function canPlace(id, x, z) {
   var d = DEFS[id],
     sz = d.size || 1,
@@ -1850,7 +1861,7 @@ function loadGame(slot) {
   // The gate (src/save.js). Refuse a save this build cannot interpret; repair the
   // one that is merely damaged. Either way the raw text is kept under a side key,
   // so a refused or repaired city is never silently destroyed.
-  var gate = SaveIO.sanitise(data, { ages: AGES.length, gw: GW, gh: GH, ids: Object.keys(DEFS) });
+  var gate = SaveIO.sanitise(data, { ages: AGES.length, gw: GW, gh: GH, ids: Object.keys(DEFS), sizes: defSizes() });
   if (!gate.ok) {
     try {
       localStorage.setItem(keyOf(slot) + ".refused", raw);
@@ -4050,7 +4061,7 @@ function importCode() {
   // Gate it BEFORE writing: an import used to overwrite the live slot and only
   // then discover the code was not a city, so a bad paste cost the player the
   // city they had.
-  var gate = SaveIO.sanitise(JSON.parse(raw), { ages: AGES.length, gw: GW, gh: GH, ids: Object.keys(DEFS) });
+  var gate = SaveIO.sanitise(JSON.parse(raw), { ages: AGES.length, gw: GW, gh: GH, ids: Object.keys(DEFS), sizes: defSizes() });
   if (!gate.ok) {
     toast("❌ Not a city: " + gate.reason);
     return;

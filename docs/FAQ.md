@@ -2,7 +2,7 @@
 
 # ❓ Frequently Asked Questions
 
-[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](../LICENSE) ![Version](https://img.shields.io/badge/version-1.1.0-blue.svg) ![Offline ready](https://img.shields.io/badge/offline-ready-success) ![Single file](https://img.shields.io/badge/single--file-yes-blueviolet)
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](../LICENSE) ![Version](https://img.shields.io/badge/version-1.2.0-blue.svg) ![Offline ready](https://img.shields.io/badge/offline-ready-success) ![Single file](https://img.shields.io/badge/single--file-yes-blueviolet)
 
 </div>
 

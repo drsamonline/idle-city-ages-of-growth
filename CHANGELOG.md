@@ -2,7 +2,7 @@
 
 # 📓 Changelog
 
-[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE) ![Version](https://img.shields.io/badge/version-1.1.0-blue.svg) ![Keep a Changelog](https://img.shields.io/badge/keep%20a%20changelog-1.1.0-orange) ![SemVer](https://img.shields.io/badge/semver-2.0.0-blue)
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE) ![Version](https://img.shields.io/badge/version-1.2.0-blue.svg) ![Keep a Changelog](https://img.shields.io/badge/keep%20a%20changelog-1.1.0-orange) ![SemVer](https://img.shields.io/badge/semver-2.0.0-blue)
 
 All notable changes to **IDLE CITY — Ages of Growth** are documented here.
 
@@ -38,6 +38,29 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   hook, the keyboard layer, the focus ring and the mobile-width fix — so the public demo was
   running older code than the app. Both are rebuilt from `src/` and the demo is re-synced:
   **31 assertions, 0 failing**.
+
+## [1.2.0] — 2026-11-12
+
+### Fixed
+
+- **A saved city can no longer carry two buildings on the same ground, or a
+  building half off the map.** The save gate checked a building's *origin* and
+  never its *footprint*. Two consequences, both reachable from a hand-edited save,
+  a bad import code or a truncated write: a 2×2 Town Hall at `x=43` drew off the
+  map, and two buildings sharing a tile were both kept — but `bAt()` returns the
+  **first** match, so the second could never be selected or demolished again while
+  still counting toward population, quests and the level tallies, and a duplicated
+  `unique` wonder locked the real one out for the rest of the run. A duplicated
+  road tile was likewise kept twice.
+  The gate now mirrors `canPlace()`: the **whole footprint** must be on the grid,
+  a building must not stand on ground a building kept earlier already holds, and a
+  road tile is kept once. Each repair is named — `buildings-overlap:N`,
+  `roads-duplicate:N` — and a dropped duplicate never costs the city its Town Hall:
+  one hall survives, so the save loads instead of being refused. Footprints arrive
+  through `opt.sizes` (`defSizes()` in `src/game.js`), so a caller that supplies
+  none still gets the 1×1 rule and an older embed keeps working.
+  `test/save.test.js` grows from 41 to 56 cases, and the build test now requires
+  both artefacts to carry the new strings.
 
 ## [1.1.1] — 2026-10-25
 

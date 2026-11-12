@@ -15,10 +15,10 @@
       "at": "2026-11-06T12:38:36Z"
     },
     "docs/play/index.html": {
-      "sha": "c5240567020b742ffc07cd32cc471a602701927e",
-      "producer": "build/build.js@2548210",
+      "sha": "e9e6285a7dfe0be3a6b0ceafc2084fbe577ebb09",
+      "producer": "build/build.js@1.2.0",
       "class": "generated",
-      "at": "2026-11-09T00:36:21Z"
+      "at": "2026-11-12T18:45:00Z"
     },
     ".github/workflows/build-apps.yml": {
       "sha": "00c0ec96ed1568bc4fcf7434cd88025df3551ab2",
@@ -27,23 +27,23 @@
       "at": "2026-11-10T15:12:18Z"
     },
     "docs/play/idle-city.min.html": {
-      "sha": "ee7e254caf8b307b3da2af805235735dbf64ce00",
-      "producer": "build/build.js@2548210",
+      "sha": "d63fbffbbc43e7a0216e63c591b5e9ad1bdd91ba",
+      "producer": "build/build.js@1.2.0",
       "class": "generated",
-      "at": "2026-11-09T00:36:21Z"
+      "at": "2026-11-12T18:45:00Z"
     },
     "index.html": {
-      "sha": "c5240567020b742ffc07cd32cc471a602701927e",
-      "producer": "build/build.js@2548210",
+      "sha": "e9e6285a7dfe0be3a6b0ceafc2084fbe577ebb09",
+      "producer": "build/build.js@1.2.0",
       "class": "generated",
-      "at": "2026-11-09T00:36:21Z"
+      "at": "2026-11-12T18:45:00Z"
     },
     "idle-city.min.html": {
-      "sha": "ee7e254caf8b307b3da2af805235735dbf64ce00",
-      "producer": "build/build.js@2548210",
+      "sha": "d63fbffbbc43e7a0216e63c591b5e9ad1bdd91ba",
+      "producer": "build/build.js@1.2.0",
       "class": "generated",
-      "at": "2026-11-09T00:36:21Z"
+      "at": "2026-11-12T18:45:00Z"
     }
   },
-  "updated": "2026-11-10T15:12:18Z"
+  "updated": "2026-11-12T18:45:00Z"
 }

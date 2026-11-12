@@ -107,6 +107,10 @@ const MUST_CARRY = [
   // `SaveIO` itself does not, and a marker that the minified build cannot carry
   // would be a test that only ever passes for one of the two files.
   ["the save gate", "newer-version"],
+  // the 2026-11-12 overlap rule: the strings survive the toplevel mangle, the
+  // function names do not
+  ["the overlap rule", "buildings-overlap"],
+  ["the duplicate-road rule", "roads-duplicate"],
 ];
 for (const name of ["index.html", "idle-city.min.html"]) {
   const html = fs.readFileSync(path.join(repo, name), "utf8");
