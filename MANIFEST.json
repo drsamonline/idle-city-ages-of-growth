@@ -9,16 +9,16 @@
       "at": "2026-11-04T20:05:13Z"
     },
     "docs/index.html": {
-      "sha": "95160e5060c604dcc6a892fb2115be378fd247fb",
-      "producer": "bootstrap@2026-11-04",
-      "class": "generated",
-      "at": "2026-11-06T12:38:36Z"
+      "sha": "967adfa9460b9a680c7fd73a6cf8e24bc49ba5d5",
+      "producer": "human",
+      "class": "hand",
+      "at": "2026-11-14T18:06:33Z"
     },
     "docs/play/index.html": {
-      "sha": "e9e6285a7dfe0be3a6b0ceafc2084fbe577ebb09",
-      "producer": "build/build.js@1.2.0",
-      "class": "generated",
-      "at": "2026-11-12T18:45:00Z"
+      "sha": "f3dd9e11939ccea7945d3b585a633a8afe3b9b11",
+      "producer": "human",
+      "class": "hand",
+      "at": "2026-11-14T18:06:34Z"
     },
     ".github/workflows/build-apps.yml": {
       "sha": "00c0ec96ed1568bc4fcf7434cd88025df3551ab2",
@@ -27,16 +27,16 @@
       "at": "2026-11-10T15:12:18Z"
     },
     "docs/play/idle-city.min.html": {
-      "sha": "d63fbffbbc43e7a0216e63c591b5e9ad1bdd91ba",
-      "producer": "build/build.js@1.2.0",
-      "class": "generated",
-      "at": "2026-11-12T18:45:00Z"
+      "sha": "8fcdb943f017da1819cb7d7d4ee95df561313a3d",
+      "producer": "human",
+      "class": "hand",
+      "at": "2026-11-14T18:06:34Z"
     },
     "index.html": {
-      "sha": "e9e6285a7dfe0be3a6b0ceafc2084fbe577ebb09",
-      "producer": "build/build.js@1.2.0",
-      "class": "generated",
-      "at": "2026-11-12T18:45:00Z"
+      "sha": "f3dd9e11939ccea7945d3b585a633a8afe3b9b11",
+      "producer": "human",
+      "class": "hand",
+      "at": "2026-11-14T18:06:34Z"
     },
     "idle-city.min.html": {
       "sha": "d63fbffbbc43e7a0216e63c591b5e9ad1bdd91ba",
@@ -45,5 +45,5 @@
       "at": "2026-11-12T18:45:00Z"
     }
   },
-  "updated": "2026-11-12T18:45:00Z"
+  "updated": "2026-11-14T18:06:34Z"
 }
