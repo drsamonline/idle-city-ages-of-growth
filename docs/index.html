@@ -795,6 +795,14 @@ node build/build.js</pre>
     --ink: #14161a;
     --line: #e2ddd2;
   }
+
+/* ---- a11y: button contrast (measured, WCAG AA) ----------------------------
+   A button paired a surface token that flips with the theme with a text colour
+   that does not, so one mode rendered the label invisible. Each rule below
+   pins the pair. Ratios are from the rendered page, not from the source. */
+
+[data-theme="dark"] .btn.btn-primary{color:#0b0f14!important}    /* 1.27 -> 15.2 on #e9e4dc */
+[data-theme="dark"] .support-copy{color:#d6cfc4!important}       /* 2.87 -> 11.2 on #141b21 */
 </style>
 
 <section class="support" id="support" aria-labelledby="support-h" data-support>
