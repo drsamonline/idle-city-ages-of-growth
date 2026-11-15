@@ -13,6 +13,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+- **The Fusion Age finally has a city in it, not just a reactor.** Ages 0–6 each
+  unlock a service or a decoration that makes the city better to live in; age 7
+  unlocked exactly two buildings, a Fusion Reactor and the Space Elevator, so the
+  final era had power and a monument and nothing civic. Two buildings close that
+  gap: the **Nano Clinic** (🧬, services → health, radius 14 — the widest in the
+  game, 2.4/s upkeep, 4 power) and the **Holo Garden** (🌸, decor, +18 fun — the
+  largest in the game). Both are priced for a Fusion-Age economy (9,000/4,500 and
+  6,000/3,000) and need no new drawing code: a service is drawn from its `ic` and
+  a decor reuses the park shape.
+- **The three content tables are now checked against each other.**
+  `test/content.test.js` loads `AGES`, `DEFS` and `QUESTS` out of `src/game.js` in
+  a `vm` sandbox (no DOM, no canvas) and asserts the agreements nothing else could:
+  every building's `age` is an age that exists, every `svc` is one of the four
+  buckets `computeCity()` collects (`safety`/`health`/`edu`/`waste`), every service
+  has a radius or it covers nothing, every age has a wonder and at least three
+  quests, `QUESTS.length === AGES.length` (a missing group made `checkQuests()`
+  index `undefined` on the tick a city reached that age), quest ids are unique, and
+  every building a quest's `countDef()` names really exists. 23 checks, and the
+  final-age-service check is what would have caught this gap: it reported
+  `age 7 (FUSION AGE) has 0` before the two buildings were added.
+
 - **A bad save can no longer take the game down — and a bad import can no longer
   overwrite a good city.** `loadGame()` used to copy whatever JSON it found straight
   onto the live state: `age: 999` made `AGES[999]` undefined and threw on the next

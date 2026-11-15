@@ -369,6 +369,21 @@ var DEFS = {
     k: "park",
     desc: "A marvel of waterworks — +12 city fun."
   },
+  holo: {
+    id: "holo",
+    cat: "dec",
+    zone: "D",
+    name: "Holo Garden",
+    ic: "🌸",
+    age: 7,
+    cost: {
+      m: 6000,
+      t: 3000
+    },
+    fun: 18,
+    k: "park",
+    desc: "A park grown from light — +18 city fun, the largest in the game."
+  },
   tower: {
     id: "tower",
     cat: "zone",
@@ -488,6 +503,22 @@ var DEFS = {
     r: 10,
     upkeep: 1.5,
     desc: "Modern knowledge economy."
+  },
+  nano: {
+    id: "nano",
+    cat: "svc",
+    name: "Nano Clinic",
+    ic: "🧬",
+    age: 7,
+    cost: {
+      m: 9000,
+      t: 4500
+    },
+    svc: "health",
+    r: 14,
+    upkeep: 2.4,
+    pow: 4,
+    desc: "Fusion-age medicine — the widest health coverage in the game (r 14)."
   },
   farm: {
     id: "farm",

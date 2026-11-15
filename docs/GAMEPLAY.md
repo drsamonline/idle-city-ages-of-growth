@@ -51,7 +51,7 @@ Advancing an Age unlocks new buildings and multiplies your economy.
 | 4 | **Industrial Age** | ×2.6 | Coal Mine, Steam Plant, Recycling Plant, Grand Exposition |
 | 5 | **Modern Age** | ×3.5 | Oil Pump, Oil Plant, Library, Grand Fountain, Sky Needle |
 | 6 | **Digital Age** | ×5.0 | Nuclear Plant, Solar Farm, Grid Battery, University, High-rise Tower, Orbital Beacon |
-| 7 | **Fusion Age** | ×8.0 | Fusion Reactor, Space Elevator |
+| 7 | **Fusion Age** | ×8.0 | Fusion Reactor, Nano Clinic, Holo Garden, Space Elevator |
 
 **To advance an Age you must complete that Age's quests.** The **ADVANCE AGE** button in the side
 panel lights up when the set is done.
@@ -84,12 +84,12 @@ Zones cost materials and money once, then **build, fill and level up by themselv
 
 ### 🏥 SERVICES
 Coverage buildings that improve life within a radius: **Watchpost** (safety), **Fire Watch**
-(fire response — halves fire downtime), **Healer**, **School**, **Library**, **University**
+(fire response — halves fire downtime), **Healer**, **Nano Clinic**, **School**, **Library**, **University**
 (research), **Compost Heap**, **Waste Depot**, **Recycling Plant** (waste). The **Town Hall**
 is the heart of the city — roads must reach it.
 
 ### 🌳 DECOR
-**Park · Plaza · Grand Fountain** — cheap happiness, no jobs, no pollution.
+**Park · Plaza · Grand Fountain · Holo Garden** — cheap happiness, no jobs, no pollution.
 
 ### 🏛 WONDERS
 One-off landmark builds (Great Monolith → Space Elevator) with big happiness and prestige effects.
