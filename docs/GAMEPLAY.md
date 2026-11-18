@@ -4,7 +4,7 @@
 
 [![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](../LICENSE) ![Version](https://img.shields.io/badge/version-1.2.0-blue.svg) ![Author: Dr. Sohil Momin](https://img.shields.io/badge/author-Dr.%20Sohil%20Momin-blueviolet) ![Mobile friendly](https://img.shields.io/badge/mobile-friendly-success)
 
-*Everything you need to run a thriving city — from a Stone Age camp to a Fusion Age world-city.*
+*Everything you need to run a thriving city — from a Stone Age camp to an Orbital Age world-city.*
 
 </div>
 
@@ -12,7 +12,7 @@
 
 ## 1. The goal
 
-Grow a tiny village into a **Fusion Age world-city**. Citizens live, work and build on their own —
+Grow a tiny village into an **Orbital Age world-city**. Citizens live, work and build on their own —
 your job is to **shape the city and keep it sustainable**. Happiness is life: **if happiness ever
 hits zero, the city collapses and the run is over.**
 
@@ -52,6 +52,7 @@ Advancing an Age unlocks new buildings and multiplies your economy.
 | 5 | **Modern Age** | ×3.5 | Oil Pump, Oil Plant, Library, Grand Fountain, Sky Needle |
 | 6 | **Digital Age** | ×5.0 | Nuclear Plant, Solar Farm, Grid Battery, University, High-rise Tower, Orbital Beacon |
 | 7 | **Fusion Age** | ×8.0 | Fusion Reactor, Nano Clinic, Holo Garden, Space Elevator |
+| 8 | **Orbital Age** | ×12.0 | Orbital Solar Array, Orbital Academy, Ring Park, Dyson Ring |
 
 **To advance an Age you must complete that Age's quests.** The **ADVANCE AGE** button in the side
 panel lights up when the set is done.
@@ -169,6 +170,13 @@ Build a Fusion Reactor · Reach 2000 population · Happiness 85 or more · **FUT
 build a world-city!
 </details>
 
+<details>
+<summary><b>Orbital Age</b></summary>
+
+Build an Orbital Solar Array · Reach 4000 population · Complete the research tree — all 10 techs ·
+**BEYOND THE SKY** — build a Dyson Ring
+</details>
+
 ---
 
 ## 6. Challenges 🎯
@@ -210,7 +218,7 @@ injection at the cost of goodwill.
 
 - **3 save slots** (💾 button) plus **autosave** every 10 seconds.
 - **Export / Import**: copy the save code to move your city to another device or back it up.
-- **🌟 Ascend**: in the **Fusion Age** with **2,500+ population**, ascend to start a fresh city
+- **🌟 Ascend**: in the final age (the **Orbital Age**) with **2,500+ population**, ascend to start a fresh city
   while keeping a permanent **Legacy** bonus (+25 % income per ascension).
 
 ---

@@ -8,7 +8,7 @@
 
 <!-- shot:end -->
 
-**A single-file idle city-builder that grows from a Stone Age village into a Fusion Age world-city.**
+**A single-file idle city-builder that grows from a Stone Age village into an Orbital Age world-city.**
 Lay roads, zone land, generate power and keep your citizens happy — the city runs itself while you watch, plan and expand.
 
 [![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE)
@@ -48,14 +48,14 @@ Lay roads, zone land, generate power and keep your citizens happy — the city r
 
 | | |
 |---|---|
-| 🏛 **8 Ages of progress** | Stone → Bronze → Iron → Medieval → Industrial → Modern → Digital → Fusion. Each age unlocks buildings, power, fuel and a bigger growth multiplier. |
+| 🏛 **9 Ages of progress** | Stone → Bronze → Iron → Medieval → Industrial → Modern → Digital → Fusion → Orbital. Each age unlocks buildings, power, fuel and a bigger growth multiplier. |
 | 🗺 **Tile city-builder** | Lay roads, zone Residential / Corporate / Industrial / Fun districts, and place utilities, services, decor and world wonders on a procedural 44×28 map. |
 | ⚙️ **Living simulation** | Zones self-construct, fill with citizens and level up on their own. Agents drive along your road network. Day/night cycle and weather. |
 | ⚡ **Real economy** | Money, Materials, Food, Fuel, Power, Research and Happiness — all connected. Growth pauses the moment something runs short, and the status bar tells you exactly what. |
-| 🎯 **Quests, Tech & Challenges** | 36 quests gate the ages, 10 research techs reshape the economy, and 3 timed challenges award medals. |
+| 🎯 **Quests, Tech & Challenges** | 40 quests gate the ages, 10 research techs reshape the economy, and 3 timed challenges award medals. |
 | 🎲 **Events & disasters** | Festivals, trade booms, migration waves, fires and earthquakes keep a run unpredictable. Citizens also file petitions you can accept or refuse. |
 | 💾 **Full save system** | 3 save slots, autosave, and a shareable export/import code to move a city between devices — and a save that is damaged or from a newer build is refused by name instead of crashing the game. |
-| 🌟 **Ascension** | Reach the Fusion Age at 2,500 citizens to Ascend — carry a permanent Legacy bonus into your next city. |
+| 🌟 **Ascension** | Reach the Orbital Age at 2,500 citizens to Ascend — carry a permanent Legacy bonus into your next city. |
 | 📱 **Fully responsive** | Purpose-built mobile layout with touch pan/pinch-zoom, safe-area support and reachable controls down to 320 px wide. |
 | 📦 **Zero dependencies** | One HTML file. No build step to play, no server, no network. Open it and go. |
 

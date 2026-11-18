@@ -2,7 +2,7 @@
 
 # 📓 Changelog
 
-[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE) ![Version](https://img.shields.io/badge/version-1.2.0-blue.svg) ![Keep a Changelog](https://img.shields.io/badge/keep%20a%20changelog-1.1.0-orange) ![SemVer](https://img.shields.io/badge/semver-2.0.0-blue)
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE) ![Version](https://img.shields.io/badge/version-1.3.0-blue.svg) ![Keep a Changelog](https://img.shields.io/badge/keep%20a%20changelog-1.1.0-orange) ![SemVer](https://img.shields.io/badge/semver-2.0.0-blue)
 
 All notable changes to **IDLE CITY — Ages of Growth** are documented here.
 
@@ -12,6 +12,53 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 </div>
 
 ## [Unreleased]
+
+## [1.3.0] — 2026-11-18
+
+- **The ninth age: the ORBITAL AGE.** The game ended at the Fusion Age with the
+  Space Elevator standing in a city that had nowhere left to go. The Orbital Age
+  (×12.0 income, the largest multiplier in the game) gives that elevator a
+  destination and four things to build there: the **Orbital Solar Array** (🛰,
+  700 power, and the sun multiplier applies — no atmosphere in the way), the
+  **Orbital Academy** (🎓, education, radius 16 — the widest in the game), the
+  **Ring Park** (🌌, +26 fun, the largest in the game) and the **Dyson Ring**
+  (🪐, a wonder: +6 happiness and +5% income, one per city). Four new quests gate
+  it, and the last of them asks for the whole research tree as well as the wonder.
+- **Ascension is the last age, not the eighth one.** Two places compared
+  `S.age >= 7` while the rest of the game said `AGES.length - 1`. That was
+  invisible while there were eight ages and wrong the moment a ninth existed:
+  the new final age would have handed out ascension an age early, at the Fusion
+  Age, where it was already possible. Both now read `AGES.length - 1`, and the
+  ascension label and its toast name the last age from `AGES` instead of saying
+  "Fusion Age" in a string.
+- **Two superlatives were retired rather than left false.** The Holo Garden
+  claimed "+18 city fun, the largest in the game" and the Nano Clinic "the widest
+  health coverage in the game (r 14)" — both true until a bigger park and a wider
+  academy existed. The garden now just says +18; the clinic's claim was about
+  health and still holds, so it stands.
+- **`test/content.test.js` now checks the two tables it could never see.** It
+  cut `src/game.js` at `ageCost()` — which is above `AGES`, `DEFS` and `QUESTS`
+  and below nothing else that mattered, except that `TECHS` and `CHALS` are
+  declared further down, so the research tree and the three challenges were
+  checked by nothing at all. They are pulled out by brace matching now, and the
+  assertions are the failures that do not throw: a `req` that names a tech that
+  does not exist (unbuyable for ever), a research cycle (both locked, looking
+  healthy), a definition whose `tech` names a tech that does not exist
+  (unbuildable, refused with the raw key), a tech read by neither `hasTech()` nor
+  a building's gate (bought, and it changes no number), a challenge with a goal of
+  zero (won on the first tick).
+- **The numbers the shop window advertises are now a test.** "36 quests", "10
+  research techs", "3 timed challenges" and "8 Ages of progress" are written in
+  the README and twice in `docs/index.html`. Three files, one set of numbers, and
+  nothing compared them to the tables. Now `npm test` does — which is how the
+  ninth age forced all of them to be updated in the same commit instead of
+  drifting one batch at a time.
+- **Proof.** 46 assertions in `test/content.test.js` (was 23), 139 in the whole
+  suite, and four mutations each turn it red: a prerequisite pointed at a
+  non-existent tech, a challenge goal set to 0, a tech's only reader removed, and
+  the final-age gate rewritten as the literal `S.age < 8`.
+
+
 
 - **The Fusion Age finally has a city in it, not just a reactor.** Ages 0–6 each
   unlock a service or a decoration that makes the city better to live in; age 7

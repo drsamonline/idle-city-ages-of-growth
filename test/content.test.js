@@ -158,9 +158,147 @@ allQuests.forEach((q) => {
 ok("every building a quest counts exists", missing.length === 0, missing.join(", "));
 
 /* ---- 6. the new last-age content ----------------------------------------- */
-ok("the Fusion Age offers more than a reactor and a wonder",
+ok("the final age offers more than a reactor and a wonder",
   IDS.filter((k) => DEFS[k].age === lastAge).length >= 4,
   String(IDS.filter((k) => DEFS[k].age === lastAge).length));
+
+/* ---- 7. the research tree and the challenges ----------------------------
+ *
+ * THE GAP THIS CLOSES. Sections 1-6 see AGES, DEFS, CATS and QUESTS, because
+ * all four are declared above `ageCost()` and that is where the sandbox cuts.
+ * TECHS and CHALS are declared BELOW the cut, so for as long as this file has
+ * existed the research tree and the three timed challenges were checked by
+ * NOTHING — and a broken one does not throw:
+ *
+ *   - a tech whose `req` names a tech that does not exist can never be bought:
+ *     `buyTech()` tests `hasTech(t.req)`, which stays false forever, so it sits
+ *     in the Research tab behind a lock that never opens;
+ *   - a research CYCLE (a requires b, b requires a) locks both, and looks
+ *     perfectly healthy in the tab;
+ *   - a definition whose `tech` names a tech that does not exist is placed in
+ *     the palette and refused on every click with "Requires <id> research",
+ *     where <id> is the raw key, because techName() falls back to it;
+ *   - a tech or a challenge with an age past the last age is unreachable;
+ *   - a challenge with a goal of 0 is won on the first tick.
+ *
+ * They are pulled out by BRACE MATCHING rather than by moving the cut, because
+ * what lies between `ageCost()` and `TECHS` is S, the map and the DOM, and a
+ * cut placed there would drag all of it into the sandbox.
+ */
+function grabTable(name) {
+  const at = src.indexOf("var " + name + " = ");
+  if (at < 0) return null;
+  const open = src.indexOf("[", at);
+  let depth = 0;
+  for (let i = open; i < src.length; i++) {
+    if (src[i] === "[") depth++;
+    else if (src[i] === "]") { depth--; if (depth === 0) return src.slice(at, i + 1) + ";"; }
+  }
+  return null;
+}
+const techSrc = grabTable("TECHS"), chalSrc = grabTable("CHALS");
+ok("the research table can be read out of src/game.js", !!techSrc);
+ok("the challenge table can be read out of src/game.js", !!chalSrc);
+vm.runInContext((techSrc || "var TECHS = [];") + (chalSrc || "var CHALS = [];") +
+  "\nthis.TECHS = TECHS; this.CHALS = CHALS;", ctx, { filename: "src/game.js" });
+const TECHS = ctx.TECHS || [], CHALS = ctx.CHALS || [];
+const TIDS = TECHS.map((t) => t.id);
+
+ok("TECHS is a non-empty table", TECHS.length > 0, String(TECHS.length));
+ok("tech ids are unique", TIDS.length === new Set(TIDS).size,
+  TIDS.filter((id, i) => TIDS.indexOf(id) !== i).join(", "));
+ok("every tech has a name, an icon, a description and a positive cost",
+  TECHS.every((t) => t.id && t.n && t.ic && t.d && isNum(t.cost) && t.cost > 0),
+  TECHS.filter((t) => !(t.id && t.n && t.ic && t.d && isNum(t.cost) && t.cost > 0)).map((t) => t.id).join(", "));
+ok("every tech is buyable in an age that exists",
+  TECHS.every((t) => Number.isInteger(t.age) && t.age >= 0 && t.age < AGES.length),
+  TECHS.filter((t) => !(Number.isInteger(t.age) && t.age >= 0 && t.age < AGES.length)).map((t) => t.id + "@" + t.age).join(", "));
+
+/* A prerequisite must exist, and must not reach back to the tech it unlocks. */
+const badReq = TECHS.filter((t) => t.req && TIDS.indexOf(t.req) < 0).map((t) => t.id + "->" + t.req);
+ok("every prerequisite names a tech that exists", badReq.length === 0, badReq.join(", "));
+ok("no tech requires itself", TECHS.every((t) => t.req !== t.id),
+  TECHS.filter((t) => t.req === t.id).map((t) => t.id).join(", "));
+const cycles = [];
+TECHS.forEach((t) => {
+  const seen = [];
+  let cur = t;
+  while (cur && cur.req) {
+    if (seen.indexOf(cur.id) >= 0) { cycles.push(t.id); break; }
+    seen.push(cur.id);
+    cur = TECHS.find((x) => x.id === cur.req);
+  }
+  if (cur && seen.indexOf(cur.id) >= 0 && cycles.indexOf(t.id) < 0) cycles.push(t.id);
+});
+ok("the research tree has no cycle, so nothing is locked for ever",
+  cycles.length === 0, cycles.join(", "));
+
+/* `tech` on a definition is what gates the High-rise Tower. techName() falls back
+   to the raw id, so a typo there is invisible on screen and fatal to the build. */
+const badTech = IDS.filter((k) => DEFS[k].tech && TIDS.indexOf(DEFS[k].tech) < 0)
+  .map((k) => k + "->" + DEFS[k].tech);
+ok("every building's research gate names a tech that exists", badTech.length === 0, badTech.join(", "));
+
+/* A tech nobody reads is a purchase that does nothing. hasTech() is the only way
+   an effect is applied, and S.tech.indexOf() is the way a gate is applied; a tech
+   read by neither is advertised in the Research tab and changes no number. */
+const unread = TECHS.filter((t) =>
+  src.indexOf('hasTech("' + t.id + '")') < 0 && src.indexOf('tech: "' + t.id + '"') < 0);
+ok("every tech is read by the simulation or gates a building",
+  unread.length === 0, unread.map((t) => t.id).join(", "));
+
+ok("CHALS is a non-empty table", CHALS.length > 0, String(CHALS.length));
+ok("challenge ids are unique",
+  CHALS.length === new Set(CHALS.map((c) => c.id)).size);
+ok("every challenge has a goal above zero, a deadline and a medal",
+  CHALS.every((c) => c.id && c.n && isNum(c.goal) && c.goal > 0 && isNum(c.deadline) && c.deadline > 0 && isNum(c.gold) && c.gold > 0),
+  CHALS.filter((c) => !(c.id && c.n && isNum(c.goal) && c.goal > 0 && isNum(c.deadline) && c.deadline > 0 && isNum(c.gold) && c.gold > 0)).map((c) => c.id).join(", "));
+
+/* ---- 8. the last age is the last age, not a magic number -----------------
+ *
+ * The ascension gate used to read `S.age >= 7` in two places while the rest of
+ * the game said `AGES.length - 1`. That is invisible while there are eight ages
+ * and wrong the moment a ninth is added: the new final age would have handed out
+ * ascension a whole age early. This assertion is what makes the ninth age safe.
+ */
+const magic = src.match(new RegExp("S\\.age\\s*(?:>=|<)\\s*" + lastAge + "\\b", "g")) || [];
+ok("no code compares S.age to the literal index of the final age",
+  magic.length === 0, magic.join(", "));
+const lenExprs = src.match(/AGES\.length - 1/g) || [];
+ok("the final-age gates are written as AGES.length - 1, not a number",
+  lenExprs.length >= 4, String(lenExprs.length));
+
+/* ---- 9. the numbers the page and the README advertise -------------------
+ *
+ * "36 quests" is written in the README, in docs/index.html's description and on
+ * its feature card; "10 research techs" and "3 timed challenges" likewise. Three
+ * files, one set of numbers, and until now nothing compared them to the tables —
+ * so the next content batch could leave the shop window describing the last one.
+ */
+const advertised = {
+  "README.md": [
+    [/\|\s*\W*\s*(\d+) Ages of progress/, AGES.length, "ages"],
+    [/(\d+) quests gate the ages/, allQuests.length, "quests"],
+    [/(\d+) research techs/, TECHS.length, "techs"],
+    [/(\d+) timed challenges/, CHALS.length, "challenges"],
+  ],
+  "docs/index.html": [
+    [/(\d+) ages, (\d+) quests, (\d+) techs, (\d+) challenges/, [AGES.length, allQuests.length, TECHS.length, CHALS.length], "the feature line"],
+    [/<h3>(\d+) Ages of progress<\/h3>/, AGES.length, "ages"],
+    [/(\d+) quests gate the ages, (\d+) research techs[^.]*?(\d+) timed challenges/, [allQuests.length, TECHS.length, CHALS.length], "the feature card"],
+  ],
+};
+Object.keys(advertised).forEach((file) => {
+  const text = fs.readFileSync(path.join(__dirname, "..", file), "utf8");
+  advertised[file].forEach(([re, want, label]) => {
+    const m = text.match(re);
+    const got = m && m.slice(1).map(Number);
+    const wantArr = Array.isArray(want) ? want : [want];
+    ok(file + " advertises the real " + label,
+      !!got && got.length === wantArr.length && got.every((n, i) => n === wantArr[i]),
+      m ? "says " + got.join("/") + ", the tables say " + wantArr.join("/") : "the line was not found");
+  });
+});
 
 console.log("\n" + passed + " passed, " + failed + " failed");
 process.exit(failed === 0 ? 0 : 1);

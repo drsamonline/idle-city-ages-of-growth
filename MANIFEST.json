@@ -3,22 +3,22 @@
   "locked": false,
   "files": {
     "README.md": {
-      "sha": "98d965bcc32fdd5b087a38401a3a91baa00af389",
-      "producer": "bootstrap@2026-11-04",
+      "sha": "59f00a73f300027241806e4f417d4c1c4f3c312a",
+      "producer": "cycle@2026-11-18-orbital-age",
       "class": "generated",
-      "at": "2026-11-04T20:05:13Z"
+      "at": "2026-11-18T06:36:06Z"
     },
     "docs/index.html": {
-      "sha": "967adfa9460b9a680c7fd73a6cf8e24bc49ba5d5",
-      "producer": "human",
+      "sha": "b816f13dab7c1d3b394a77b00f9def0dc7bf7b87",
+      "producer": "cycle@2026-11-18-orbital-age",
       "class": "hand",
-      "at": "2026-11-14T18:06:33Z"
+      "at": "2026-11-18T06:36:07Z"
     },
     "docs/play/index.html": {
-      "sha": "ea756d008507b910f92282ddaf867680bb1f6e56",
-      "producer": "build/build.js@1.2.0",
+      "sha": "94e590276ebb85c2bc33630ab90158ef9d611c4b",
+      "producer": "cycle@2026-11-18-orbital-age",
       "class": "generated",
-      "at": "2026-11-15T18:43:07Z"
+      "at": "2026-11-18T06:36:06Z"
     },
     ".github/workflows/build-apps.yml": {
       "sha": "00c0ec96ed1568bc4fcf7434cd88025df3551ab2",
@@ -27,23 +27,23 @@
       "at": "2026-11-10T15:12:18Z"
     },
     "docs/play/idle-city.min.html": {
-      "sha": "8669301ee47bc04788ea95369a9fae9ad4f9b618",
-      "producer": "build/build.js@1.2.0",
+      "sha": "76b4627ef11706dae22897d71254ab65b1ec5f17",
+      "producer": "cycle@2026-11-18-orbital-age",
       "class": "generated",
-      "at": "2026-11-15T18:43:07Z"
+      "at": "2026-11-18T06:36:06Z"
     },
     "index.html": {
-      "sha": "ea756d008507b910f92282ddaf867680bb1f6e56",
-      "producer": "build/build.js@1.2.0",
+      "sha": "94e590276ebb85c2bc33630ab90158ef9d611c4b",
+      "producer": "cycle@2026-11-18-orbital-age",
       "class": "generated",
-      "at": "2026-11-15T18:43:07Z"
+      "at": "2026-11-18T06:36:06Z"
     },
     "idle-city.min.html": {
-      "sha": "8669301ee47bc04788ea95369a9fae9ad4f9b618",
-      "producer": "build/build.js@1.2.0",
+      "sha": "76b4627ef11706dae22897d71254ab65b1ec5f17",
+      "producer": "cycle@2026-11-18-orbital-age",
       "class": "generated",
-      "at": "2026-11-15T18:43:07Z"
+      "at": "2026-11-18T06:36:06Z"
     }
   },
-  "updated": "2026-11-15T18:43:07Z"
+  "updated": "2026-11-18T06:36:07Z"
 }

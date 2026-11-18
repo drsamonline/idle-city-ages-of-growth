@@ -48,7 +48,7 @@ The button only lights up when the set is finished. Quest lists are in
 <details>
 <summary><b>What is Ascension / Legacy?</b></summary>
 
-Once you reach the **Fusion Age** with **2,500+ citizens**, the **🌟 ASCEND** button lets you start
+Once you reach the final age (the **Orbital Age**) with **2,500+ citizens**, the **🌟 ASCEND** button lets you start
 a brand-new city while keeping a permanent **Legacy** bonus — **+25 % income per ascension**.
 </details>
 

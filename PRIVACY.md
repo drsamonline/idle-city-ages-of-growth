@@ -7,7 +7,7 @@ Changes: Initial version.
 
 ## What this app is
 
-A single-file idle city-builder that grows from a Stone Age village into a Fusion Age world-city.
+A single-file idle city-builder that grows from a Stone Age village into an Orbital Age world-city.
 
 It runs on your own device. There is no account, no server and no sign-in.
 

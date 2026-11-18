@@ -90,6 +90,15 @@ var AGES = [{
   glass: "#c77dff",
   accent: "#7df9ff",
   mult: 8.0
+}, {
+  n: "ORBITAL AGE",
+  ground: "#2b3a4a",
+  road: "#2a2d36",
+  wall: "#eef3f8",
+  roof: "#101a33",
+  glass: "#8fe9ff",
+  accent: "#b98cff",
+  mult: 12.0
 }];
 var T = {
   GRASS: 0,
@@ -382,7 +391,7 @@ var DEFS = {
     },
     fun: 18,
     k: "park",
-    desc: "A park grown from light — +18 city fun, the largest in the game."
+    desc: "A park grown from light — +18 city fun."
   },
   tower: {
     id: "tower",
@@ -706,6 +715,65 @@ var DEFS = {
     cost: {
       m: 800000,
       t: 350000
+    },
+    k: "wonder",
+    unique: 1,
+    desc: "Wonder: +6 happiness & +5% income, forever. One per city."
+  },
+  orbit: {
+    id: "orbit",
+    cat: "util",
+    name: "Orbital Solar Array",
+    ic: "🛰",
+    age: 8,
+    cost: {
+      m: 55000,
+      t: 26000
+    },
+    powCap: 700,
+    k: "solar",
+    desc: "Sunlight with no atmosphere in the way — 700 power, and more by day."
+  },
+  ringpark: {
+    id: "ringpark",
+    cat: "dec",
+    zone: "D",
+    name: "Ring Park",
+    ic: "🌌",
+    age: 8,
+    cost: {
+      m: 14000,
+      t: 7000
+    },
+    fun: 26,
+    k: "park",
+    desc: "A park that circles the world — +26 city fun, the largest in the game."
+  },
+  academy: {
+    id: "academy",
+    cat: "svc",
+    name: "Orbital Academy",
+    ic: "🎓",
+    age: 8,
+    cost: {
+      m: 24000,
+      t: 12000
+    },
+    svc: "edu",
+    r: 16,
+    upkeep: 2.0,
+    pow: 4,
+    desc: "Teaches a whole district at once — the widest education coverage in the game (r 16)."
+  },
+  dyson: {
+    id: "dyson",
+    cat: "wonder",
+    name: "Dyson Ring",
+    ic: "🪐",
+    age: 8,
+    cost: {
+      m: 5000000,
+      t: 2000000
     },
     k: "wonder",
     unique: 1,
@@ -1113,6 +1181,47 @@ var QUESTS = [
     rw: {
       m: 100000,
       t: 50000
+    }
+  }],
+  [{
+    id: "ob1",
+    t: "Build an Orbital Solar Array",
+    c: function() {
+      return countDef("orbit") >= 1;
+    },
+    rw: {
+      m: 150000,
+      t: 75000
+    }
+  }, {
+    id: "ob2",
+    t: "Reach 4000 population",
+    c: function() {
+      return S.pop >= 4000;
+    },
+    rw: {
+      m: 200000,
+      t: 100000
+    }
+  }, {
+    id: "ob3",
+    t: "Complete the research tree — all 10 techs",
+    c: function() {
+      return S.tech.length >= 10;
+    },
+    rw: {
+      m: 180000,
+      t: 90000
+    }
+  }, {
+    id: "ob4",
+    t: "BEYOND THE SKY — build a Dyson Ring",
+    c: function() {
+      return countDef("dyson") >= 1;
+    },
+    rw: {
+      m: 400000,
+      t: 200000
     }
   }]
 ];
@@ -2788,9 +2897,9 @@ function updateQuests() {
     aub.textContent = ok ? "⬆ ADVANCE AGE (" + c.m + "💰 " + c.t + "🧱)" : "⬆ COMPLETE QUESTS TO ADVANCE";
   }
   var asc = el("ascend"),
-    canA = S.age >= 7 && S.pop >= 2500;
+    canA = S.age >= AGES.length - 1 && S.pop >= 2500;
   asc.disabled = !canA;
-  asc.textContent = canA ? "🌟 ASCEND → Legacy " + (S.legacy + 1) + " (+" + ((S.legacy + 1) * 25) + "% income)" : "🌟 ASCEND — Fusion Age + 2500 pop";
+  asc.textContent = canA ? "🌟 ASCEND → Legacy " + (S.legacy + 1) + " (+" + ((S.legacy + 1) * 25) + "% income)" : "🌟 ASCEND — " + AGES[AGES.length - 1].n + " + 2500 pop";
   var sb = el("btnSide");
   if (sb) sb.className = "sbtn" + (S.age < AGES.length - 1 && questsComplete() ? " alert" : "");
 }
@@ -3145,7 +3254,7 @@ el("sideclose").addEventListener("click", function() {
 });
 var TUT = [{
   ic: "🏛",
-  t: "Welcome, Mayor! Your goal: grow a tiny Stone Age village into a Fusion Age world-city. Citizens live, work and build on their own — your job is to shape the city and keep it sustainable."
+  t: "Welcome, Mayor! Your goal: grow a tiny Stone Age village into an Orbital Age world-city. Citizens live, work and build on their own — your job is to shape the city and keep it sustainable."
 }, {
   ic: "🛣",
   t: "Start by laying ROADS outward from the Town Hall (pick the ROAD tab and drag to paint). Buildings only work when connected to the Town Hall by road."
@@ -3228,8 +3337,8 @@ function restartCity() {
 }
 
 function tryAscend() {
-  if (S.age < 7 || S.pop < 2500) {
-    toast("Ascension unlocks in the FUSION AGE at 2500 population");
+  if (S.age < AGES.length - 1 || S.pop < 2500) {
+    toast("Ascension unlocks in the " + AGES[AGES.length - 1].n + " at 2500 population");
     return;
   }
   S.legacy = (S.legacy || 0) + 1;
