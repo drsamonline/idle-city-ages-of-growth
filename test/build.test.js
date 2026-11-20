@@ -35,7 +35,7 @@ function ok(name, cond, detail) {
 }
 
 /* ---- 1. the sources are there ------------------------------------------- */
-["src/index.html", "src/style.css", "src/game.js", "build/build.js"].forEach((f) => {
+["src/index.html", "src/style.css", "src/game.js", "src/legacy.js", "build/build.js"].forEach((f) => {
   ok(f + " exists", fs.existsSync(path.join(repo, f)));
 });
 
@@ -111,6 +111,9 @@ const MUST_CARRY = [
   // function names do not
   ["the overlap rule", "buildings-overlap"],
   ["the duplicate-road rule", "roads-duplicate"],
+  // the legacy ladder (2026-11-21): the rank names are strings, so they survive
+  // the toplevel mangle that erases `Legacy` itself
+  ["the legacy ladder", "Ringbearer"],
 ];
 for (const name of ["index.html", "idle-city.min.html"]) {
   const html = fs.readFileSync(path.join(repo, name), "utf8");

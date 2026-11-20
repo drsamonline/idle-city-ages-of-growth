@@ -2,7 +2,7 @@
 
 # 📓 Changelog
 
-[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE) ![Version](https://img.shields.io/badge/version-1.3.0-blue.svg) ![Keep a Changelog](https://img.shields.io/badge/keep%20a%20changelog-1.1.0-orange) ![SemVer](https://img.shields.io/badge/semver-2.0.0-blue)
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE) ![Version](https://img.shields.io/badge/version-1.4.0-blue.svg) ![Keep a Changelog](https://img.shields.io/badge/keep%20a%20changelog-1.1.0-orange) ![SemVer](https://img.shields.io/badge/semver-2.0.0-blue)
 
 All notable changes to **IDLE CITY — Ages of Growth** are documented here.
 
@@ -12,6 +12,40 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 </div>
 
 ## [Unreleased]
+
+## [1.4.0] — 2026-11-21
+
+- **The endgame is worth something, and Legacy is a ladder.** Ascension used to award a flat `+1`
+  whatever the run did, so a city that finished the Orbital Age — the Dyson Ring, nine wonders, the
+  whole research tree — scored exactly the same as one that limped to 2,500 citizens. The ring was
+  the last thing the game asked for and it was worth nothing, and Legacy was a number with no name
+  and no next step. Both are fixed by one new pure module, `src/legacy.js`, which the page loads
+  before `game.js` and `build/build.js` inlines into both shipped files.
+  - **`Legacy.award(run)`** scores the run: **1** for ascending, **+1** for the Dyson Ring,
+    **+1 per 3 wonders** (up to 9), **+1 per 1,000 citizens past 2,500** (up to +3,000) and **+1**
+    for all 10 techs — a bare ascension is still 1, so no existing save loses value, and a finished
+    Orbital run is 9.
+  - **`Legacy.rank(points)`** walks a named ladder: Settler (0), Founder (3), Steward (6),
+    Architect (10), Worldsmith (15), Ringbearer (21), Star-founder (28), with `nextRank()`,
+    `toNext()` and `label()` for the HUD.
+  - **What did not change:** +25% income per point (`incomePct()`), and the starting seed of 1,500
+    money and 600 materials per point (`startBonus()`) — both now read from one place instead of two
+    literals in `restartCity()`.
+  - **In the UI:** the Ascend button previews the award (`ASCEND → +4 Legacy · Architect`), the age
+    pill shows `🏛️ Founder · 3`, and crossing a threshold announces the rank-up and the points to
+    the next one.
+- **Proved, not asserted.** `test/legacy.test.js` (42 assertions) is new: the property that was false
+  is now the first assertion (a ring run scores strictly more than a bare one), each term of the
+  score is tested on its own, the award is checked monotonic in population, every junk input
+  (`null`, `NaN`, `Infinity`, `-5000`, a string, `[]`) is refused to a whole point ≥ 1, the ladder is
+  checked strictly ascending from 0 with unique names, and the two pre-existing rewards are pinned.
+  `test/content.test.js` gained six checks that the ladder is *wired* — the page loads `legacy.js`
+  before `game.js`, `game.js` calls `Legacy.award()`, and the flat `+1` has not come back — and
+  `test/build.test.js` now requires `src/legacy.js` and a `Ringbearer` marker in both shipped files.
+  Three mutations were run and all three were caught: dropping the ring term, making the award a
+  flat 1, and loading `legacy.js` after `game.js`.
+- Docs follow the code: README's feature row, `docs/GAMEPLAY.md` §8, the site's Prestige stat, the
+  Ascension card and the FAQ answer all describe the scored award and the ladder.
 
 ## [1.3.0] — 2026-11-18
 

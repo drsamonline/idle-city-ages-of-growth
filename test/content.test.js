@@ -300,5 +300,26 @@ Object.keys(advertised).forEach((file) => {
   });
 });
 
+/* ---- 10. the legacy ladder is wired, not just written -------------------
+ *
+ * src/legacy.js holds the ranks and the award. Two ways it can quietly stop
+ * mattering: the page stops loading it (or loads it after game.js, which calls
+ * it at load time), or game.js goes back to awarding a flat +1 so the Dyson Ring
+ * is worth nothing again. Both are checked here because neither is a syntax
+ * error anywhere.
+ */
+const Legacy = require(path.join(__dirname, "..", "src", "legacy.js"));
+const page = fs.readFileSync(path.join(__dirname, "..", "src", "index.html"), "utf8");
+const iLegacy = page.indexOf('src="legacy.js"');
+const iGame = page.indexOf('src="game.js"');
+ok("src/index.html loads legacy.js", iLegacy >= 0);
+ok("legacy.js is loaded before game.js", iLegacy >= 0 && iGame > iLegacy);
+ok("game.js awards what Legacy.award() scores", /Legacy\.award\(/.test(src));
+ok("game.js no longer awards a flat +1 on ascension",
+  !/S\.legacy\s*=\s*\(S\.legacy \|\| 0\) \+ 1\s*;/.test(src));
+ok("the ladder starts at 0 so every player holds a rank", Legacy.RANKS[0].at === 0);
+ok("the ring is worth more than a bare ascension",
+  Legacy.award({ pop: 2500, dyson: 1 }) > Legacy.award({ pop: 2500 }));
+
 console.log("\n" + passed + " passed, " + failed + " failed");
 process.exit(failed === 0 ? 0 : 1);

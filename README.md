@@ -55,7 +55,7 @@ Lay roads, zone land, generate power and keep your citizens happy — the city r
 | 🎯 **Quests, Tech & Challenges** | 40 quests gate the ages, 10 research techs reshape the economy, and 3 timed challenges award medals. |
 | 🎲 **Events & disasters** | Festivals, trade booms, migration waves, fires and earthquakes keep a run unpredictable. Citizens also file petitions you can accept or refuse. |
 | 💾 **Full save system** | 3 save slots, autosave, and a shareable export/import code to move a city between devices — and a save that is damaged or from a newer build is refused by name instead of crashing the game. |
-| 🌟 **Ascension** | Reach the Orbital Age at 2,500 citizens to Ascend — carry a permanent Legacy bonus into your next city. |
+| 🌟 **Ascension & Legacy ranks** | Reach the Orbital Age at 2,500 citizens to Ascend. A run is scored, not just counted: the Dyson Ring, every 3 wonders, every 1,000 citizens past the gate and the finished research tree each add a Legacy point (+25% income each), and the points walk a named ladder — Settler → Founder → Steward → Architect → Worldsmith → Ringbearer → Star-founder. |
 | 📱 **Fully responsive** | Purpose-built mobile layout with touch pan/pinch-zoom, safe-area support and reachable controls down to 320 px wide. |
 | 📦 **Zero dependencies** | One HTML file. No build step to play, no server, no network. Open it and go. |
 

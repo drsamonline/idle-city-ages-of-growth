@@ -2899,7 +2899,13 @@ function updateQuests() {
   var asc = el("ascend"),
     canA = S.age >= AGES.length - 1 && S.pop >= 2500;
   asc.disabled = !canA;
-  asc.textContent = canA ? "🌟 ASCEND → Legacy " + (S.legacy + 1) + " (+" + ((S.legacy + 1) * 25) + "% income)" : "🌟 ASCEND — " + AGES[AGES.length - 1].n + " + 2500 pop";
+  if (canA) {
+    var gain = ascendAward(),
+      tot = (S.legacy || 0) + gain;
+    asc.textContent = "🌟 ASCEND → +" + gain + " Legacy · " + Legacy.rank(tot).n + " (" + Legacy.incomePct(tot) + "% income)";
+  } else {
+    asc.textContent = "🌟 ASCEND — " + AGES[AGES.length - 1].n + " + 2500 pop";
+  }
   var sb = el("btnSide");
   if (sb) sb.className = "sbtn" + (S.age < AGES.length - 1 && questsComplete() ? " alert" : "");
 }
@@ -2947,7 +2953,7 @@ function updateInfo() {
 }
 
 function updateHUD() {
-  el("agepill").textContent = AGES[S.age].n + (S.legacy > 0 ? " 🌟" + S.legacy : "");
+  el("agepill").textContent = AGES[S.age].n + (S.legacy > 0 ? " " + Legacy.label(S.legacy) : "");
   el("rMoney").innerHTML = "💰<b>" + fmtN(S.money) + "</b> <span class='rate'>" + (S.moneyRate >= 0 ? "+" : "") + S.moneyRate.toFixed(1) + "/s</span>";
   el("rMats").innerHTML = "🧱<b>" + fmtN(S.mats) + "</b> <span class='rate'>+" + (S.matsRate || 0).toFixed(1) + "/s</span>";
   el("rFood").innerHTML = "🍖<b>" + fmtN(S.food) + "</b> <span class='rate'>" + (S.foodProd - S.foodUse >= 0 ? "+" : "") + (S.foodProd - S.foodUse).toFixed(1) + "/s</span>";
@@ -3309,10 +3315,9 @@ function restartCity() {
   var lg = S.legacy || 0;
   S = newState();
   S.legacy = lg;
-  if (lg > 0) {
-    S.money += lg * 1500;
-    S.mats += lg * 600;
-  }
+  var seed = Legacy.startBonus(lg);
+  S.money += seed.money;
+  S.mats += seed.mats;
   S.tut = 99;
   genMap();
   computeCity();
@@ -3336,14 +3341,33 @@ function restartCity() {
   toast("🌱 A new city rises. Good luck, Mayor!");
 }
 
+/* What THIS run is worth — the ring, the wonders, the citizens past the gate
+   and the finished research tree, all read from src/legacy.js so the award is
+   one table and not a literal in the button text. */
+function ascendAward() {
+  return Legacy.award({
+    pop: S.pop,
+    wonders: S.wonders || 0,
+    techs: (S.tech || []).length,
+    dyson: countDef("dyson")
+  });
+}
+
 function tryAscend() {
   if (S.age < AGES.length - 1 || S.pop < 2500) {
     toast("Ascension unlocks in the " + AGES[AGES.length - 1].n + " at 2500 population");
     return;
   }
-  S.legacy = (S.legacy || 0) + 1;
+  var gained = ascendAward(),
+    total = (S.legacy || 0) + gained,
+    before = Legacy.rank(S.legacy || 0),
+    after = Legacy.rank(total);
+  S.legacy = total;
   restartCity();
-  toast("🌟 ASCENDED! Legacy " + S.legacy + ": +" + (S.legacy * 25) + "% income forever");
+  toast("🌟 ASCENDED! +" + gained + " Legacy — " + after.ic + " " + after.n + " (" + total + "): +" + Legacy.incomePct(total) + "% income forever");
+  if (after.n !== before.n) setTimeout(function() {
+    toast("🏅 RANK UP — " + after.ic + " " + after.n + " · next at " + Legacy.toNext(total) + " more");
+  }, 1400);
 }
 el("ascend").addEventListener("click", tryAscend);
 var TECHS = [{

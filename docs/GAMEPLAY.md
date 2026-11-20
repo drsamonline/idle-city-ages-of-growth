@@ -219,7 +219,15 @@ injection at the cost of goodwill.
 - **3 save slots** (💾 button) plus **autosave** every 10 seconds.
 - **Export / Import**: copy the save code to move your city to another device or back it up.
 - **🌟 Ascend**: in the final age (the **Orbital Age**) with **2,500+ population**, ascend to start a fresh city
-  while keeping a permanent **Legacy** bonus (+25 % income per ascension).
+  while keeping a permanent **Legacy** bonus (+25 % income per Legacy point).
+- **Legacy points are scored, not flat.** Ascending is worth 1 point, and the run adds more for what it
+  actually finished: **+1** for the Dyson Ring, **+1 per 3 wonders** (up to 9), **+1 per 1,000 citizens
+  past 2,500** (up to +3,000) and **+1** for the whole research tree. So the last thing the game asks you
+  to build is finally worth something.
+- **Legacy ranks.** Your total points walk a named ladder — **Settler** (0) → **Founder** (3) →
+  **Steward** (6) → **Architect** (10) → **Worldsmith** (15) → **Ringbearer** (21) →
+  **Star-founder** (28). The age pill shows your rank and points, and a rank-up is announced when you
+  cross a threshold.
 
 ---
 

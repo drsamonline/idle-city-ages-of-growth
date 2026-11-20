@@ -3,7 +3,7 @@
  * IDLE CITY — build script
  * Author: Dr. Sohil Momin
  *
- * Inlines src/style.css, src/save.js and src/game.js into a single playable file
+ * Inlines src/style.css, src/save.js, src/legacy.js and src/game.js into a single playable file
  * (index.html) and produces a minified build (idle-city.min.html).
  *
  * Usage:  node build/build.js
@@ -19,6 +19,7 @@ const src = path.join(root, "src");
 const html = fs.readFileSync(path.join(src, "index.html"), "utf8");
 const css = fs.readFileSync(path.join(src, "style.css"), "utf8");
 const save = fs.readFileSync(path.join(src, "save.js"), "utf8");
+const legacy = fs.readFileSync(path.join(src, "legacy.js"), "utf8");
 const js = fs.readFileSync(path.join(src, "game.js"), "utf8");
 
 const single = html
@@ -26,6 +27,8 @@ const single = html
     "<style>\n" + css.trim() + "\n</style>")
   .replace(/<script src="save\.js"><\/script>/,
     "<script>\n" + save.trim() + "\n</script>")
+  .replace(/<script src="legacy\.js"><\/script>/,
+    "<script>\n" + legacy.trim() + "\n</script>")
   .replace(/<script src="game\.js"><\/script>/,
     "<script>\n" + js.trim() + "\n</script>");
 
