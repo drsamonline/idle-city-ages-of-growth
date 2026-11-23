@@ -2,7 +2,7 @@
 
 # 📓 Changelog
 
-[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE) ![Version](https://img.shields.io/badge/version-1.4.0-blue.svg) ![Keep a Changelog](https://img.shields.io/badge/keep%20a%20changelog-1.1.0-orange) ![SemVer](https://img.shields.io/badge/semver-2.0.0-blue)
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE) ![Version](https://img.shields.io/badge/version-1.5.0-blue.svg) ![Keep a Changelog](https://img.shields.io/badge/keep%20a%20changelog-1.1.0-orange) ![SemVer](https://img.shields.io/badge/semver-2.0.0-blue)
 
 All notable changes to **IDLE CITY — Ages of Growth** are documented here.
 
@@ -12,6 +12,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 </div>
 
 ## [Unreleased]
+
+## [1.5.0] — 2026-11-23
+
+- **The Legacy rank now does something.** The ladder shipped in 1.4.0 was display-only: income is
+  `+25%` per **point**, so two cities on the same score earned exactly the same money under
+  different names, and a Settler was an Architect with a different word on the HUD. Climbing past
+  the point where income already carries you bought nothing you could feel.
+  - **`Legacy.wonderDiscountPct(points)`** — 5% off every wonder's money **and** materials cost per
+    rank above Settler: 0% at Settler, 30% at Star-founder. There is no separate cap, on purpose:
+    the rank is already bounded by the ladder, so a cap would be a number no input could reach —
+    code no test could tell from its own removal. `Legacy.discount(cost, points)` does the
+    arithmetic, rounded once, so a price is always whole and never negative.
+  - **`baseCost(id)` in `game.js`** — one function now prices every build, so the palette, the
+    charge and the ledger cannot disagree. `placeCost()` is `baseCost()` plus the ground the
+    building stands on (the forest premium and the `t_eng` road discount keep their old order).
+  - **The ascend button names it** — `… · Architect (100% income · wonders -15%)` — so the rank's
+    value is visible before the next city is founded, not discovered after.
+  - **Tests.** `test/legacy.test.js` 42 → 59 assertions (the discount is monotonic, held at the
+    threshold, capped, whole, and safe against ten kinds of junk input); `test/content.test.js`
+    now fails if `game.js` stops reading `Legacy.wonderDiscountPct` or stops pricing through
+    `baseCost`; `test/build.test.js` requires the string `wonders -` in both shipped files.
 
 ## [1.4.0] — 2026-11-21
 

@@ -1451,17 +1451,31 @@ function forestOn(x, z) {
   return tileAt(x, z) === T.FOREST;
 }
 
-function placeCost(id, x, z) {
+/* What `id` costs before the ground it stands on is considered — one place, so
+   the palette, the charge and the ledger cannot disagree about a price.
+   The wonder discount is Legacy's rank made real: the ladder was display-only,
+   so every wonder now costs less at each rank above Settler. */
+function baseCost(id) {
   var d = DEFS[id],
     c = {
       m: d.cost ? d.cost.m : 0,
       t: d.cost ? d.cost.t : 0
     };
+  if (id === "road" && hasTech("t_eng")) c.m = Math.round(c.m * 0.7);
+  if (d.cat === "wonder") {
+    var dc = Legacy.discount(c, S.legacy || 0);
+    c.m = dc.m;
+    c.t = dc.t;
+  }
+  return c;
+}
+
+function placeCost(id, x, z) {
+  var c = baseCost(id);
   if (forestOn(x, z)) {
     c.m = Math.round(c.m * 1.2);
     c.t += 10;
   }
-  if (id === "road" && hasTech("t_eng")) c.m = Math.round(c.m * 0.7);
   return c;
 }
 
@@ -2870,7 +2884,8 @@ function rebuildItems() {
     d = DEFS[keys[i]];
     if (d.cat !== S.tab || d.id === "hall") continue;
     var un = itemUnlocked(d);
-    var cost = d.cost ? ("💰" + d.cost.m + (d.cost.t ? " 🧱" + d.cost.t : "")) : "free";
+    var bc = baseCost(d.id),
+      cost = bc.m || bc.t ? "💰" + bc.m + (bc.t ? " 🧱" + bc.t : "") : "free";
     h += '<div class="item' + (S.tool === d.id ? " sel" : "") + (un ? "" : " lock") + '" data-id="' + d.id + '">' + '<div class="ic">' + d.ic + '</div><div><div class="nm">' + d.name + '</div>' + '<div class="ct">' + (un ? cost : "") + "</div>" + (un ? "" : '<div class="lk">' + itemLockedBy(d) + "</div>") + "</div></div>";
   }
   el("items").innerHTML = h;
@@ -2902,7 +2917,7 @@ function updateQuests() {
   if (canA) {
     var gain = ascendAward(),
       tot = (S.legacy || 0) + gain;
-    asc.textContent = "🌟 ASCEND → +" + gain + " Legacy · " + Legacy.rank(tot).n + " (" + Legacy.incomePct(tot) + "% income)";
+    asc.textContent = "🌟 ASCEND → +" + gain + " Legacy · " + Legacy.rank(tot).n + " (" + Legacy.incomePct(tot) + "% income" + (Legacy.wonderDiscountPct(tot) > 0 ? " · wonders -" + Legacy.wonderDiscountPct(tot) + "%" : "") + ")";
   } else {
     asc.textContent = "🌟 ASCEND — " + AGES[AGES.length - 1].n + " + 2500 pop";
   }

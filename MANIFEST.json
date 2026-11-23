@@ -3,10 +3,10 @@
   "locked": false,
   "files": {
     "README.md": {
-      "sha": "1c5de9e7ee5e6f6d1e209ad6f40bf41244249859",
-      "producer": "cycle@2026-11-21-legacy-ladder",
+      "sha": "de5c1747c057f32b99e713d00eaff713af035a44",
+      "producer": "cycle@2026-11-23-legacy-rank",
       "class": "generated",
-      "at": "2026-11-20T18:44:16Z"
+      "at": "2026-11-23T00:44:37Z"
     },
     "docs/index.html": {
       "sha": "28fcc5748b090365959df72d9046835c57d7b073",
@@ -15,10 +15,10 @@
       "at": "2026-11-20T18:44:32Z"
     },
     "docs/play/index.html": {
-      "sha": "ee6bef244ada38e2261dac6ff71e86cad92a1d30",
-      "producer": "cycle@2026-11-21-legacy-ladder",
+      "sha": "d1af6259ef71819f1b7bac8847ccf4ea9290716c",
+      "producer": "cycle@2026-11-23-legacy-rank",
       "class": "generated",
-      "at": "2026-11-20T18:44:16Z"
+      "at": "2026-11-23T00:44:37Z"
     },
     ".github/workflows/build-apps.yml": {
       "sha": "00c0ec96ed1568bc4fcf7434cd88025df3551ab2",
@@ -27,23 +27,23 @@
       "at": "2026-11-10T15:12:18Z"
     },
     "docs/play/idle-city.min.html": {
-      "sha": "fe8ffd7440b7336f66a94e36696c12ffdbd7625a",
-      "producer": "cycle@2026-11-21-legacy-ladder",
+      "sha": "522a4b88a550accb45464c7038d9db9df23c7084",
+      "producer": "cycle@2026-11-23-legacy-rank",
       "class": "generated",
-      "at": "2026-11-20T18:44:16Z"
+      "at": "2026-11-23T00:44:37Z"
     },
     "index.html": {
-      "sha": "ee6bef244ada38e2261dac6ff71e86cad92a1d30",
-      "producer": "cycle@2026-11-21-legacy-ladder",
+      "sha": "d1af6259ef71819f1b7bac8847ccf4ea9290716c",
+      "producer": "cycle@2026-11-23-legacy-rank",
       "class": "generated",
-      "at": "2026-11-20T18:44:16Z"
+      "at": "2026-11-23T00:44:37Z"
     },
     "idle-city.min.html": {
-      "sha": "fe8ffd7440b7336f66a94e36696c12ffdbd7625a",
-      "producer": "cycle@2026-11-21-legacy-ladder",
+      "sha": "522a4b88a550accb45464c7038d9db9df23c7084",
+      "producer": "cycle@2026-11-23-legacy-rank",
       "class": "generated",
-      "at": "2026-11-20T18:44:16Z"
+      "at": "2026-11-23T00:44:37Z"
     }
   },
-  "updated": "2026-11-20T18:44:32Z"
+  "updated": "2026-11-23T00:44:37Z"
 }

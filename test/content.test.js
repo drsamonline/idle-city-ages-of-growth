@@ -321,5 +321,11 @@ ok("the ladder starts at 0 so every player holds a rank", Legacy.RANKS[0].at ===
 ok("the ring is worth more than a bare ascension",
   Legacy.award({ pop: 2500, dyson: 1 }) > Legacy.award({ pop: 2500 }));
 
+ok("game.js charges the rank's wonder discount", /Legacy\.discount\(c, S\.legacy/.test(src));
+ok("game.js prices every build through one function", /function baseCost\(/.test(src) &&
+  /var c = baseCost\(id\);/.test(src));
+ok("the palette shows the price it will charge", /baseCost\(d\.id\)/.test(src));
+ok("wonders are what the discount is applied to", /d\.cat === "wonder"/.test(src));
+
 console.log("\n" + passed + " passed, " + failed + " failed");
 process.exit(failed === 0 ? 0 : 1);

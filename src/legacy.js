@@ -112,6 +112,40 @@ var Legacy = (function () {
     return count(points) * 25;
   }
 
+  // The wonder discount — what the RANK is for.
+  //
+  // The income bonus is per POINT, so the ladder changed nothing a player could
+  // feel: two cities on the same score earned the same money under different
+  // names, and a Settler was an Architect with a different word on the HUD. The
+  // rank now buys something points alone do not: every wonder in the next city
+  // costs less. 5% per rank above Settler, so the ladder is worth climbing past
+  // the point where income already carries you.
+  var WONDER_DISCOUNT_PER_RANK = 5;
+
+  // The percentage off every wonder's money AND materials cost at `points`.
+  //
+  // There is deliberately no separate cap: `rankIndex` is already bounded by the
+  // ladder, so the discount tops out at the top rank (6 * 5% = 30% today) and a
+  // cap written beside it would be a number no input could reach — code no test
+  // can tell from its own removal. If the ladder ever grows, the discount grows
+  // with it, which is the behaviour a player would expect anyway.
+  function wonderDiscountPct(points) {
+    return rankIndex(points) * WONDER_DISCOUNT_PER_RANK;
+  }
+
+  // What a wonder costs at `points`, given its list price. The arithmetic lives
+  // HERE, not in game.js, so the test can prove the price a player is charged
+  // and not merely that the page mentions the function. Rounded once, at the
+  // end, so a cost is always a whole number and never negative.
+  function discount(cost, points) {
+    var m = count(cost && cost.m),
+      t = count(cost && cost.t),
+      pct = wonderDiscountPct(points);
+    if (!pct) return { m: m, t: t };
+    var f = (100 - pct) / 100;
+    return { m: Math.round(m * f), t: Math.round(t * f) };
+  }
+
   // What a new city starts with, unchanged: the same per-point seed the game
   // has always given, now read from one place instead of two literals.
   function startBonus(points) {
@@ -136,6 +170,9 @@ var Legacy = (function () {
     nextRank: nextRank,
     toNext: toNext,
     incomePct: incomePct,
+    WONDER_DISCOUNT_PER_RANK: WONDER_DISCOUNT_PER_RANK,
+    wonderDiscountPct: wonderDiscountPct,
+    discount: discount,
     startBonus: startBonus,
     label: label
   };

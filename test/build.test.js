@@ -114,6 +114,9 @@ const MUST_CARRY = [
   // the legacy ladder (2026-11-21): the rank names are strings, so they survive
   // the toplevel mangle that erases `Legacy` itself
   ["the legacy ladder", "Ringbearer"],
+  // the wonder discount (2026-11-23): the ascend button names it, and the
+  // string survives the toplevel mangle that erases `Legacy` itself
+  ["the wonder discount", "wonders -"],
 ];
 for (const name of ["index.html", "idle-city.min.html"]) {
   const html = fs.readFileSync(path.join(repo, name), "utf8");

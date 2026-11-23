@@ -115,5 +115,63 @@ ok("no label at zero", Legacy.label(0) === "");
 ok("the label carries the rank name", Legacy.label(10).indexOf(Legacy.rank(10).n) >= 0);
 ok("the label carries the points", Legacy.label(10).indexOf("10") >= 0);
 
+/* ---- 8. the rank does something: wonders cost less ---------------------
+ *
+ * The ladder was DISPLAY ONLY. Income is +25% per POINT, so two cities on the
+ * same score earned exactly the same money under different names — a Settler
+ * was an Architect with a different word on the HUD, and climbing the ladder
+ * bought nothing you could feel. The rank now discounts every wonder in the
+ * next city. The assertion that would have been false before is the first one:
+ * a Founder must pay STRICTLY less than a Settler for the same wonder.
+ */
+ok("a Settler gets no wonder discount", Legacy.wonderDiscountPct(0) === 0);
+ok("a Founder pays less than a Settler for the same wonder",
+  Legacy.wonderDiscountPct(R[1].at) > Legacy.wonderDiscountPct(R[0].at),
+  Legacy.wonderDiscountPct(R[1].at) + " vs " + Legacy.wonderDiscountPct(R[0].at));
+ok("every rank costs 5% more off than the one below it",
+  R.every((r, i) => Legacy.wonderDiscountPct(r.at) === i * Legacy.WONDER_DISCOUNT_PER_RANK),
+  R.map((r) => Legacy.wonderDiscountPct(r.at)).join("/"));
+ok("the discount is held AT the threshold, like the rank",
+  Legacy.wonderDiscountPct(R[2].at) === Legacy.wonderDiscountPct(R[2].at - 1) + Legacy.WONDER_DISCOUNT_PER_RANK);
+const TOP_DISC = (R.length - 1) * Legacy.WONDER_DISCOUNT_PER_RANK;
+ok("the discount tops out at the top rank, whatever the score",
+  Legacy.wonderDiscountPct(1e6) === TOP_DISC, String(Legacy.wonderDiscountPct(1e6)));
+ok("no rank is discounted more than the top rank",
+  R.every((r) => Legacy.wonderDiscountPct(r.at) <= TOP_DISC));
+ok("the discount is a whole percentage", Number.isInteger(Legacy.wonderDiscountPct(R[3].at)));
+
+let discMono = true;
+for (let p = 0; p <= 40; p++) {
+  if (Legacy.wonderDiscountPct(p + 1) < Legacy.wonderDiscountPct(p)) discMono = false;
+}
+ok("the discount never goes down as the score goes up", discMono);
+
+let discSafe = true;
+[undefined, null, NaN, -5, -1e9, "x", {}, [], Infinity, 1e9].forEach((v) => {
+  const d = Legacy.wonderDiscountPct(v);
+  if (!(typeof d === "number" && isFinite(d) && d >= 0 && d <= TOP_DISC)) discSafe = false;
+});
+ok("no junk score can make the discount NaN, negative or above the top rank", discSafe);
+
+/* the arithmetic the player is actually charged — in legacy.js, so it can be
+   proved here instead of only being mentioned in game.js */
+const list = { m: 1000, t: 400 };
+ok("a Settler pays the list price", Legacy.discount(list, 0).m === 1000 && Legacy.discount(list, 0).t === 400);
+ok("a Founder pays 5% less, in money AND materials",
+  Legacy.discount(list, R[1].at).m === 950 && Legacy.discount(list, R[1].at).t === 380,
+  JSON.stringify(Legacy.discount(list, R[1].at)));
+ok("an Architect pays 15% less", Legacy.discount(list, R[3].at).m === 850,
+  String(Legacy.discount(list, R[3].at).m));
+ok("a Star-founder pays 30% less, and no more",
+  Legacy.discount(list, 1e6).m === 700 && Legacy.discount(list, 1e6).t === 280);
+ok("a discounted price is always a whole number",
+  Number.isInteger(Legacy.discount({ m: 101, t: 7 }, R[1].at).m));
+ok("a discounted price is never negative",
+  Legacy.discount({ m: 1, t: 1 }, 1e6).m >= 0 && Legacy.discount({ m: 1, t: 1 }, 1e6).t >= 0);
+ok("a wonder with no price stays free", Legacy.discount(null, R[4].at).m === 0 &&
+  Legacy.discount(null, R[4].at).t === 0);
+ok("the discount never makes a wonder dearer",
+  Legacy.discount(list, R[6].at).m <= list.m && Legacy.discount(list, R[6].at).t <= list.t);
+
 console.log("\n" + passed + " passed, " + failed + " failed");
 process.exit(failed ? 1 : 0);

@@ -1428,6 +1428,40 @@ var Legacy = (function () {
     return count(points) * 25;
   }
 
+  // The wonder discount — what the RANK is for.
+  //
+  // The income bonus is per POINT, so the ladder changed nothing a player could
+  // feel: two cities on the same score earned the same money under different
+  // names, and a Settler was an Architect with a different word on the HUD. The
+  // rank now buys something points alone do not: every wonder in the next city
+  // costs less. 5% per rank above Settler, so the ladder is worth climbing past
+  // the point where income already carries you.
+  var WONDER_DISCOUNT_PER_RANK = 5;
+
+  // The percentage off every wonder's money AND materials cost at `points`.
+  //
+  // There is deliberately no separate cap: `rankIndex` is already bounded by the
+  // ladder, so the discount tops out at the top rank (6 * 5% = 30% today) and a
+  // cap written beside it would be a number no input could reach — code no test
+  // can tell from its own removal. If the ladder ever grows, the discount grows
+  // with it, which is the behaviour a player would expect anyway.
+  function wonderDiscountPct(points) {
+    return rankIndex(points) * WONDER_DISCOUNT_PER_RANK;
+  }
+
+  // What a wonder costs at `points`, given its list price. The arithmetic lives
+  // HERE, not in game.js, so the test can prove the price a player is charged
+  // and not merely that the page mentions the function. Rounded once, at the
+  // end, so a cost is always a whole number and never negative.
+  function discount(cost, points) {
+    var m = count(cost && cost.m),
+      t = count(cost && cost.t),
+      pct = wonderDiscountPct(points);
+    if (!pct) return { m: m, t: t };
+    var f = (100 - pct) / 100;
+    return { m: Math.round(m * f), t: Math.round(t * f) };
+  }
+
   // What a new city starts with, unchanged: the same per-point seed the game
   // has always given, now read from one place instead of two literals.
   function startBonus(points) {
@@ -1452,6 +1486,9 @@ var Legacy = (function () {
     nextRank: nextRank,
     toNext: toNext,
     incomePct: incomePct,
+    WONDER_DISCOUNT_PER_RANK: WONDER_DISCOUNT_PER_RANK,
+    wonderDiscountPct: wonderDiscountPct,
+    discount: discount,
     startBonus: startBonus,
     label: label
   };
@@ -2915,17 +2952,31 @@ function forestOn(x, z) {
   return tileAt(x, z) === T.FOREST;
 }
 
-function placeCost(id, x, z) {
+/* What `id` costs before the ground it stands on is considered — one place, so
+   the palette, the charge and the ledger cannot disagree about a price.
+   The wonder discount is Legacy's rank made real: the ladder was display-only,
+   so every wonder now costs less at each rank above Settler. */
+function baseCost(id) {
   var d = DEFS[id],
     c = {
       m: d.cost ? d.cost.m : 0,
       t: d.cost ? d.cost.t : 0
     };
+  if (id === "road" && hasTech("t_eng")) c.m = Math.round(c.m * 0.7);
+  if (d.cat === "wonder") {
+    var dc = Legacy.discount(c, S.legacy || 0);
+    c.m = dc.m;
+    c.t = dc.t;
+  }
+  return c;
+}
+
+function placeCost(id, x, z) {
+  var c = baseCost(id);
   if (forestOn(x, z)) {
     c.m = Math.round(c.m * 1.2);
     c.t += 10;
   }
-  if (id === "road" && hasTech("t_eng")) c.m = Math.round(c.m * 0.7);
   return c;
 }
 
@@ -4334,7 +4385,8 @@ function rebuildItems() {
     d = DEFS[keys[i]];
     if (d.cat !== S.tab || d.id === "hall") continue;
     var un = itemUnlocked(d);
-    var cost = d.cost ? ("💰" + d.cost.m + (d.cost.t ? " 🧱" + d.cost.t : "")) : "free";
+    var bc = baseCost(d.id),
+      cost = bc.m || bc.t ? "💰" + bc.m + (bc.t ? " 🧱" + bc.t : "") : "free";
     h += '<div class="item' + (S.tool === d.id ? " sel" : "") + (un ? "" : " lock") + '" data-id="' + d.id + '">' + '<div class="ic">' + d.ic + '</div><div><div class="nm">' + d.name + '</div>' + '<div class="ct">' + (un ? cost : "") + "</div>" + (un ? "" : '<div class="lk">' + itemLockedBy(d) + "</div>") + "</div></div>";
   }
   el("items").innerHTML = h;
@@ -4366,7 +4418,7 @@ function updateQuests() {
   if (canA) {
     var gain = ascendAward(),
       tot = (S.legacy || 0) + gain;
-    asc.textContent = "🌟 ASCEND → +" + gain + " Legacy · " + Legacy.rank(tot).n + " (" + Legacy.incomePct(tot) + "% income)";
+    asc.textContent = "🌟 ASCEND → +" + gain + " Legacy · " + Legacy.rank(tot).n + " (" + Legacy.incomePct(tot) + "% income" + (Legacy.wonderDiscountPct(tot) > 0 ? " · wonders -" + Legacy.wonderDiscountPct(tot) + "%" : "") + ")";
   } else {
     asc.textContent = "🌟 ASCEND — " + AGES[AGES.length - 1].n + " + 2500 pop";
   }
