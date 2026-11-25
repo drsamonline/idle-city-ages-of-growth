@@ -183,7 +183,7 @@ ok("a non-object challenge is dropped", shapes.save.chal === null);
 
 /* ---- 5. a clean save is left alone ------------------------------------ */
 const clean = {
-  v: 1, age: 2, money: 1234, mats: 55, fuel: 3, food: 60, waste: 0, legacy: 1,
+  v: 1, age: 2, money: 1234, mats: 55, fuel: 3, food: 60, waste: 0, legacy: 1, tier: 0,
   pop: 30, time: 900, seed: 7, questsDone: ["q1"], buildings: [["hall", 20, 14, 1, 0, 0]],
   roads: [[1, 2]], cleared: [], lastSave: 1700000000000, tut: 99, dead: false,
   warned: false, ach: ["a"], tech: ["t"], rp: 4, petT: 150, disT: 300, chal: null, medals: {}
@@ -194,6 +194,16 @@ ok("a clean save needs no repair", same.repairs.length === 0, same.repairs.join(
 ok("a clean save keeps its numbers", same.save.money === 1234 && same.save.pop === 30 && same.save.age === 2);
 ok("a clean save keeps its buildings", same.save.buildings.length === 1 && same.save.buildings[0][0] === "hall");
 ok("the gate reports its own version", SaveIO.VERSION === 1);
+
+/* ---- the second ascension tier survives a save ------------------------- */
+const withTier = gate({ age: 2, money: 100, legacy: 0, tier: 2, buildings: [] });
+ok("a save carrying a tier keeps it", withTier.ok === true && withTier.save.tier === 2);
+const noTier = gate({ age: 2, money: 100, legacy: 4, buildings: [] });
+ok("a pre-tier save reads as tier 0", noTier.ok === true && noTier.save.tier === 0);
+const badTier = gate({ age: 2, money: 100, tier: -3, buildings: [] });
+ok("a negative tier is repaired to 0", badTier.ok === true && badTier.save.tier === 0);
+const junkTier = gate({ age: 2, money: 100, tier: "many", buildings: [] });
+ok("a junk tier is repaired to 0", junkTier.ok === true && junkTier.save.tier === 0);
 
 console.log("\n" + passed + " passed, " + failed + " failed");
 process.exit(failed ? 1 : 0);
