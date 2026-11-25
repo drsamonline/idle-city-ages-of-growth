@@ -69,6 +69,7 @@ var SaveIO = (function () {
     ["food", 60, 0, CAP],
     ["waste", 0, 0, CAP],
     ["legacy", 0, 0, CAP],
+    ["tier", 0, 0, CAP],
     ["pop", 5, 0, CAP],
     ["time", 0, 0, CAP],
     ["rp", 0, 0, CAP],

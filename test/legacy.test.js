@@ -115,5 +115,51 @@ ok("no label at zero", Legacy.label(0) === "");
 ok("the label carries the rank name", Legacy.label(10).indexOf(Legacy.rank(10).n) >= 0);
 ok("the label carries the points", Legacy.label(10).indexOf("10") >= 0);
 
+/* ---- 8. the second ascension tier -------------------------------------- */
+const TOP = R[R.length - 1].at;
+ok("the top of the ladder is where Transcendence unlocks", Legacy.isTop(TOP) === true);
+ok("one point short of the top does not unlock it", Legacy.isTop(TOP - 1) === false);
+ok("a junk score is not at the top", Legacy.isTop(NaN) === false);
+ok("the tier constant is exposed", Legacy.TIER_BONUS === 10 && Legacy.TOP === TOP);
+
+const t0 = Legacy.transcend({ points: TOP, tier: 0 });
+ok("transcending from the top is allowed", t0.ok === true);
+ok("it spends the legacy back to zero", t0.points === 0);
+ok("it raises the tier by exactly one", t0.tier === 1);
+ok("it says what happened", /Ascension I/.test(t0.says));
+
+const t1 = Legacy.transcend({ points: TOP, tier: 2 });
+ok("a second transcendence goes to the next tier", t1.tier === 3);
+ok("a tier carried as junk cannot corrupt the count", Legacy.transcend({ points: TOP, tier: NaN }).tier === 1);
+ok("a negative tier counts as none", Legacy.transcend({ points: TOP, tier: -5 }).tier === 1);
+
+const refused = Legacy.transcend({ points: TOP - 1, tier: 1 });
+ok("transcending below the top is refused", refused.ok === false);
+ok("the refusal names the rank that unlocks it", refused.reason.indexOf(R[R.length - 1].n) >= 0);
+ok("the refusal names the points needed", refused.reason.indexOf(String(TOP)) >= 0);
+ok("a refused transcendence moves nothing", refused.tier === undefined && refused.points === undefined);
+ok("no state at all is refused, not assumed", Legacy.transcend().ok === false);
+ok("transcend is pure: the input is not mutated", (function () {
+  const st = { points: TOP, tier: 0 };
+  Legacy.transcend(st);
+  return st.points === TOP && st.tier === 0;
+})());
+
+ok("a tier is worth 10 percentage points with no points banked", Legacy.incomePct(0, 1) === 10);
+ok("tiers add to the per-point bonus", Legacy.incomePct(5, 2) === 125 + 20);
+ok("no tier leaves the old number exactly as it was", Legacy.incomePct(5) === 125);
+ok("a junk tier adds nothing", Legacy.incomePct(5, "x") === 125);
+ok("a transcended start is richer per point", Legacy.startBonus(2, 1).money === 6000);
+ok("and its materials double too", Legacy.startBonus(2, 1).mats === 2400);
+ok("no tier leaves the old seed exactly as it was", Legacy.startBonus(3).money === 4500);
+ok("a tier with no points still starts with nothing", Legacy.startBonus(0, 3).money === 0);
+
+ok("the label names the tier once one is held", Legacy.label(0, 1).indexOf("Ascension I") >= 0);
+ok("the label names the second tier", Legacy.label(0, 2).indexOf("Ascension II") >= 0);
+ok("the label keeps the rank inside a tier", Legacy.label(TOP, 1).indexOf(R[R.length - 1].n) >= 0);
+ok("no tier means the old label is untouched", Legacy.label(10) === Legacy.label(10, 0));
+ok("no points and no tier is still no label", Legacy.label(0, 0) === "");
+ok("a tier the table has not named is still printed", Legacy.label(0, 12).indexOf("12") >= 0);
+
 console.log("\n" + passed + " passed, " + failed + " failed");
 process.exit(failed ? 1 : 0);

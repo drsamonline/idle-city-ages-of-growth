@@ -2,7 +2,7 @@
 
 # 📓 Changelog
 
-[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE) ![Version](https://img.shields.io/badge/version-1.4.0-blue.svg) ![Keep a Changelog](https://img.shields.io/badge/keep%20a%20changelog-1.1.0-orange) ![SemVer](https://img.shields.io/badge/semver-2.0.0-blue)
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE) ![Version](https://img.shields.io/badge/version-1.6.0-blue.svg) ![Keep a Changelog](https://img.shields.io/badge/keep%20a%20changelog-1.1.0-orange) ![SemVer](https://img.shields.io/badge/semver-2.0.0-blue)
 
 All notable changes to **IDLE CITY — Ages of Growth** are documented here.
 
@@ -12,6 +12,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 </div>
 
 ## [Unreleased]
+
+## [1.6.0] — 2026-11-25
+
+- **The ladder has a second tier, and the top of it is a decision.** Reaching Star-founder used to be
+  the end of the road: every later ascension paid points into a counter that could only hold the rank
+  it already held. At the top, the Ascend button now **Transcends** — it spends the 28 points back to
+  zero and raises the **tier** by one, and the tier is what survives the reset.
+- **What a tier is worth.** A flat **+10 percentage points of income, forever** (`incomePct(0, 1)` is
+  10%), and the starting seed of every later city is multiplied by the tier (`startBonus(2, 1)` is
+  6,000 money and 2,400 materials against 3,000 and 1,200). Both live in `src/legacy.js` with the
+  ladder, so the HUD, the button and the toasts cannot disagree about what a tier pays.
+- **Nothing a player already had moves.** `incomePct(points)` and `startBonus(points)` are unchanged
+  for anyone holding no tier, and every existing save reads as tier 0 — the field is repaired by the
+  save gate like the rest, and a save that never had it is accepted rather than refused.
+- **It is refused rather than assumed.** `transcend()` below the top answers with the rank and the
+  number of points it needs, and moves nothing; a junk tier in a save counts as no tier.
+- 73 assertions in `test/legacy.test.js` (was 45), 52 in `test/save.test.js`, 47 in
+  `test/build.test.js` — the last of these now asserts the *wiring* (the page asks the engine, keeps
+  the tier across a restart, writes it, and reads it back), because the engine being right is not the
+  same as the game using it. **232 assertions, ten mutations, all ten red.**
+
 
 ## [1.4.0] — 2026-11-21
 

@@ -137,6 +137,18 @@ ok("src/game.js is a substantial game, not a stub", game.length > 50000, game.le
 ok("the inlined build contains the game source",
   html.indexOf(game.trim().slice(0, 200)) >= 0);
 
+/* The second ascension tier is a GAME change, so the page has to carry the wiring,
+   not just the engine that knows about it. These are static because game.js is DOM
+   code with no Node harness; each one names a link in the chain that a mutation
+   would break, and the mutation run below proves each assertion bites. */
+ok("the page asks the engine whether the ladder is finished", game.indexOf("Legacy.isTop(") >= 0);
+ok("the page takes the second tier from the engine", game.indexOf("Legacy.transcend(") >= 0);
+ok("the page keeps the tier across a restart", /S\.tier = tr;/.test(game));
+ok("the page's income reads the tier", game.indexOf("Legacy.incomePct(S.legacy, S.tier)") >= 0);
+ok("the page writes the tier into the save", /tier: S\.tier \|\| 0,/.test(game));
+ok("the page reads the tier back from the save", /S\.tier = data\.tier \|\| 0;/.test(game));
+ok("the save gate knows the field", require("fs").readFileSync(path.join(__dirname, "..", "src", "save.js"), "utf8").indexOf('["tier", 0, 0, CAP]') >= 0);
+
 fs.rmSync(tmp, { recursive: true, force: true });
 
 console.log("\n" + passed + " passed, " + failed + " failed");

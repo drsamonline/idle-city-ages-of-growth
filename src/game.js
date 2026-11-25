@@ -1248,6 +1248,7 @@ function newState() {
     food: 60,
     waste: 0,
     legacy: 0,
+    tier: 0,
     weather: 0,
     weatherT: 90,
     pop: 5,
@@ -1850,7 +1851,7 @@ function simTick(dt) {
     }
   }
   var empRatio = S.jobs > 0 ? Math.min(1, S.pop / S.jobs) : 0;
-  var money = (S.pop * 0.16 + S.incomeBase * empRatio * shortage * fuelOK) * AGES[S.age].mult * (1 + S.legacy * 0.25 + S.wonders * 0.05 + Math.min(0.3, (S.eduCov || 0) * 0.3)) * (hasTech("t_trade") ? 1.15 : 1) * (hasTech("t_ai") ? 1.2 : 1);
+  var money = (S.pop * 0.16 + S.incomeBase * empRatio * shortage * fuelOK) * AGES[S.age].mult * (1 + Legacy.incomePct(S.legacy, S.tier) / 100 + S.wonders * 0.05 + Math.min(0.3, (S.eduCov || 0) * 0.3)) * (hasTech("t_trade") ? 1.15 : 1) * (hasTech("t_ai") ? 1.2 : 1);
   money -= S.upkeep;
   S.money = Math.max(0, S.money + money * dt);
   S.moneyRate = money;
@@ -1961,6 +1962,7 @@ function saveGame() {
     food: S.food,
     waste: S.waste,
     legacy: S.legacy,
+    tier: S.tier || 0,
     pop: S.pop,
     time: S.time,
     seed: S.seed,
@@ -2024,6 +2026,7 @@ function loadGame(slot) {
   S.food = typeof data.food === "number" ? data.food : 60;
   S.waste = data.waste || 0;
   S.legacy = data.legacy || 0;
+  S.tier = data.tier || 0;
   S.pop = data.pop || 5;
   S.time = data.time || 0;
   S.seed = data.seed || 7;
@@ -2899,10 +2902,13 @@ function updateQuests() {
   var asc = el("ascend"),
     canA = S.age >= AGES.length - 1 && S.pop >= 2500;
   asc.disabled = !canA;
-  if (canA) {
+  if (canA && Legacy.isTop(S.legacy)) {
+    asc.textContent = "\u2b50 TRANSCEND → Ascension " + Legacy.roman((S.tier || 0) + 1) +
+      " · legacy " + (S.legacy || 0) + " → 0, +" + Legacy.TIER_BONUS + "% income forever";
+  } else if (canA) {
     var gain = ascendAward(),
       tot = (S.legacy || 0) + gain;
-    asc.textContent = "🌟 ASCEND → +" + gain + " Legacy · " + Legacy.rank(tot).n + " (" + Legacy.incomePct(tot) + "% income)";
+    asc.textContent = "🌟 ASCEND → +" + gain + " Legacy · " + Legacy.rank(tot).n + " (" + Legacy.incomePct(tot, S.tier) + "% income)";
   } else {
     asc.textContent = "🌟 ASCEND — " + AGES[AGES.length - 1].n + " + 2500 pop";
   }
@@ -2953,7 +2959,7 @@ function updateInfo() {
 }
 
 function updateHUD() {
-  el("agepill").textContent = AGES[S.age].n + (S.legacy > 0 ? " " + Legacy.label(S.legacy) : "");
+  el("agepill").textContent = AGES[S.age].n + ((S.legacy > 0 || S.tier > 0) ? " " + Legacy.label(S.legacy, S.tier) : "");
   el("rMoney").innerHTML = "💰<b>" + fmtN(S.money) + "</b> <span class='rate'>" + (S.moneyRate >= 0 ? "+" : "") + S.moneyRate.toFixed(1) + "/s</span>";
   el("rMats").innerHTML = "🧱<b>" + fmtN(S.mats) + "</b> <span class='rate'>+" + (S.matsRate || 0).toFixed(1) + "/s</span>";
   el("rFood").innerHTML = "🍖<b>" + fmtN(S.food) + "</b> <span class='rate'>" + (S.foodProd - S.foodUse >= 0 ? "+" : "") + (S.foodProd - S.foodUse).toFixed(1) + "/s</span>";
@@ -3312,10 +3318,12 @@ function restartCity() {
   try {
     localStorage.removeItem(keyOf(SLOT));
   } catch (e) {}
-  var lg = S.legacy || 0;
+  var lg = S.legacy || 0,
+    tr = S.tier || 0;
   S = newState();
   S.legacy = lg;
-  var seed = Legacy.startBonus(lg);
+  S.tier = tr;
+  var seed = Legacy.startBonus(lg, tr);
   S.money += seed.money;
   S.mats += seed.mats;
   S.tut = 99;
@@ -3358,13 +3366,25 @@ function tryAscend() {
     toast("Ascension unlocks in the " + AGES[AGES.length - 1].n + " at 2500 population");
     return;
   }
+  /* From the top of the ladder the same button spends the legacy instead of
+     banking it: that is the second tier, and it is the only way to hold one. */
+  if (Legacy.isTop(S.legacy)) {
+    var out = Legacy.transcend({ points: S.legacy, tier: S.tier });
+    if (!out.ok) { toast(out.reason); return; }
+    S.legacy = out.points;
+    S.tier = out.tier;
+    restartCity();
+    toast("\u2b50 TRANSCENDED — " + Legacy.label(0, S.tier) + ". Every city from here earns +" +
+      Legacy.incomePct(0, S.tier) + "% income before a single point is banked.");
+    return;
+  }
   var gained = ascendAward(),
     total = (S.legacy || 0) + gained,
     before = Legacy.rank(S.legacy || 0),
     after = Legacy.rank(total);
   S.legacy = total;
   restartCity();
-  toast("🌟 ASCENDED! +" + gained + " Legacy — " + after.ic + " " + after.n + " (" + total + "): +" + Legacy.incomePct(total) + "% income forever");
+  toast("🌟 ASCENDED! +" + gained + " Legacy — " + after.ic + " " + after.n + " (" + total + "): +" + Legacy.incomePct(total, S.tier) + "% income forever");
   if (after.n !== before.n) setTimeout(function() {
     toast("🏅 RANK UP — " + after.ic + " " + after.n + " · next at " + Legacy.toNext(total) + " more");
   }, 1400);

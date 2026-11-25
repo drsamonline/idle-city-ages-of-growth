@@ -46,6 +46,21 @@ var Legacy = (function () {
   // No run is worth more than this, whatever it reports. A bound, not a target.
   var MAX_AWARD = 12;
 
+  // THE SECOND ASCENSION TIER. The ladder above has a top, and reaching it used
+  // to be the end of the road: every later ascension paid points into a counter
+  // that could only ever hold the same rank, so a player at Star-founder had
+  // nothing left to earn. A TRANSCENDENCE is the ascension you can only take
+  // FROM the top: legacy is spent back to 0 and the tier goes up by one. What
+  // survives is the tier, and it is worth a flat +10 percentage points of income
+  // forever — a floor under the next city, not a multiplier on the old one.
+  //
+  // It is deliberately NOT a bigger number on the same button. Reaching the top
+  // is a decision: spend 28 points to be permanently richer at the start, or
+  // keep them and stay where you are. A player who never transcends loses
+  // nothing they had.
+  var TIER_BONUS = 10;
+  var TOP = RANKS[RANKS.length - 1].at;
+
   // A count: a positive finite number floored, anything else 0. A save, a bug or
   // a caller passing nothing must not be able to make an award NaN or negative.
   function count(v) {
@@ -107,29 +122,73 @@ var Legacy = (function () {
     return n ? n.at - count(points) : 0;
   }
 
-  // The income bonus, unchanged: +25% per legacy point.
-  function incomePct(points) {
-    return count(points) * 25;
+  // Is the ladder finished? Transcendence unlocks here and nowhere else.
+  function isTop(points) {
+    return count(points) >= TOP;
   }
 
-  // What a new city starts with, unchanged: the same per-point seed the game
-  // has always given, now read from one place instead of two literals.
-  function startBonus(points) {
-    var p = count(points);
-    return { money: p * 1500, mats: p * 600 };
+  // Transcend: the second-tier ascension. Pure — it returns the state the game
+  // should write, and refuses rather than assuming a player is allowed.
+  //
+  //   transcend({ points, tier }) -> { ok, tier, points, says } | { ok:false, reason }
+  function transcend(state) {
+    var points = count(state && state.points),
+      tier = count(state && state.tier);
+    if (!isTop(points)) {
+      return {
+        ok: false,
+        reason: "Transcendence unlocks at " + RANKS[RANKS.length - 1].n + " (" + TOP + " legacy points)"
+      };
+    }
+    return {
+      ok: true,
+      tier: tier + 1,
+      points: 0,
+      says: "Transcended \u2014 Ascension " + roman(tier + 1) + ", legacy spent"
+    };
   }
 
-  // "🌟 Architect · 12" — the one-line label the HUD and the toasts share.
-  function label(points) {
-    var p = count(points);
+  // "II" for 2, and the number itself past the table: a tier the game has not
+  // named is still a tier, and a save may carry any number of them.
+  var NUMERALS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+  function roman(n) {
+    return NUMERALS[n - 1] || String(n);
+  }
+
+  // The income bonus: +25% per legacy point, plus a flat +10 points per tier.
+  // The second argument is optional, so every existing caller and save is worth
+  // exactly what it was worth before.
+  function incomePct(points, tier) {
+    return count(points) * 25 + count(tier) * TIER_BONUS;
+  }
+
+  // What a new city starts with: the per-point seed, doubled per tier. A
+  // transcended player starts a city with more, and the tier is why.
+  function startBonus(points, tier) {
+    var p = count(points),
+      t = count(tier);
+    return { money: p * 1500 * (1 + t), mats: p * 600 * (1 + t) };
+  }
+
+  // "🌟 Architect · 12", or "⭐ Ascension II · 0" once a tier is held — the one
+  // line the HUD and the toasts share.
+  function label(points, tier) {
+    var p = count(points),
+      t = count(tier);
+    if (t > 0) return "\u2b50 Ascension " + roman(t) + (p > 0 ? " \u00b7 " + rank(p).n + " " + p : " \u00b7 " + p);
     if (p <= 0) return "";
-    return rank(p).ic + " " + rank(p).n + " · " + p;
+    return rank(p).ic + " " + rank(p).n + " \u00b7 " + p;
   }
 
   return {
     RANKS: RANKS,
     GATE_POP: GATE_POP,
     MAX_AWARD: MAX_AWARD,
+    TIER_BONUS: TIER_BONUS,
+    TOP: TOP,
+    isTop: isTop,
+    transcend: transcend,
+    roman: roman,
     award: award,
     rank: rank,
     rankIndex: rankIndex,
