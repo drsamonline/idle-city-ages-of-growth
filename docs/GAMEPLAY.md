@@ -38,7 +38,7 @@ Every resource has a live **+/- per second** rate shown in the top bar.
 
 ---
 
-## 3. The eight Ages
+## 3. The nine Ages
 
 Advancing an Age unlocks new buildings and multiplies your economy.
 

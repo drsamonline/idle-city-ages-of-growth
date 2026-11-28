@@ -2,7 +2,7 @@
 
 # 📓 Changelog
 
-[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE) ![Version](https://img.shields.io/badge/version-1.4.0-blue.svg) ![Keep a Changelog](https://img.shields.io/badge/keep%20a%20changelog-1.1.0-orange) ![SemVer](https://img.shields.io/badge/semver-2.0.0-blue)
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg)](LICENSE) ![Version](https://img.shields.io/badge/version-1.4.1-blue.svg) ![Keep a Changelog](https://img.shields.io/badge/keep%20a%20changelog-1.1.0-orange) ![SemVer](https://img.shields.io/badge/semver-2.0.0-blue)
 
 All notable changes to **IDLE CITY — Ages of Growth** are documented here.
 
@@ -12,6 +12,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 </div>
 
 ## [Unreleased]
+
+## [1.4.1] — 2026-11-28
+
+- **The shop window described a different game: eight ages, and three files naming three
+  versions.** The site's progression band stopped at the Fusion Age and its headline read
+  "Eight ages" while the game has had nine since 1.2.0 — so the one thing the page never showed
+  was the endgame the whole 1.4.0 Legacy ladder is built around: the Orbital Age, ×12 income, the
+  Dyson Ring, Ascension. `docs/GAMEPLAY.md` §3 had the same stale count in its own heading, directly
+  above a table that already listed nine rows. Separately, the version badge read **1.1.0** on the
+  site, **1.2.0** in the README and **1.4.0** in the changelog, against `package.json`'s 1.4.0 —
+  three answers to one question.
+  - **The band now ends at Orbital.** A ninth chip (`Age 8 · Orbital · ×12.0`) and a `--era-8`
+    colour continue the ramp, the `--grad` gradient spans all nine, and the rail is a 9-column grid
+    with a 5-column step at 1100 px so the chips stay legible.
+  - **One version, one place.** Every badge now reads 1.4.1, and `test/content.test.js` compares
+    them to `package.json` so they cannot drift apart again.
+  - **Proved, not asserted.** A new §11 in `test/content.test.js` reads the era chips out of
+    `docs/index.html` and compares them to `AGES` one by one — count, order, name and multiplier —
+    and checks that the band's headline and `GAMEPLAY.md`'s heading spell the number of ages the
+    tables actually hold. Every one of those assertions fails on 1.4.0: the rail had 8 chips where
+    `AGES.length` is 9, the headline said "Eight ages", and both headings said "eight".
 
 ## [1.4.0] — 2026-11-21
 

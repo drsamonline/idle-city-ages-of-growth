@@ -3,16 +3,16 @@
   "locked": false,
   "files": {
     "README.md": {
-      "sha": "1c5de9e7ee5e6f6d1e209ad6f40bf41244249859",
-      "producer": "cycle@2026-11-21-legacy-ladder",
+      "sha": "676908d7585c8b4b0fffd79331e5ab3fe4071733",
+      "producer": "cycle@2026-11-28-shop-window",
       "class": "generated",
-      "at": "2026-11-20T18:44:16Z"
+      "at": "2026-11-28T00:37:51Z"
     },
     "docs/index.html": {
-      "sha": "28fcc5748b090365959df72d9046835c57d7b073",
-      "producer": "cycle@2026-11-21-legacy-ladder",
+      "sha": "1ec712051dd54b7b025b449661bbe8624a299ed1",
+      "producer": "cycle@2026-11-28-shop-window",
       "class": "hand",
-      "at": "2026-11-20T18:44:32Z"
+      "at": "2026-11-28T00:38:02Z"
     },
     "docs/play/index.html": {
       "sha": "ee6bef244ada38e2261dac6ff71e86cad92a1d30",
@@ -45,5 +45,5 @@
       "at": "2026-11-20T18:44:16Z"
     }
   },
-  "updated": "2026-11-20T18:44:32Z"
+  "updated": "2026-11-28T00:38:02Z"
 }

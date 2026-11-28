@@ -72,7 +72,7 @@
 :root{
   /* progression palette — the page itself advances through the ages */
   --era-0:#a9663a; --era-1:#bd8b4c; --era-2:#8c8177; --era-3:#6f7d78;
-  --era-4:#5a8296; --era-5:#3f93ad; --era-6:#2aa7c4; --era-7:#22d3ee;
+  --era-4:#5a8296; --era-5:#3f93ad; --era-6:#2aa7c4; --era-7:#22d3ee; --era-8:#67e8f9;
 
   --paper:#faf6f0; --paper-2:#f3ece2; --card:#fffdf9; --ink:#2b2320;
   --ink-soft:#5c5049; --ink-faint:#8a7c72; --line:#e4d9cb; --line-2:#d6c7b4;
@@ -85,7 +85,7 @@
   --serif:ui-serif,Georgia,"Iowan Old Style","Palatino Linotype",Palatino,"Times New Roman",serif;
   --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Inter,Helvetica,Arial,sans-serif;
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
-  --grad:linear-gradient(90deg,var(--era-0),var(--era-1),var(--era-2),var(--era-3),var(--era-4),var(--era-5),var(--era-6),var(--era-7));
+  --grad:linear-gradient(90deg,var(--era-0),var(--era-1),var(--era-2),var(--era-3),var(--era-4),var(--era-5),var(--era-6),var(--era-7),var(--era-8));
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
@@ -186,7 +186,8 @@ a[href*="/releases/latest/download/"] svg{width:16px;height:16px;flex:none;displ
 .band{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper-2);margin-top:56px}
 .band-in{padding:38px 0}
 .band h2{font-size:clamp(1.4rem,2.6vw,1.9rem)}
-.era-rail{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-top:24px}
+.era-rail{display:grid;grid-template-columns:repeat(9,1fr);gap:8px;margin-top:24px}
+@media(max-width:1100px){.era-rail{grid-template-columns:repeat(5,1fr)}}
 @media(max-width:900px){.era-rail{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:520px){.era-rail{grid-template-columns:repeat(2,1fr)}}
 .era{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px 12px 13px;position:relative;overflow:hidden}
@@ -447,7 +448,7 @@ html.no-js .reveal{opacity:1;transform:none}
 <div class="band">
   <div class="wrap band-in">
     <span class="eyebrow">The progression</span>
-    <h2>Eight ages, each one a bigger economy</h2>
+    <h2>Nine ages, each one a bigger economy</h2>
     <div class="era-rail">
       <div class="era"><span class="bar" style="background:var(--era-0)"></span><div class="n">Age 0</div><div class="nm">Stone</div><div class="mx">&times;1.0</div></div>
       <div class="era"><span class="bar" style="background:var(--era-1)"></span><div class="n">Age 1</div><div class="nm">Bronze</div><div class="mx">&times;1.3</div></div>
@@ -457,6 +458,7 @@ html.no-js .reveal{opacity:1;transform:none}
       <div class="era"><span class="bar" style="background:var(--era-5)"></span><div class="n">Age 5</div><div class="nm">Modern</div><div class="mx">&times;3.5</div></div>
       <div class="era"><span class="bar" style="background:var(--era-6)"></span><div class="n">Age 6</div><div class="nm">Digital</div><div class="mx">&times;5.0</div></div>
       <div class="era"><span class="bar" style="background:var(--era-7)"></span><div class="n">Age 7</div><div class="nm">Fusion</div><div class="mx">&times;8.0</div></div>
+      <div class="era"><span class="bar" style="background:var(--era-8)"></span><div class="n">Age 8</div><div class="nm">Orbital</div><div class="mx">&times;12.0</div></div>
     </div>
   </div>
 </div>
@@ -685,7 +687,7 @@ node build/build.js</pre>
   <div class="wrap">
     <div class="badge-strip reveal">
       <img src="https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue.svg" alt="License: PolyForm Noncommercial 1.0.0" onerror="this.style.display='none'" />
-      <img src="https://img.shields.io/badge/version-1.1.0-blue.svg" alt="Version 1.1.0" onerror="this.style.display='none'" />
+      <img src="https://img.shields.io/badge/version-1.4.1-blue.svg" alt="Version 1.4.1" onerror="this.style.display='none'" />
       <img src="https://img.shields.io/badge/dependencies-0-brightgreen" alt="Dependencies: 0" onerror="this.style.display='none'" />
       <img src="https://img.shields.io/badge/single--file-yes-blueviolet" alt="Single file: yes" onerror="this.style.display='none'" />
       <img src="https://img.shields.io/badge/offline-ready-success" alt="Offline ready" onerror="this.style.display='none'" />

@@ -321,5 +321,60 @@ ok("the ladder starts at 0 so every player holds a rank", Legacy.RANKS[0].at ===
 ok("the ring is worth more than a bare ascension",
   Legacy.award({ pop: 2500, dyson: 1 }) > Legacy.award({ pop: 2500 }));
 
+/* ---- 11. the shop window's progression band is the game's ages -----------
+ *
+ * docs/index.html draws the progression as one chip per age, and it was drawn for
+ * eight: the ninth (Orbital) was never added, so the page that sells the game
+ * stopped at Fusion while the endgame — x12 income, the Dyson Ring, Ascension —
+ * was the one thing the band did not show. The same stale count sat in the band's
+ * headline and in docs/GAMEPLAY.md section 3's heading, directly above a table
+ * that already listed nine rows. The chips are now read out of the page and
+ * compared to AGES: one per age, in order, with the right name and multiplier.
+ */
+const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+const site = fs.readFileSync(path.join(__dirname, "..", "docs", "index.html"), "utf8");
+const CHIP = /<div class="era"><span class="bar"[^>]*><\/span><div class="n">Age (\d+)<\/div><div class="nm">([^<]+)<\/div><div class="mx">&times;([\d.]+)<\/div><\/div>/g;
+const chips = [...site.matchAll(CHIP)].map((m) => ({ i: +m[1], name: m[2].trim(), mult: +m[3] }));
+ok("the era band carries one chip per age",
+  chips.length === AGES.length, "the band has " + chips.length + ", AGES has " + AGES.length);
+ok("the era chips are numbered 0..n in order",
+  chips.every((c, k) => c.i === k), chips.map((c) => c.i).join(","));
+/* When the counts differ, every chip is compared against the wrong age, so the
+   detail has to say that rather than print a list of false mismatches. */
+const chipMismatch = (pick) => chips.length !== AGES.length
+  ? "the band has " + chips.length + " chips, AGES has " + AGES.length
+  : chips.map((c, k) => pick(c) + " vs " + pick(AGES[k])).join(", ");
+ok("every era chip names its age",
+  chips.length === AGES.length && chips.every((c, k) => c.name.toUpperCase() === String(AGES[k].n).split(" ")[0].toUpperCase()),
+  chipMismatch((a) => a.name || String(a.n).split(" ")[0]));
+ok("every era chip carries the age's real multiplier",
+  chips.length === AGES.length && chips.every((c, k) => Math.abs(c.mult - AGES[k].mult) < 1e-9),
+  chipMismatch((a) => String(a.mult)));
+
+const bandHead = (site.match(/<h2>([^<]*ages[^<]*)<\/h2>/) || [])[1] || "";
+ok("the band's headline counts the ages the tables hold",
+  new RegExp("\\b" + WORDS[AGES.length] + " ages\\b", "i").test(bandHead), "says: " + bandHead);
+
+const gameplay = fs.readFileSync(path.join(__dirname, "..", "docs", "GAMEPLAY.md"), "utf8");
+const ageHead = (gameplay.match(/## 3\. The (\w+) Ages/) || [])[1];
+ok("docs/GAMEPLAY.md's age heading counts the ages the tables hold",
+  !!ageHead && ageHead.toLowerCase() === WORDS[AGES.length], "says: " + ageHead);
+const ageRows = (gameplay.match(/^\| \d+ \| \*\*/gm) || []).length;
+ok("docs/GAMEPLAY.md's age table has one row per age",
+  ageRows === AGES.length, "the table has " + ageRows + ", AGES has " + AGES.length);
+
+/* ---- 12. one version, in one place --------------------------------------
+ *
+ * The site said 1.1.0, the README 1.2.0 and the changelog 1.4.0 while
+ * package.json said 1.4.0 — three answers to one question, none of them checked.
+ */
+const pkgVersion = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "package.json"), "utf8")).version;
+["README.md", "CHANGELOG.md", "docs/index.html"].forEach((file) => {
+  const text = fs.readFileSync(path.join(__dirname, "..", file), "utf8");
+  const m = text.match(/badge\/version-(\d+\.\d+\.\d+)-blue\.svg/);
+  ok(file + "'s version badge matches package.json",
+    !!m && m[1] === pkgVersion, m ? "says " + m[1] + ", package.json says " + pkgVersion : "the badge was not found");
+});
+
 console.log("\n" + passed + " passed, " + failed + " failed");
 process.exit(failed === 0 ? 0 : 1);
